@@ -1,0 +1,71 @@
+
+fun lookup "bogus" = 10000
+  | lookup s = 0
+
+open String
+val Conc: string ref = ref ""
+
+%%
+
+%eop EOF SEMICOLON
+
+%pos int
+
+%left SUB PLUS
+%left TIMES INTDIV
+%right CARAT
+
+
+%term 
+	  ID of string | INT of int | PRINT |
+	  PLUS of string | TIMES of string | INTDIV of string | SUB of string 
+    | REALDIV of string | CARAT of string | EOF | SEMICOLON of string
+
+
+%nonterm EXP of int | START of int option 
+
+%name Sample
+
+%subst PRINT for ID
+%prefer PLUS TIMES INTDIV SUB
+%keyword PRINT SEMICOLON
+
+%noshift EOF
+%value ID ("bogus")
+%verbose
+%%
+
+
+  START : PRINT EXP (print (Int.toString EXP);
+                     print "\n";
+                     SOME EXP)
+        | EXP (SOME EXP)
+        | (NONE)
+
+  EXP : INT             (let val _ = Conc := !Conc ^ Int.toString (INT) in 1 end)
+      | ID              (lookup ID)
+
+      | EXP PLUS EXP    (let val _ = Conc := !Conc ^ Int.toString (EXP1) ^ " + " 
+                         ^ Int.toString (EXP2)
+                         in 1 end)
+
+      | EXP TIMES EXP   (let val _ = Conc := !Conc ^ Int.toString (EXP1) ^ " * " 
+                         ^ Int.toString (EXP2)
+                         in 1 end)
+      
+      | EXP INTDIV EXP  (let val _ = Conc := !Conc ^ Int.toString (EXP1) ^ " div " 
+                         ^ Int.toString (EXP2)
+                         in 1 end)
+
+      | EXP REALDIV EXP (let val _ = Conc := !Conc ^ Int.toString (EXP1) ^ " / " 
+                         ^ Int.toString (EXP2)
+                         in 1 end)
+      
+      | EXP SUB EXP     (let val _ = Conc := !Conc ^ Int.toString (EXP1) ^ " - " 
+                         ^ Int.toString (EXP2)
+                         in 1 end)
+
+      | EXP CARAT EXP   (let fun e (m,0) = 1
+                                | e (m,l) = m*e(m,l-1)
+                             val _ = Conc := !Conc ^ Int.toString (e (EXP1, EXP2))
+                         in 1 end)

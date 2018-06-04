@@ -28,31 +28,31 @@ val Conc: string ref = ref ""
 	  PLUS | TIMES | INTDIV | SUB | REALDIV | CARAT | EOF | SEMICOLON
 
 	  (* Parentheses and Comments *)
-	  LCOMMENTPAREN | RCOMMENTPAREN | LPAREN | 
+(*	  LCOMMENTPAREN | RCOMMENTPAREN | LPAREN | 
 	  RPAREN | LBRACK | RBRACK | 
-
+*)
 	  (* Assignment and Comparison *)
-	  UNEQUAL | EQUAL | VARASSIGN | GREATERTHAN | LESSTHAN |
+(*	  UNEQUAL | EQUAL | VARASSIGN | GREATERTHAN | LESSTHAN |
 	  GREATERTHANEQUAL | LESSTHANEQUAL |
-
+*)
 	  (* Misc. *)
-    BAR | BANG | COLON | COLONGT | HASH | 
+(*    BAR | BANG | COLON | COLONGT | HASH | 
     ARROW | DARROW | SEMICOLON | COMPOSITION | EOF 
-
+*)
     (* Identifiers *)
-    IF | THEN | ELSE | NOT | OR | AND | ANDALSO | ORELSE | 
+(*    IF | THEN | ELSE | NOT | OR | AND | ANDALSO | ORELSE | 
     LET | IN | END | VAL | FUN | FN | FUNCTOR | FUNSIG | 
     HANDLE | RAISE | EXCEPTION | CASE | OF | TRUE | FALSE |
     TYPE | DATATYPE | REF | SOME | NONE | AS | ABSTYPE |
     OPEN | WITH | WITHTYPE | WHILE | DO | WHERE | 
     SIG | STRUCT | SIGNATURE | STRUCTURE 
-
+*)
 %nonterm EXP of int | START of int option 
 
-%name parser
+%name Sample
 
 %subst PRINT for ID
-%prefer PLUS TIMES DIV SUB
+%prefer PLUS TIMES INTDIV SUB
 %keyword PRINT SEMICOLON
 
 %noshift EOF
@@ -72,29 +72,34 @@ val Conc: string ref = ref ""
       | ID              (lookup ID)
 
   		(* Arithmatic Parsing Actions *)
-      | EXP PLUS EXP    (Conc := !Conc ^ String.fromInt (EXP1) ^ " + " 
-      								   ^ String.fromInt (EXP2))
+      | EXP PLUS EXP    (let val _ = Conc := !Conc ^ String.fromInt (EXP1) ^ " + " 
+      								   ^ String.fromInt (EXP2)
+                         in 1 end)
 
-      | EXP TIMES EXP   (Conc := !Conc ^ String.fromInt (EXP1) ^ " * " 
-      								   ^ String.fromInt (EXP2))
+      | EXP TIMES EXP   (let val _ = Conc := !Conc ^ String.fromInt (EXP1) ^ " * " 
+                         ^ String.fromInt (EXP2)
+                         in 1 end)
       
-      | EXP INTDIV EXP  (Conc := !Conc ^ String.fromInt (EXP1) ^ " div " 
-      								   ^ String.fromInt (EXP2))
+      | EXP INTDIV EXP  (let val _ = Conc := !Conc ^ String.fromInt (EXP1) ^ " div " 
+                         ^ String.fromInt (EXP2)
+                         in 1 end)
 
-      | EXP REALDIV EXP (Conc := !Conc ^ String.fromInt (EXP1) ^ " / " 
-      								   ^ String.fromInt (EXP2))
+      | EXP REALDIV EXP (let val _ = Conc := !Conc ^ String.fromInt (EXP1) ^ " \ " 
+                         ^ String.fromInt (EXP2)
+                         in 1 end)
       
-      | EXP SUB EXP     (Conc := !Conc ^ String.fromInt (EXP1) ^ " - " 
-      								   ^ String.fromInt (EXP2))
+      | EXP SUB EXP     (let val _ = Conc := !Conc ^ String.fromInt (EXP1) ^ " - " 
+                         ^ String.fromInt (EXP2)
+                         in 1 end)
 
       | EXP CARAT EXP   (let fun e (m,0) = 1
                                 | e (m,l) = m*e(m,l-1)
-                         in Conc := !Conc ^ String.fromInt (e (EXP1, EXP2))
-                         end)
+                             val _ = Conc := !Conc ^ String.fromInt (e (EXP1, EXP2))
+                         in 1 end)
 
       (* Parentheses and Comments Parsing Actions *)
 
-      | LCOMMENTPAREN   ()
+(*      | LCOMMENTPAREN   ()
 
       | RCOMMENTPAREN   ()
 
@@ -105,10 +110,10 @@ val Conc: string ref = ref ""
       | LBRACK          ()
 
       | RBRACK          ()
-
+*)
       (* Assignment and Comparison Parsing Actions *)
 
-      | EXP UNEQUAL EXP (Conc := !Conc ^ String.fromInt (EXP1) ^ " <> " 
+(*      | EXP UNEQUAL EXP (Conc := !Conc ^ String.fromInt (EXP1) ^ " <> " 
                                        ^ String.fromInt (EXP2))
 
       | EXP EQUAL EXP   (Conc := !Conc ^ String.fromInt (EXP1) ^ " = " 
@@ -127,10 +132,10 @@ val Conc: string ref = ref ""
 
       | EXP LESSTHANEQUAL EXP      (Conc := !Conc ^ String.fromInt (EXP1) ^ " <= " 
                                                   ^ String.fromInt (EXP2))
-
+*)
       (* Misc. Parsing Actions *)
 
-      | BAR             ()
+(*      | BAR             ()
 
       | BANG            ()
 
@@ -145,10 +150,10 @@ val Conc: string ref = ref ""
       | DARROW          ()
 
       | COMPOSITION     ()
-
+*)
       (* Identifiers *)
 
-      | IF EXP THEN EXP ELSE EXP (Conc := !Conc ^ 
+(*      | IF EXP THEN EXP ELSE EXP (Conc := !Conc ^ 
                                   "if "         ^ String.fromInt (EXP1) ^ 
                                   " <> 0 then " ^ String.fromInt (EXP2) ^ 
                                   " else "      ^ String.fromInt (EXP3) ^ " ")
@@ -222,7 +227,7 @@ val Conc: string ref = ref ""
       | SIGNATURE       ()
 
       | STRUCTURE       ()
-
+*)
 
 (*      | IF EXP THEN EXP ELSE EXP 
       					(Conc := !Conc ^ 

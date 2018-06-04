@@ -1,0 +1,306 @@
+11 shift/reduce conflicts
+
+error:  state 12: shift/reduce conflict (shift REALDIV, reduce by rule 10)
+error:  state 13: shift/reduce conflict (shift CARAT, reduce by rule 8)
+error:  state 13: shift/reduce conflict (shift REALDIV, reduce by rule 8)
+error:  state 13: shift/reduce conflict (shift SUB, reduce by rule 8)
+error:  state 13: shift/reduce conflict (shift INTDIV, reduce by rule 8)
+error:  state 13: shift/reduce conflict (shift TIMES, reduce by rule 8)
+error:  state 13: shift/reduce conflict (shift PLUS, reduce by rule 8)
+error:  state 14: shift/reduce conflict (shift REALDIV, reduce by rule 9)
+error:  state 15: shift/reduce conflict (shift REALDIV, reduce by rule 7)
+error:  state 16: shift/reduce conflict (shift REALDIV, reduce by rule 6)
+error:  state 17: shift/reduce conflict (shift REALDIV, reduce by rule 5)
+
+state 0:
+
+	START : . PRINT EXP 
+	START : . EXP 
+	START : .  (reduce by rule 2)
+
+	ID	shift 4
+	INT	shift 3
+	PRINT	shift 2
+
+	EXP	goto 1
+	START	goto 18
+
+	.	reduce by rule 2
+
+
+state 1:
+
+	EXP : EXP . PLUS EXP 
+	EXP : EXP . TIMES EXP 
+	EXP : EXP . INTDIV EXP 
+	EXP : EXP . REALDIV EXP 
+	EXP : EXP . SUB EXP 
+	EXP : EXP . CARAT EXP 
+	START : EXP .  (reduce by rule 1)
+
+	PLUS	shift 10
+	TIMES	shift 9
+	INTDIV	shift 8
+	SUB	shift 7
+	REALDIV	shift 6
+	CARAT	shift 5
+
+
+	.	reduce by rule 1
+
+
+state 2:
+
+	START : PRINT . EXP 
+
+	ID	shift 4
+	INT	shift 3
+
+	EXP	goto 11
+
+	.	error
+
+
+state 3:
+
+	EXP : INT .  (reduce by rule 3)
+
+
+
+	.	reduce by rule 3
+
+
+state 4:
+
+	EXP : ID .  (reduce by rule 4)
+
+
+
+	.	reduce by rule 4
+
+
+state 5:
+
+	EXP : EXP CARAT . EXP 
+
+	ID	shift 4
+	INT	shift 3
+
+	EXP	goto 12
+
+	.	error
+
+
+state 6:
+
+	EXP : EXP REALDIV . EXP 
+
+	ID	shift 4
+	INT	shift 3
+
+	EXP	goto 13
+
+	.	error
+
+
+state 7:
+
+	EXP : EXP SUB . EXP 
+
+	ID	shift 4
+	INT	shift 3
+
+	EXP	goto 14
+
+	.	error
+
+
+state 8:
+
+	EXP : EXP INTDIV . EXP 
+
+	ID	shift 4
+	INT	shift 3
+
+	EXP	goto 15
+
+	.	error
+
+
+state 9:
+
+	EXP : EXP TIMES . EXP 
+
+	ID	shift 4
+	INT	shift 3
+
+	EXP	goto 16
+
+	.	error
+
+
+state 10:
+
+	EXP : EXP PLUS . EXP 
+
+	ID	shift 4
+	INT	shift 3
+
+	EXP	goto 17
+
+	.	error
+
+
+state 11:
+
+	EXP : EXP . PLUS EXP 
+	EXP : EXP . TIMES EXP 
+	EXP : EXP . INTDIV EXP 
+	EXP : EXP . REALDIV EXP 
+	EXP : EXP . SUB EXP 
+	EXP : EXP . CARAT EXP 
+	START : PRINT EXP .  (reduce by rule 0)
+
+	PLUS	shift 10
+	TIMES	shift 9
+	INTDIV	shift 8
+	SUB	shift 7
+	REALDIV	shift 6
+	CARAT	shift 5
+
+
+	.	reduce by rule 0
+
+error:  state 12: shift/reduce conflict (shift REALDIV, reduce by rule 10)
+
+state 12:
+
+	EXP : EXP . PLUS EXP 
+	EXP : EXP . TIMES EXP 
+	EXP : EXP . INTDIV EXP 
+	EXP : EXP . REALDIV EXP 
+	EXP : EXP . SUB EXP 
+	EXP : EXP . CARAT EXP 
+	EXP : EXP CARAT EXP .  (reduce by rule 10)
+
+	REALDIV	shift 6
+	CARAT	shift 5
+
+
+	.	reduce by rule 10
+
+error:  state 13: shift/reduce conflict (shift CARAT, reduce by rule 8)
+error:  state 13: shift/reduce conflict (shift REALDIV, reduce by rule 8)
+error:  state 13: shift/reduce conflict (shift SUB, reduce by rule 8)
+error:  state 13: shift/reduce conflict (shift INTDIV, reduce by rule 8)
+error:  state 13: shift/reduce conflict (shift TIMES, reduce by rule 8)
+error:  state 13: shift/reduce conflict (shift PLUS, reduce by rule 8)
+
+state 13:
+
+	EXP : EXP . PLUS EXP 
+	EXP : EXP . TIMES EXP 
+	EXP : EXP . INTDIV EXP 
+	EXP : EXP . REALDIV EXP 
+	EXP : EXP REALDIV EXP .  (reduce by rule 8)
+	EXP : EXP . SUB EXP 
+	EXP : EXP . CARAT EXP 
+
+	PLUS	shift 10
+	TIMES	shift 9
+	INTDIV	shift 8
+	SUB	shift 7
+	REALDIV	shift 6
+	CARAT	shift 5
+
+
+	.	reduce by rule 8
+
+error:  state 14: shift/reduce conflict (shift REALDIV, reduce by rule 9)
+
+state 14:
+
+	EXP : EXP . PLUS EXP 
+	EXP : EXP . TIMES EXP 
+	EXP : EXP . INTDIV EXP 
+	EXP : EXP . REALDIV EXP 
+	EXP : EXP . SUB EXP 
+	EXP : EXP SUB EXP .  (reduce by rule 9)
+	EXP : EXP . CARAT EXP 
+
+	TIMES	shift 9
+	INTDIV	shift 8
+	REALDIV	shift 6
+	CARAT	shift 5
+
+
+	.	reduce by rule 9
+
+error:  state 15: shift/reduce conflict (shift REALDIV, reduce by rule 7)
+
+state 15:
+
+	EXP : EXP . PLUS EXP 
+	EXP : EXP . TIMES EXP 
+	EXP : EXP . INTDIV EXP 
+	EXP : EXP INTDIV EXP .  (reduce by rule 7)
+	EXP : EXP . REALDIV EXP 
+	EXP : EXP . SUB EXP 
+	EXP : EXP . CARAT EXP 
+
+	REALDIV	shift 6
+	CARAT	shift 5
+
+
+	.	reduce by rule 7
+
+error:  state 16: shift/reduce conflict (shift REALDIV, reduce by rule 6)
+
+state 16:
+
+	EXP : EXP . PLUS EXP 
+	EXP : EXP . TIMES EXP 
+	EXP : EXP TIMES EXP .  (reduce by rule 6)
+	EXP : EXP . INTDIV EXP 
+	EXP : EXP . REALDIV EXP 
+	EXP : EXP . SUB EXP 
+	EXP : EXP . CARAT EXP 
+
+	REALDIV	shift 6
+	CARAT	shift 5
+
+
+	.	reduce by rule 6
+
+error:  state 17: shift/reduce conflict (shift REALDIV, reduce by rule 5)
+
+state 17:
+
+	EXP : EXP . PLUS EXP 
+	EXP : EXP PLUS EXP .  (reduce by rule 5)
+	EXP : EXP . TIMES EXP 
+	EXP : EXP . INTDIV EXP 
+	EXP : EXP . REALDIV EXP 
+	EXP : EXP . SUB EXP 
+	EXP : EXP . CARAT EXP 
+
+	TIMES	shift 9
+	INTDIV	shift 8
+	REALDIV	shift 6
+	CARAT	shift 5
+
+
+	.	reduce by rule 5
+
+
+state 18:
+
+
+	EOF	accept
+	SEMICOLON	accept
+
+
+	.	error
+
+39 of 70 action table entries left after compaction
+9 goto table entries

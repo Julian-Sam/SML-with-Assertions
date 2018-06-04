@@ -51,7 +51,7 @@ struct
                                                 of SOME s => s
                                                  | _ => ""))
 	  val dummyEOF = SampleLrVals.Tokens.EOF(0,0)
-	  val dummySEMI = SampleLrVals.Tokens.SEMI(0,0)
+	  val dummySEMI = SampleLrVals.Tokens.SEMICOLON ("bogus", 0,0)
 	  fun loop lexer =
 	      let val (result,lexer) = invoke lexer
 		  val (nextToken,lexer) = SampleParser.Stream.get lexer
