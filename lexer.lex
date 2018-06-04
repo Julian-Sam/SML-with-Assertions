@@ -50,7 +50,7 @@ word = "0w"{num}|"0wx"{hexnum};
 	(* Arithmetic *)
 "*"          => (Tokens.TIMES(!pos,!pos));
 "/"          => (Tokens.REALDIV(!pos,!pos));
-"div"	     => Tokens.INTDIV(!pos,!pos);
+"div"	     => (Tokens.INTDIV(!pos,!pos));
 "+"          => (Tokens.PLUS(!pos,!pos));
 "-"          => (Tokens.SUB(!pos,!pos));
 "^"          => (Tokens.CARAT(!pos,!pos));
@@ -138,6 +138,7 @@ word = "0w"{num}|"0wx"{hexnum};
 "signature"	 => (Tokens.SIGNATURE(!pos, !pos));
 "structure"	 => (Tokens.STRUCTURE(!pos, !pos));
 
+{id}		 => (Tokens.ID(!pos, !pos));
 
 "."          => (error ("ignoring bad character "^yytext,!pos,!pos);
              lex());
