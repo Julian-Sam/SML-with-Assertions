@@ -27,7 +27,8 @@ hex = (~?)"0x"{hexnum};
 word = "0w"{num}|"0wx"{hexnum};
 
 %%
-\n           => (pos := (!pos) + 1; lex());
+\n           => (pos := (!pos) + 1; 
+				 Tokens.NEWLINE (yytext, !pos, !pos));
 {ws}+        => (lex());
 {integer}    => (Tokens.INT (valOf (Int.fromString yytext), !pos, !pos));
 
@@ -37,7 +38,7 @@ word = "0w"{num}|"0wx"{hexnum};
 "+"          => (Tokens.PLUS(yytext, !pos,!pos));
 "-"          => (Tokens.SUB(yytext, !pos,!pos));
 "^"          => (Tokens.CARAT(yytext, !pos,!pos));
-
+";"			 => (Tokens.SEMICOLON (yytext, !pos, !pos));
 {id}		 => (Tokens.ID(yytext, !pos, !pos));
 
 "."          => (error ("ignoring bad character "^yytext,!pos,!pos);

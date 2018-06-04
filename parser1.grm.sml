@@ -14,6 +14,7 @@ fun lookup "bogus" = 10000
 
 open String
 val Conc: string ref = ref ""
+val outStream = TextIO.openOut "testOutput.sml"
 
 
 end
@@ -22,42 +23,44 @@ structure Token = Token
 local open LrTable in 
 val table=let val actionRows =
 "\
-\\001\000\001\000\006\000\002\000\005\000\000\000\
-\\001\000\010\000\000\000\011\000\000\000\000\000\
-\\021\000\004\000\012\000\005\000\011\000\006\000\010\000\007\000\009\000\
-\\008\000\008\000\009\000\007\000\000\000\
-\\022\000\004\000\012\000\005\000\011\000\006\000\010\000\007\000\009\000\
-\\008\000\008\000\009\000\007\000\000\000\
-\\023\000\001\000\006\000\002\000\005\000\003\000\004\000\000\000\
-\\024\000\000\000\
-\\025\000\000\000\
-\\026\000\005\000\011\000\006\000\010\000\008\000\008\000\009\000\007\000\000\000\
-\\027\000\008\000\008\000\009\000\007\000\000\000\
-\\028\000\008\000\008\000\009\000\007\000\000\000\
-\\029\000\004\000\012\000\005\000\011\000\006\000\010\000\007\000\009\000\
-\\008\000\008\000\009\000\007\000\000\000\
-\\030\000\005\000\011\000\006\000\010\000\008\000\008\000\009\000\007\000\000\000\
-\\031\000\008\000\008\000\009\000\007\000\000\000\
+\\001\000\001\000\007\000\002\000\006\000\000\000\
+\\001\000\004\000\000\000\011\000\000\000\000\000\
+\\001\000\004\000\025\000\011\000\025\000\000\000\
+\\022\000\005\000\013\000\006\000\012\000\007\000\011\000\008\000\010\000\
+\\009\000\009\000\010\000\008\000\000\000\
+\\023\000\005\000\013\000\006\000\012\000\007\000\011\000\008\000\010\000\
+\\009\000\009\000\010\000\008\000\000\000\
+\\024\000\001\000\007\000\002\000\006\000\003\000\005\000\000\000\
+\\026\000\000\000\
+\\027\000\000\000\
+\\028\000\006\000\012\000\007\000\011\000\009\000\009\000\010\000\008\000\000\000\
+\\029\000\009\000\009\000\010\000\008\000\000\000\
+\\030\000\009\000\009\000\010\000\008\000\000\000\
+\\031\000\005\000\013\000\006\000\012\000\007\000\011\000\008\000\010\000\
+\\009\000\009\000\010\000\008\000\000\000\
+\\032\000\006\000\012\000\007\000\011\000\009\000\009\000\010\000\008\000\000\000\
+\\033\000\009\000\009\000\010\000\008\000\000\000\
 \"
 val actionRowNumbers =
-"\004\000\003\000\000\000\005\000\
-\\006\000\000\000\000\000\000\000\
-\\000\000\000\000\000\000\002\000\
-\\012\000\010\000\011\000\009\000\
-\\008\000\007\000\001\000"
+"\005\000\002\000\004\000\000\000\
+\\006\000\007\000\000\000\000\000\
+\\000\000\000\000\000\000\000\000\
+\\003\000\013\000\011\000\012\000\
+\\010\000\009\000\008\000\001\000"
 val gotoT =
 "\
-\\001\000\001\000\002\000\018\000\000\000\
-\\000\000\
-\\001\000\011\000\000\000\
+\\001\000\002\000\002\000\019\000\003\000\001\000\000\000\
 \\000\000\
 \\000\000\
 \\001\000\012\000\000\000\
+\\000\000\
+\\000\000\
 \\001\000\013\000\000\000\
 \\001\000\014\000\000\000\
 \\001\000\015\000\000\000\
 \\001\000\016\000\000\000\
 \\001\000\017\000\000\000\
+\\001\000\018\000\000\000\
 \\000\000\
 \\000\000\
 \\000\000\
@@ -67,8 +70,8 @@ val gotoT =
 \\000\000\
 \\000\000\
 \"
-val numstates = 19
-val numrules = 11
+val numstates = 20
+val numrules = 13
 val s = ref "" and index = ref 0
 val string_to_int = fn () => 
 let val i = !index
@@ -135,8 +138,8 @@ datatype svalue = VOID | ntVOID of unit ->  unit
  | REALDIV of unit ->  (string) | SUB of unit ->  (string)
  | INTDIV of unit ->  (string) | TIMES of unit ->  (string)
  | PLUS of unit ->  (string) | INT of unit ->  (int)
- | ID of unit ->  (string) | START of unit ->  (int option)
- | EXP of unit ->  (int)
+ | ID of unit ->  (string) | NEWLINE of unit ->  (string)
+ | START of unit ->  (int option) | EXP of unit ->  (int)
 end
 type svalue = MlyValue.svalue
 type result = int option
@@ -154,9 +157,6 @@ val preferred_change : (term list * term list) list =
  $$ (T 2))::
 (nil
 ,nil
- $$ (T 3))::
-(nil
-,nil
  $$ (T 4))::
 (nil
 ,nil
@@ -164,20 +164,23 @@ val preferred_change : (term list * term list) list =
 (nil
 ,nil
  $$ (T 6))::
+(nil
+,nil
+ $$ (T 7))::
 nil
 val noShift = 
-fn (T 9) => true | _ => false
+fn _ => false
 val showTerminal =
 fn (T 0) => "ID"
   | (T 1) => "INT"
   | (T 2) => "PRINT"
-  | (T 3) => "PLUS"
-  | (T 4) => "TIMES"
-  | (T 5) => "INTDIV"
-  | (T 6) => "SUB"
-  | (T 7) => "REALDIV"
-  | (T 8) => "CARAT"
-  | (T 9) => "EOF"
+  | (T 3) => "EOF"
+  | (T 4) => "PLUS"
+  | (T 5) => "TIMES"
+  | (T 6) => "INTDIV"
+  | (T 7) => "SUB"
+  | (T 8) => "REALDIV"
+  | (T 9) => "CARAT"
   | (T 10) => "SEMICOLON"
   | _ => "bogus-term"
 local open Header in
@@ -186,7 +189,7 @@ fn (T 0) => MlyValue.ID(fn () => ("bogus")) |
 _ => MlyValue.VOID
 end
 val terms : term list = nil
- $$ (T 9) $$ (T 2)end
+ $$ (T 3) $$ (T 2)end
 structure Actions =
 struct 
 exception mlyAction of int
@@ -217,20 +220,28 @@ end
 ))
  in ( LrTable.NT 1, ( result, defaultPos, defaultPos), rest671)
 end
-|  ( 3, ( ( _, ( MlyValue.INT INT1, INT1left, INT1right)) :: rest671))
+|  ( 3, ( ( _, ( MlyValue.NEWLINE NEWLINE1, NEWLINE1left, 
+NEWLINE1right)) :: rest671)) => let val  result = MlyValue.START (fn _
+ => let val  NEWLINE1 = NEWLINE1 ()
+ in (!Conc)
+end)
+ in ( LrTable.NT 1, ( result, NEWLINE1left, NEWLINE1right), rest671)
+
+end
+|  ( 4, ( ( _, ( MlyValue.INT INT1, INT1left, INT1right)) :: rest671))
  => let val  result = MlyValue.EXP (fn _ => let val  (INT as INT1) = 
 INT1 ()
  in (let val _ = Conc := !Conc ^ Int.toString (INT) in 1 end)
 end)
  in ( LrTable.NT 0, ( result, INT1left, INT1right), rest671)
 end
-|  ( 4, ( ( _, ( MlyValue.ID ID1, ID1left, ID1right)) :: rest671)) =>
+|  ( 5, ( ( _, ( MlyValue.ID ID1, ID1left, ID1right)) :: rest671)) =>
  let val  result = MlyValue.EXP (fn _ => let val  (ID as ID1) = ID1 ()
  in (lookup ID)
 end)
  in ( LrTable.NT 0, ( result, ID1left, ID1right), rest671)
 end
-|  ( 5, ( ( _, ( MlyValue.EXP EXP2, _, EXP2right)) :: ( _, ( 
+|  ( 6, ( ( _, ( MlyValue.EXP EXP2, _, EXP2right)) :: ( _, ( 
 MlyValue.PLUS PLUS1, _, _)) :: ( _, ( MlyValue.EXP EXP1, EXP1left, _))
  :: rest671)) => let val  result = MlyValue.EXP (fn _ => let val  EXP1
  = EXP1 ()
@@ -244,7 +255,7 @@ let val _ = Conc := !Conc ^ Int.toString (EXP1) ^ " + "
 end)
  in ( LrTable.NT 0, ( result, EXP1left, EXP2right), rest671)
 end
-|  ( 6, ( ( _, ( MlyValue.EXP EXP2, _, EXP2right)) :: ( _, ( 
+|  ( 7, ( ( _, ( MlyValue.EXP EXP2, _, EXP2right)) :: ( _, ( 
 MlyValue.TIMES TIMES1, _, _)) :: ( _, ( MlyValue.EXP EXP1, EXP1left, _
 )) :: rest671)) => let val  result = MlyValue.EXP (fn _ => let val  
 EXP1 = EXP1 ()
@@ -258,7 +269,7 @@ let val _ = Conc := !Conc ^ Int.toString (EXP1) ^ " * "
 end)
  in ( LrTable.NT 0, ( result, EXP1left, EXP2right), rest671)
 end
-|  ( 7, ( ( _, ( MlyValue.EXP EXP2, _, EXP2right)) :: ( _, ( 
+|  ( 8, ( ( _, ( MlyValue.EXP EXP2, _, EXP2right)) :: ( _, ( 
 MlyValue.INTDIV INTDIV1, _, _)) :: ( _, ( MlyValue.EXP EXP1, EXP1left,
  _)) :: rest671)) => let val  result = MlyValue.EXP (fn _ => let val  
 EXP1 = EXP1 ()
@@ -272,7 +283,7 @@ let val _ = Conc := !Conc ^ Int.toString (EXP1) ^ " div "
 end)
  in ( LrTable.NT 0, ( result, EXP1left, EXP2right), rest671)
 end
-|  ( 8, ( ( _, ( MlyValue.EXP EXP2, _, EXP2right)) :: ( _, ( 
+|  ( 9, ( ( _, ( MlyValue.EXP EXP2, _, EXP2right)) :: ( _, ( 
 MlyValue.REALDIV REALDIV1, _, _)) :: ( _, ( MlyValue.EXP EXP1, 
 EXP1left, _)) :: rest671)) => let val  result = MlyValue.EXP (fn _ =>
  let val  EXP1 = EXP1 ()
@@ -286,7 +297,7 @@ let val _ = Conc := !Conc ^ Int.toString (EXP1) ^ " / "
 end)
  in ( LrTable.NT 0, ( result, EXP1left, EXP2right), rest671)
 end
-|  ( 9, ( ( _, ( MlyValue.EXP EXP2, _, EXP2right)) :: ( _, ( 
+|  ( 10, ( ( _, ( MlyValue.EXP EXP2, _, EXP2right)) :: ( _, ( 
 MlyValue.SUB SUB1, _, _)) :: ( _, ( MlyValue.EXP EXP1, EXP1left, _))
  :: rest671)) => let val  result = MlyValue.EXP (fn _ => let val  EXP1
  = EXP1 ()
@@ -300,7 +311,7 @@ let val _ = Conc := !Conc ^ Int.toString (EXP1) ^ " - "
 end)
  in ( LrTable.NT 0, ( result, EXP1left, EXP2right), rest671)
 end
-|  ( 10, ( ( _, ( MlyValue.EXP EXP2, _, EXP2right)) :: ( _, ( 
+|  ( 11, ( ( _, ( MlyValue.EXP EXP2, _, EXP2right)) :: ( _, ( 
 MlyValue.CARAT CARAT1, _, _)) :: ( _, ( MlyValue.EXP EXP1, EXP1left, _
 )) :: rest671)) => let val  result = MlyValue.EXP (fn _ => let val  
 EXP1 = EXP1 ()
@@ -314,6 +325,22 @@ let fun e (m,0) = 1
 )
 end)
  in ( LrTable.NT 0, ( result, EXP1left, EXP2right), rest671)
+end
+|  ( 12, ( ( _, ( MlyValue.NEWLINE NEWLINE1, NEWLINE1left, 
+NEWLINE1right)) :: rest671)) => let val  result = MlyValue.NEWLINE (fn
+ _ => let val  NEWLINE1 = NEWLINE1 ()
+ in (
+let
+                            val _ = TextIO.output (outStream, !Conc ^ "\n")
+                            val _ = print (!Conc);
+                            val _ = TextIO.flushOut (outStream)
+                          in
+                            !Conc
+                          end
+)
+end)
+ in ( LrTable.NT 2, ( result, NEWLINE1left, NEWLINE1right), rest671)
+
 end
 | _ => raise (mlyAction i392)
 end
@@ -333,20 +360,20 @@ fun INT (i,p1,p2) = Token.TOKEN (ParserData.LrTable.T 1,(
 ParserData.MlyValue.INT (fn () => i),p1,p2))
 fun PRINT (p1,p2) = Token.TOKEN (ParserData.LrTable.T 2,(
 ParserData.MlyValue.VOID,p1,p2))
-fun PLUS (i,p1,p2) = Token.TOKEN (ParserData.LrTable.T 3,(
-ParserData.MlyValue.PLUS (fn () => i),p1,p2))
-fun TIMES (i,p1,p2) = Token.TOKEN (ParserData.LrTable.T 4,(
-ParserData.MlyValue.TIMES (fn () => i),p1,p2))
-fun INTDIV (i,p1,p2) = Token.TOKEN (ParserData.LrTable.T 5,(
-ParserData.MlyValue.INTDIV (fn () => i),p1,p2))
-fun SUB (i,p1,p2) = Token.TOKEN (ParserData.LrTable.T 6,(
-ParserData.MlyValue.SUB (fn () => i),p1,p2))
-fun REALDIV (i,p1,p2) = Token.TOKEN (ParserData.LrTable.T 7,(
-ParserData.MlyValue.REALDIV (fn () => i),p1,p2))
-fun CARAT (i,p1,p2) = Token.TOKEN (ParserData.LrTable.T 8,(
-ParserData.MlyValue.CARAT (fn () => i),p1,p2))
-fun EOF (p1,p2) = Token.TOKEN (ParserData.LrTable.T 9,(
+fun EOF (p1,p2) = Token.TOKEN (ParserData.LrTable.T 3,(
 ParserData.MlyValue.VOID,p1,p2))
+fun PLUS (i,p1,p2) = Token.TOKEN (ParserData.LrTable.T 4,(
+ParserData.MlyValue.PLUS (fn () => i),p1,p2))
+fun TIMES (i,p1,p2) = Token.TOKEN (ParserData.LrTable.T 5,(
+ParserData.MlyValue.TIMES (fn () => i),p1,p2))
+fun INTDIV (i,p1,p2) = Token.TOKEN (ParserData.LrTable.T 6,(
+ParserData.MlyValue.INTDIV (fn () => i),p1,p2))
+fun SUB (i,p1,p2) = Token.TOKEN (ParserData.LrTable.T 7,(
+ParserData.MlyValue.SUB (fn () => i),p1,p2))
+fun REALDIV (i,p1,p2) = Token.TOKEN (ParserData.LrTable.T 8,(
+ParserData.MlyValue.REALDIV (fn () => i),p1,p2))
+fun CARAT (i,p1,p2) = Token.TOKEN (ParserData.LrTable.T 9,(
+ParserData.MlyValue.CARAT (fn () => i),p1,p2))
 fun SEMICOLON (i,p1,p2) = Token.TOKEN (ParserData.LrTable.T 10,(
 ParserData.MlyValue.SEMICOLON (fn () => i),p1,p2))
 end

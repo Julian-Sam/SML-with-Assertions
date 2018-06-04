@@ -4,6 +4,7 @@ fun lookup "bogus" = 10000
 
 open String
 val Conc: string ref = ref ""
+val outStream = TextIO.openOut "testOutput.sml"
 
 %%
 
@@ -17,12 +18,12 @@ val Conc: string ref = ref ""
 
 
 %term 
-	  ID of string | INT of int | PRINT |
+	  ID of string | INT of int | PRINT | EOF |
 	  PLUS of string | TIMES of string | INTDIV of string | SUB of string 
-    | REALDIV of string | CARAT of string | EOF | SEMICOLON of string
+    | REALDIV of string | CARAT of string | SEMICOLON of string
 
 
-%nonterm EXP of int | START of int option 
+%nonterm EXP of int | START of int option | NEWLINE of string
 
 %name Sample
 
@@ -30,7 +31,7 @@ val Conc: string ref = ref ""
 %prefer PLUS TIMES INTDIV SUB
 %keyword PRINT SEMICOLON
 
-%noshift EOF
+%noshift
 %value ID ("bogus")
 %verbose
 %%
@@ -41,6 +42,7 @@ val Conc: string ref = ref ""
                      SOME EXP)
         | EXP (SOME EXP)
         | (NONE)
+        | NEWLINE (!Conc)
 
   EXP : INT             (let val _ = Conc := !Conc ^ Int.toString (INT) in 1 end)
       | ID              (lookup ID)
@@ -69,3 +71,11 @@ val Conc: string ref = ref ""
                                 | e (m,l) = m*e(m,l-1)
                              val _ = Conc := !Conc ^ Int.toString (e (EXP1, EXP2))
                          in 1 end)
+
+NEWLINE : NEWLINE        (let
+                            val _ = TextIO.output (outStream, !Conc ^ "\n")
+                            val _ = print (!Conc);
+                            val _ = TextIO.flushOut (outStream)
+                          in
+                            !Conc
+                          end)

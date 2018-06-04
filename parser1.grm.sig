@@ -3,13 +3,13 @@ sig
 type ('a,'b) token
 type svalue
 val SEMICOLON: (string) *  'a * 'a -> (svalue,'a) token
-val EOF:  'a * 'a -> (svalue,'a) token
 val CARAT: (string) *  'a * 'a -> (svalue,'a) token
 val REALDIV: (string) *  'a * 'a -> (svalue,'a) token
 val SUB: (string) *  'a * 'a -> (svalue,'a) token
 val INTDIV: (string) *  'a * 'a -> (svalue,'a) token
 val TIMES: (string) *  'a * 'a -> (svalue,'a) token
 val PLUS: (string) *  'a * 'a -> (svalue,'a) token
+val EOF:  'a * 'a -> (svalue,'a) token
 val PRINT:  'a * 'a -> (svalue,'a) token
 val INT: (int) *  'a * 'a -> (svalue,'a) token
 val ID: (string) *  'a * 'a -> (svalue,'a) token
