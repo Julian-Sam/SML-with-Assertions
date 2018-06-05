@@ -27,8 +27,7 @@ hex = (~?)"0x"{hexnum};
 word = "0w"{num}|"0wx"{hexnum};
 
 %%
-\n           => (Tokens.NEWLINE (yytext, !pos, !pos);
-				 pos := (!pos) + 1; lex());
+\n           => (pos := (!pos) + 1; lex());
 {ws}+        => (lex());
 {integer}    => (Tokens.INT (valOf (Int.fromString yytext), !pos, !pos));
 {hex}        => (Tokens.HEX(yytext, !pos,!pos));

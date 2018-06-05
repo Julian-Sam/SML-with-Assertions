@@ -1,0 +1,183 @@
+open AbSyn
+
+val hof_num = ref 0
+
+fun nextNum () = 
+  let
+    val num = !hof_num
+  in
+    hof_num := !hof_num + 1;
+    num
+  end
+
+exception argumentMismatch;
+exception emptyDecList;
+
+fun makeMatchList (nil) = raise emptyDecList
+  | makeMatchList (L as (name,pat,exp)::t) =
+    (name, List.map (fn (n,p,e) =>
+               (if name <> n then (
+                   print ("Syntax Error: Function definition with different names "
+                   ^name^" and "^n^" not allowed.\n");
+                   raise argumentMismatch)
+                else MATCH(p,e))) L)
+
+%%
+
+%eop EOF
+
+%pos int
+
+%left SUB PLUS INTDIV REALDIV TIMES
+%left EQUALOP UNEQUALOP LESSTHAN LESSTHANEQ GREATERTHAN GREATERTHANEQ
+%right VARASSIGN BANG
+
+
+%term 
+    EOF | PLUS | SUB | INTDIV | REALDIV | TIMES
+    | GREATERTHAN | LESSTHAN | GREATERTHANEQ | LESSTHANEQ 
+    | UNEQUALOP | EQUALOP | VARASSIGN 
+    | LET | IN | END | IF | THEN | ELSE
+    | FUN | VAL | FN | RAISE | HANDLE | CASE | OF | AS | WHILE | DO
+    | INT of string | CHAR of string | REAL of string 
+    | STR of string | ID of string 
+    | SEMICOLON | BAR | BANG | DARROW | COMMA | WILDCARD 
+    | LPAREN | RPAREN | LBRACK | RBRACK
+    | TRUE | FALSE
+
+%nonterm 
+    
+    START of exp option | EXP of exp | EXPC of exp list | MATCHEXP of match list
+    | PATs of pat list | PAT of pat | DEC of dec | VALBIND of dec 
+    | FUNBIND of (string * match list) list | CONST of exp
+    | DECs of dec list | EXPS of exp list 
+    | FUNMATCH of (string * pat * exp) list
+
+%name Sample
+
+%noshift
+
+%verbose
+%%
+
+
+  START : EXP (SOME EXP) 
+        | (NONE)
+
+
+  EXP : ID              (Id ID)
+
+      | EXP PLUS EXP                  (INFIXEXP ("+", EXP1, EXP2))
+
+      | EXP SUB EXP                   (INFIXEXP ("-", EXP1, EXP2)) 
+
+      | EXP TIMES EXP                 (INFIXEXP ("*", EXP1, EXP2))
+      
+      | EXP INTDIV EXP                (INFIXEXP ("div", EXP1, EXP2))
+
+      | EXP REALDIV EXP               (INFIXEXP ("/", EXP1, EXP2))
+
+      | EXP UNEQUALOP EXP             (INFIXEXP ("<>", EXP1, EXP2))
+
+      | EXP EQUALOP EXP               (INFIXEXP ("=", EXP1, EXP2))
+
+      | EXP GREATERTHAN EXP           (INFIXEXP (">", EXP1, EXP2))
+
+      | EXP LESSTHAN EXP              (INFIXEXP ("<", EXP1, EXP2))
+
+      | EXP GREATERTHANEQ EXP         (INFIXEXP (">=", EXP1, EXP2))
+
+      | EXP LESSTHANEQ EXP            (INFIXEXP ("<=", EXP1, EXP2))
+
+      | LPAREN EXP RPAREN             (EXP)
+
+      | LBRACK RBRACK                 (Id "nil")
+
+      | RAISE EXP                     (RAISEEXP (EXP1))
+
+      | EXP HANDLE MATCHEXP           (HANDLEEXP (EXP, MATCHEXP))
+
+      | IF EXP THEN EXP ELSE EXP      (ITE (EXP1, EXP2, EXP3))
+
+      | WHILE EXP DO EXP              (WHILEDO (EXP1, EXP2))
+
+      | ID VARASSIGN EXP              (INFIXEXP (":=", Id (ID), EXP1))
+
+      | CASE EXP OF MATCHEXP          (CASEOF (EXP, MATCHEXP))
+
+      | FN MATCHEXP                   (FNOP (nextNum(), MATCHEXP))
+
+      | LET DECs IN EXPS END          (List.hd (List.foldr (fn (x,y) => [LETSTAT(x,y)]) EXPS DECs))
+
+      | BANG EXP                      (APPLY (Id ("!"), EXP1))
+
+
+EXPC : EXP                            ([EXP])
+
+     | EXP COMMA EXPC                 (EXP :: EXPC)
+
+
+EXPS : EXP                            ([EXP])
+
+     | EXP SEMICOLON EXPS             (EXP :: EXPS)
+
+
+MATCHEXP : PAT DARROW EXP                  ([MATCH (PAT, EXP1)])
+
+         | PAT DARROW EXP BAR MATCHEXP     (MATCH (PAT, EXP1) :: MATCHEXP)
+
+
+PAT : INT                           (INTPAT (INT))
+
+    | CHAR                          (CHARPAT (CHAR))
+
+    | STR                           (STRPAT (STR))
+
+    | REAL                          (REALPAT (REAL))
+
+    | TRUE                          (BOOLPAT ("true"))
+
+    | FALSE                         (BOOLPAT ("false"))
+
+    | WILDCARD                      (WILD)
+
+    | ID                            (IDPAT (ID))
+
+
+PATs : PAT                          ([PAT])
+     
+     | PAT COMMA PATs               (PAT :: PATs)
+
+
+FUNBIND : FUNMATCH                  ([makeMatchList FUNMATCH])
+
+
+VALBIND : PAT EQUALOP EXP           (VALB (PAT, EXP))
+
+
+FUNMATCH : ID PAT EQUALOP EXP                 ([(ID, PAT, EXP)])
+
+         | ID PAT EQUALOP EXP BAR FUNMATCH    ((ID, PAT, EXP) :: FUNMATCH)
+
+
+DEC : VAL VALBIND                   (VALBIND)
+    
+    | FUN FUNBIND                   (FUNCTBs (FUNBIND))
+
+
+DECs : DEC                          ([DEC])
+
+     | DEC DECs                     (DEC :: DECs)
+
+
+CONST : INT                         (Int (INT))
+  
+      | CHAR                        (Char (CHAR))
+
+      | STR                         (Str (STR))
+
+      | REAL                        (Real (REAL))
+
+      | TRUE                        (Bool ("true"))
+
+      | FALSE                       (Bool ("false"))
