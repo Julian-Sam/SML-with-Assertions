@@ -1,8 +1,7 @@
 open String
 open Int
 val Conc: string ref = ref ""
-val outStream = TextIO.openOut "testOutput.sml"
-
+exception LabError
 fun concatWith_(x, lis) = concatWith (x) (lis);
 
 %%
@@ -29,14 +28,16 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
     | ANDALSO of string | HANDLE of string | RAISE of string | EXCEPTION of string
     | WORD of string | CHAR of string | STRING of string | REAL of string | ID_NAME of string
     | MOD of string | AND of string | FN of string | VAL of string | CASE of string 
-    | OF of string | WILD of string
+    | OF of string | WILD of string | HASH of string | LCURLY of string 
+    | RCURLY of string | DOT of string
 
 %nonterm START of string option 
-       | CON of string
-       | ID of string
+       | ID of string | LONG_ID of string | CON of string 
        | EXP of string | EXP_LIST of string | EXP_SEQ of string
        | DEC of string | VALBIND of string | ID_LIST of string
        | MATCH of string | PAT of string | PAT_LIST of string
+       | EXP_ROW of string | LAB of string
+
 
 
 %name Sample
@@ -82,14 +83,19 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
      | REALDIV (REALDIV) 
      | MOD (MOD)
 
-  
+  LONG_ID : ID_NAME DOT ID_NAME (ID_NAME ^ "." ^ ID_NAME)  
+  			  | ID_NAME DOT LONG_ID (ID_NAME ^ "." ^ LONG_ID)
 
-  EXP_LIST: EXP (EXP)
-        | EXP COMMA EXP_LIST (EXP ^ ", " ^ EXP_LIST)
+  LAB : ID (ID)
+      | INT (if sub(INT, 0) = #"~" orelse sub(INT,0) = #"0" then 
+            ((print "Error: Record Var cannot start with 0 or ~"); raise LabError )
+            else INT)
 
-  EXP_SEQ: EXP SEMICOLON EXP (EXP ^ ";\n " ^ EXP)
+  EXP_LIST : EXP (EXP)
+           | EXP COMMA EXP_LIST (EXP ^ ", " ^ EXP_LIST)
 
-        | EXP SEMICOLON EXP_SEQ (EXP ^ ";\n " ^ EXP_SEQ)
+  EXP_SEQ : EXP SEMICOLON EXP (EXP ^ ";\n " ^ EXP)
+          | EXP SEMICOLON EXP_SEQ (EXP ^ ";\n " ^ EXP_SEQ)
 
   EXP : CON (CON)
 
@@ -101,11 +107,13 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
       | LPAREN EXP_LIST RPAREN (concatWith_(" ", [LPAREN, EXP_LIST, RPAREN])) 
 
+      | LCURLY EXP_ROW RCURLY (concatWith_(" ", [LCURLY, EXP_ROW, RCURLY]))
+
+      | HASH LAB (HASH ^ LAB)
+
       (* However for lists, we do not do the same as paren*)
       | LBRACK EXP_LIST RBRACK (concatWith_(" ", [LBRACK, EXP_LIST, RBRACK])) 
       
-      (* Might have to change later, since one just exp is not a sequence*)
-      (* However, one exp will always be matched to this cuz longest *)
       | LPAREN EXP_SEQ RPAREN (concatWith_(" ", [LPAREN, EXP_SEQ, RPAREN]))
 
       | LET DEC IN EXP_SEQ END (concatWith_(" ", [LET, DEC, IN, EXP_SEQ, END]))
@@ -128,6 +136,8 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
       | FN MATCH (concatWith_(" ", [FN, MATCH]))
 
+  EXP_ROW : LAB EQUALOP EXP (LAB ^ " = " ^ EXP)
+          | LAB EQUALOP EXP COMMA EXP_ROW (LAB ^ " = " ^ EXP ^ ", " ^ EXP_ROW)
 
   DEC : VAL VALBIND	(VAL ^ " " ^ VALBIND)
 
@@ -171,7 +181,7 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
   MATCH : PAT DARROW EXP (concatWith_(" ", [PAT, DARROW, EXP]))
 
         | PAT DARROW EXP BAR MATCH (concatWith_(" ", [PAT, DARROW, EXP, BAR, MATCH]))
+
+
  
-
-
 
