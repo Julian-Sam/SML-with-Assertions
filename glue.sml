@@ -51,14 +51,12 @@ struct
                                                 of SOME s => s
                                                  | _ => ""))
 	  val dummyEOF = SampleLrVals.Tokens.EOF(0,0)
-	  val dummySEMI = SampleLrVals.Tokens.SEMICOLON ("bogus", 0,0)
 	  fun loop lexer =
 	      let val (result,lexer) = invoke lexer
 		  val (nextToken,lexer) = SampleParser.Stream.get lexer
 		  val _ = case result
 			    of SOME r =>
-				(TextIO.output(TextIO.stdOut,
-				       "result = " ^ (Int.toString r) ^ "\n"); TextIO.flushOut TextIO.stdOut)
+				(TextIO.output(TextIO.stdOut, r); TextIO.flushOut TextIO.stdOut)
 			     | NONE => ()
 	       in if SampleParser.sameToken(nextToken,dummyEOF) then ()
 		  else loop lexer

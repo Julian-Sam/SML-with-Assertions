@@ -1,327 +1,1305 @@
-2 reduce/reduce conflicts
-11 shift/reduce conflicts
-1 rule not reduced
+1 reduce/reduce conflict
+115 shift/reduce conflicts
 
-warning: rule <NEWLINE : NEWLINE > will never be reduced
-error:  state 1: reduce/reduce conflict between rule 12 and rule 3 on SEMICOLON
-error:  state 1: reduce/reduce conflict between rule 12 and rule 3 on EOF
-error:  state 13: shift/reduce conflict (shift REALDIV, reduce by rule 11)
-error:  state 14: shift/reduce conflict (shift CARAT, reduce by rule 9)
-error:  state 14: shift/reduce conflict (shift REALDIV, reduce by rule 9)
-error:  state 14: shift/reduce conflict (shift SUB, reduce by rule 9)
-error:  state 14: shift/reduce conflict (shift INTDIV, reduce by rule 9)
-error:  state 14: shift/reduce conflict (shift TIMES, reduce by rule 9)
-error:  state 14: shift/reduce conflict (shift PLUS, reduce by rule 9)
-error:  state 15: shift/reduce conflict (shift REALDIV, reduce by rule 10)
-error:  state 16: shift/reduce conflict (shift REALDIV, reduce by rule 8)
-error:  state 17: shift/reduce conflict (shift REALDIV, reduce by rule 7)
-error:  state 18: shift/reduce conflict (shift REALDIV, reduce by rule 6)
+error:  state 34: shift/reduce conflict (shift ID_NAME, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift HANDLE, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift ANDALSO, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift ORELSE, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift LESSTHANEQUAL, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift GREATERTHANEQUAL, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift LESSTHAN, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift GREATERTHAN, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift VARASSIGN, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift EQUALOP, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift UNEQUAL, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift BANG, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift COLON, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift BAR, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift REALDIV, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift SUB, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift INTDIV, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift TIMES, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift PLUS, reduce by rule 34)
+error:  state 41: reduce/reduce conflict between rule 26 and rule 24 on RPAREN
+error:  state 41: shift/reduce conflict (shift RPAREN, reduce by rule 24)
+error:  state 42: shift/reduce conflict (shift ID_NAME, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift HANDLE, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift ANDALSO, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift ORELSE, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift LESSTHANEQUAL, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift GREATERTHANEQUAL, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift LESSTHAN, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift GREATERTHAN, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift VARASSIGN, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift EQUALOP, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift UNEQUAL, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift BANG, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift COLON, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift BAR, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift REALDIV, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift SUB, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift INTDIV, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift TIMES, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift PLUS, reduce by rule 29)
+error:  state 44: shift/reduce conflict (shift ID_NAME, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift HANDLE, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift ANDALSO, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift ORELSE, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift LESSTHANEQUAL, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift GREATERTHANEQUAL, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift LESSTHAN, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift GREATERTHAN, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift VARASSIGN, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift EQUALOP, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift UNEQUAL, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift BANG, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift COLON, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift BAR, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift REALDIV, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift SUB, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift INTDIV, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift TIMES, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift PLUS, reduce by rule 36)
+error:  state 45: shift/reduce conflict (shift ID_NAME, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift HANDLE, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift ANDALSO, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift ORELSE, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift LESSTHANEQUAL, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift GREATERTHANEQUAL, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift LESSTHAN, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift GREATERTHAN, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift VARASSIGN, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift EQUALOP, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift UNEQUAL, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift BANG, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift COLON, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift BAR, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift REALDIV, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift SUB, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift INTDIV, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift TIMES, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift PLUS, reduce by rule 37)
+error:  state 55: shift/reduce conflict (shift ID_NAME, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift HANDLE, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift ANDALSO, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift ORELSE, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift LESSTHANEQUAL, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift GREATERTHANEQUAL, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift LESSTHAN, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift GREATERTHAN, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift VARASSIGN, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift EQUALOP, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift UNEQUAL, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift BANG, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift COLON, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift BAR, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift REALDIV, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift SUB, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift INTDIV, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift TIMES, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift PLUS, reduce by rule 39)
+error:  state 60: shift/reduce conflict (shift ID_NAME, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift HANDLE, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift ANDALSO, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift ORELSE, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift LESSTHANEQUAL, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift GREATERTHANEQUAL, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift LESSTHAN, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift GREATERTHAN, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift VARASSIGN, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift EQUALOP, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift UNEQUAL, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift BANG, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift COLON, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift BAR, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift REALDIV, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift SUB, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift INTDIV, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift TIMES, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift PLUS, reduce by rule 38)
 
 state 0:
 
-	START : . PRINT EXP 
 	START : . EXP 
+	START : . EXP SEMICOLON 
 	START : .  (reduce by rule 2)
-	START : . NEWLINE 
 
-	ID	shift 5
-	INT	shift 4
-	PRINT	shift 3
+	INT	shift 12
+	LPAREN	shift 11
+	LBRACK	shift 10
+	WHILE	shift 9
+	IF	shift 8
+	RAISE	shift 7
+	WORD	shift 6
+	CHAR	shift 5
+	STRING	shift 4
+	REAL	shift 3
 
-	EXP	goto 2
-	START	goto 19
-	NEWLINE	goto 1
+	START	goto 61
+	CON	goto 2
+	EXP	goto 1
 
 	.	reduce by rule 2
 
-error:  state 1: reduce/reduce conflict between rule 12 and rule 3 on SEMICOLON
-error:  state 1: reduce/reduce conflict between rule 12 and rule 3 on EOF
 
 state 1:
 
-	START : NEWLINE .  (reduce by rule 3)
-	NEWLINE : NEWLINE .  (reduce by rule 12)
+	START : EXP .  (reduce by rule 0)
+	START : EXP . SEMICOLON 
+	EXP : EXP . ID EXP 
+	EXP : EXP . HANDLE MATCH 
+	EXP : EXP . ANDALSO EXP 
+	EXP : EXP . ORELSE EXP 
 
-	EOF	reduce by rule 3
-	SEMICOLON	reduce by rule 3
+	PLUS	shift 33
+	TIMES	shift 32
+	INTDIV	shift 31
+	SUB	shift 30
+	REALDIV	shift 29
+	SEMICOLON	shift 28
+	BAR	shift 27
+	COLON	shift 26
+	BANG	shift 25
+	UNEQUAL	shift 24
+	EQUALOP	shift 23
+	VARASSIGN	shift 22
+	GREATERTHAN	shift 21
+	LESSTHAN	shift 20
+	GREATERTHANEQUAL	shift 19
+	LESSTHANEQUAL	shift 18
+	ORELSE	shift 17
+	ANDALSO	shift 16
+	HANDLE	shift 15
+	ID_NAME	shift 14
 
+	ID	goto 13
 
-	.	error
+	.	reduce by rule 0
 
 
 state 2:
 
-	EXP : EXP . PLUS EXP 
-	EXP : EXP . TIMES EXP 
-	EXP : EXP . INTDIV EXP 
-	EXP : EXP . REALDIV EXP 
-	EXP : EXP . SUB EXP 
-	EXP : EXP . CARAT EXP 
-	START : EXP .  (reduce by rule 1)
-
-	PLUS	shift 11
-	TIMES	shift 10
-	INTDIV	shift 9
-	SUB	shift 8
-	REALDIV	shift 7
-	CARAT	shift 6
+	EXP : CON .  (reduce by rule 28)
 
 
-	.	reduce by rule 1
+
+	.	reduce by rule 28
 
 
 state 3:
 
-	START : PRINT . EXP 
-
-	ID	shift 5
-	INT	shift 4
-
-	EXP	goto 12
-
-	.	error
-
-
-state 4:
-
-	EXP : INT .  (reduce by rule 4)
-
-
-
-	.	reduce by rule 4
-
-
-state 5:
-
-	EXP : ID .  (reduce by rule 5)
+	CON : REAL .  (reduce by rule 5)
 
 
 
 	.	reduce by rule 5
 
 
+state 4:
+
+	CON : STRING .  (reduce by rule 7)
+
+
+
+	.	reduce by rule 7
+
+
+state 5:
+
+	CON : CHAR .  (reduce by rule 6)
+
+
+
+	.	reduce by rule 6
+
+
 state 6:
 
-	EXP : EXP CARAT . EXP 
+	CON : WORD .  (reduce by rule 4)
 
-	ID	shift 5
-	INT	shift 4
 
-	EXP	goto 13
 
-	.	error
+	.	reduce by rule 4
 
 
 state 7:
 
-	EXP : EXP REALDIV . EXP 
+	EXP : RAISE . EXP 
 
-	ID	shift 5
-	INT	shift 4
+	INT	shift 12
+	LPAREN	shift 11
+	LBRACK	shift 10
+	WHILE	shift 9
+	IF	shift 8
+	RAISE	shift 7
+	WORD	shift 6
+	CHAR	shift 5
+	STRING	shift 4
+	REAL	shift 3
 
-	EXP	goto 14
+	CON	goto 2
+	EXP	goto 34
 
 	.	error
 
 
 state 8:
 
-	EXP : EXP SUB . EXP 
+	EXP : IF . EXP THEN EXP ELSE EXP 
 
-	ID	shift 5
-	INT	shift 4
+	INT	shift 12
+	LPAREN	shift 11
+	LBRACK	shift 10
+	WHILE	shift 9
+	IF	shift 8
+	RAISE	shift 7
+	WORD	shift 6
+	CHAR	shift 5
+	STRING	shift 4
+	REAL	shift 3
 
-	EXP	goto 15
+	CON	goto 2
+	EXP	goto 35
 
 	.	error
 
 
 state 9:
 
-	EXP : EXP INTDIV . EXP 
+	EXP : WHILE . EXP DO EXP 
 
-	ID	shift 5
-	INT	shift 4
+	INT	shift 12
+	LPAREN	shift 11
+	LBRACK	shift 10
+	WHILE	shift 9
+	IF	shift 8
+	RAISE	shift 7
+	WORD	shift 6
+	CHAR	shift 5
+	STRING	shift 4
+	REAL	shift 3
 
-	EXP	goto 16
+	CON	goto 2
+	EXP	goto 36
 
 	.	error
 
 
 state 10:
 
-	EXP : EXP TIMES . EXP 
+	EXP : LBRACK . EXP_LIST RBRACK 
 
-	ID	shift 5
-	INT	shift 4
+	INT	shift 12
+	LPAREN	shift 11
+	LBRACK	shift 10
+	WHILE	shift 9
+	IF	shift 8
+	RAISE	shift 7
+	WORD	shift 6
+	CHAR	shift 5
+	STRING	shift 4
+	REAL	shift 3
 
-	EXP	goto 17
+	CON	goto 2
+	EXP	goto 38
+	EXP_LIST	goto 37
 
 	.	error
 
 
 state 11:
 
-	EXP : EXP PLUS . EXP 
+	EXP : LPAREN . EXP RPAREN 
+	EXP : LPAREN . EXP_LIST RPAREN 
+	EXP : LPAREN . EXP_SEQ RPAREN 
 
-	ID	shift 5
-	INT	shift 4
+	INT	shift 12
+	LPAREN	shift 11
+	LBRACK	shift 10
+	WHILE	shift 9
+	IF	shift 8
+	RAISE	shift 7
+	WORD	shift 6
+	CHAR	shift 5
+	STRING	shift 4
+	REAL	shift 3
 
-	EXP	goto 18
+	CON	goto 2
+	EXP	goto 41
+	EXP_LIST	goto 40
+	EXP_SEQ	goto 39
 
 	.	error
 
 
 state 12:
 
-	EXP : EXP . PLUS EXP 
-	EXP : EXP . TIMES EXP 
-	EXP : EXP . INTDIV EXP 
-	EXP : EXP . REALDIV EXP 
-	EXP : EXP . SUB EXP 
-	EXP : EXP . CARAT EXP 
-	START : PRINT EXP .  (reduce by rule 0)
-
-	PLUS	shift 11
-	TIMES	shift 10
-	INTDIV	shift 9
-	SUB	shift 8
-	REALDIV	shift 7
-	CARAT	shift 6
+	CON : INT .  (reduce by rule 3)
 
 
-	.	reduce by rule 0
 
-error:  state 13: shift/reduce conflict (shift REALDIV, reduce by rule 11)
+	.	reduce by rule 3
+
 
 state 13:
 
-	EXP : EXP . PLUS EXP 
-	EXP : EXP . TIMES EXP 
-	EXP : EXP . INTDIV EXP 
-	EXP : EXP . REALDIV EXP 
-	EXP : EXP . SUB EXP 
-	EXP : EXP . CARAT EXP 
-	EXP : EXP CARAT EXP .  (reduce by rule 11)
+	EXP : EXP ID . EXP 
 
-	REALDIV	shift 7
-	CARAT	shift 6
+	INT	shift 12
+	LPAREN	shift 11
+	LBRACK	shift 10
+	WHILE	shift 9
+	IF	shift 8
+	RAISE	shift 7
+	WORD	shift 6
+	CHAR	shift 5
+	STRING	shift 4
+	REAL	shift 3
 
+	CON	goto 2
+	EXP	goto 42
 
-	.	reduce by rule 11
+	.	error
 
-error:  state 14: shift/reduce conflict (shift CARAT, reduce by rule 9)
-error:  state 14: shift/reduce conflict (shift REALDIV, reduce by rule 9)
-error:  state 14: shift/reduce conflict (shift SUB, reduce by rule 9)
-error:  state 14: shift/reduce conflict (shift INTDIV, reduce by rule 9)
-error:  state 14: shift/reduce conflict (shift TIMES, reduce by rule 9)
-error:  state 14: shift/reduce conflict (shift PLUS, reduce by rule 9)
 
 state 14:
 
-	EXP : EXP . PLUS EXP 
-	EXP : EXP . TIMES EXP 
-	EXP : EXP . INTDIV EXP 
-	EXP : EXP . REALDIV EXP 
-	EXP : EXP REALDIV EXP .  (reduce by rule 9)
-	EXP : EXP . SUB EXP 
-	EXP : EXP . CARAT EXP 
+	ID : ID_NAME .  (reduce by rule 8)
 
-	PLUS	shift 11
-	TIMES	shift 10
-	INTDIV	shift 9
-	SUB	shift 8
-	REALDIV	shift 7
-	CARAT	shift 6
-
-
-	.	reduce by rule 9
-
-error:  state 15: shift/reduce conflict (shift REALDIV, reduce by rule 10)
-
-state 15:
-
-	EXP : EXP . PLUS EXP 
-	EXP : EXP . TIMES EXP 
-	EXP : EXP . INTDIV EXP 
-	EXP : EXP . REALDIV EXP 
-	EXP : EXP . SUB EXP 
-	EXP : EXP SUB EXP .  (reduce by rule 10)
-	EXP : EXP . CARAT EXP 
-
-	TIMES	shift 10
-	INTDIV	shift 9
-	REALDIV	shift 7
-	CARAT	shift 6
-
-
-	.	reduce by rule 10
-
-error:  state 16: shift/reduce conflict (shift REALDIV, reduce by rule 8)
-
-state 16:
-
-	EXP : EXP . PLUS EXP 
-	EXP : EXP . TIMES EXP 
-	EXP : EXP . INTDIV EXP 
-	EXP : EXP INTDIV EXP .  (reduce by rule 8)
-	EXP : EXP . REALDIV EXP 
-	EXP : EXP . SUB EXP 
-	EXP : EXP . CARAT EXP 
-
-	REALDIV	shift 7
-	CARAT	shift 6
 
 
 	.	reduce by rule 8
 
-error:  state 17: shift/reduce conflict (shift REALDIV, reduce by rule 7)
+
+state 15:
+
+	EXP : EXP HANDLE . MATCH 
+
+
+	MATCH	goto 43
+
+	.	error
+
+
+state 16:
+
+	EXP : EXP ANDALSO . EXP 
+
+	INT	shift 12
+	LPAREN	shift 11
+	LBRACK	shift 10
+	WHILE	shift 9
+	IF	shift 8
+	RAISE	shift 7
+	WORD	shift 6
+	CHAR	shift 5
+	STRING	shift 4
+	REAL	shift 3
+
+	CON	goto 2
+	EXP	goto 44
+
+	.	error
+
 
 state 17:
 
-	EXP : EXP . PLUS EXP 
-	EXP : EXP . TIMES EXP 
-	EXP : EXP TIMES EXP .  (reduce by rule 7)
-	EXP : EXP . INTDIV EXP 
-	EXP : EXP . REALDIV EXP 
-	EXP : EXP . SUB EXP 
-	EXP : EXP . CARAT EXP 
+	EXP : EXP ORELSE . EXP 
 
-	REALDIV	shift 7
-	CARAT	shift 6
+	INT	shift 12
+	LPAREN	shift 11
+	LBRACK	shift 10
+	WHILE	shift 9
+	IF	shift 8
+	RAISE	shift 7
+	WORD	shift 6
+	CHAR	shift 5
+	STRING	shift 4
+	REAL	shift 3
 
+	CON	goto 2
+	EXP	goto 45
 
-	.	reduce by rule 7
+	.	error
 
-error:  state 18: shift/reduce conflict (shift REALDIV, reduce by rule 6)
 
 state 18:
 
-	EXP : EXP . PLUS EXP 
-	EXP : EXP PLUS EXP .  (reduce by rule 6)
-	EXP : EXP . TIMES EXP 
-	EXP : EXP . INTDIV EXP 
-	EXP : EXP . REALDIV EXP 
-	EXP : EXP . SUB EXP 
-	EXP : EXP . CARAT EXP 
-
-	TIMES	shift 10
-	INTDIV	shift 9
-	REALDIV	shift 7
-	CARAT	shift 6
+	ID : LESSTHANEQUAL .  (reduce by rule 15)
 
 
-	.	reduce by rule 6
+
+	.	reduce by rule 15
 
 
 state 19:
 
+	ID : GREATERTHANEQUAL .  (reduce by rule 14)
 
-	EOF	accept
-	SEMICOLON	accept
+
+
+	.	reduce by rule 14
+
+
+state 20:
+
+	ID : LESSTHAN .  (reduce by rule 13)
+
+
+
+	.	reduce by rule 13
+
+
+state 21:
+
+	ID : GREATERTHAN .  (reduce by rule 12)
+
+
+
+	.	reduce by rule 12
+
+
+state 22:
+
+	ID : VARASSIGN .  (reduce by rule 11)
+
+
+
+	.	reduce by rule 11
+
+
+state 23:
+
+	ID : EQUALOP .  (reduce by rule 10)
+
+
+
+	.	reduce by rule 10
+
+
+state 24:
+
+	ID : UNEQUAL .  (reduce by rule 9)
+
+
+
+	.	reduce by rule 9
+
+
+state 25:
+
+	ID : BANG .  (reduce by rule 18)
+
+
+
+	.	reduce by rule 18
+
+
+state 26:
+
+	ID : COLON .  (reduce by rule 17)
+
+
+
+	.	reduce by rule 17
+
+
+state 27:
+
+	ID : BAR .  (reduce by rule 16)
+
+
+
+	.	reduce by rule 16
+
+
+state 28:
+
+	START : EXP SEMICOLON .  (reduce by rule 1)
+
+
+
+	.	reduce by rule 1
+
+
+state 29:
+
+	ID : REALDIV .  (reduce by rule 23)
+
+
+
+	.	reduce by rule 23
+
+
+state 30:
+
+	ID : SUB .  (reduce by rule 21)
+
+
+
+	.	reduce by rule 21
+
+
+state 31:
+
+	ID : INTDIV .  (reduce by rule 22)
+
+
+
+	.	reduce by rule 22
+
+
+state 32:
+
+	ID : TIMES .  (reduce by rule 20)
+
+
+
+	.	reduce by rule 20
+
+
+state 33:
+
+	ID : PLUS .  (reduce by rule 19)
+
+
+
+	.	reduce by rule 19
+
+error:  state 34: shift/reduce conflict (shift ID_NAME, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift HANDLE, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift ANDALSO, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift ORELSE, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift LESSTHANEQUAL, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift GREATERTHANEQUAL, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift LESSTHAN, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift GREATERTHAN, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift VARASSIGN, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift EQUALOP, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift UNEQUAL, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift BANG, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift COLON, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift BAR, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift REALDIV, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift SUB, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift INTDIV, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift TIMES, reduce by rule 34)
+error:  state 34: shift/reduce conflict (shift PLUS, reduce by rule 34)
+
+state 34:
+
+	EXP : EXP . ID EXP 
+	EXP : RAISE EXP .  (reduce by rule 34)
+	EXP : EXP . HANDLE MATCH 
+	EXP : EXP . ANDALSO EXP 
+	EXP : EXP . ORELSE EXP 
+
+	PLUS	shift 33
+	TIMES	shift 32
+	INTDIV	shift 31
+	SUB	shift 30
+	REALDIV	shift 29
+	BAR	shift 27
+	COLON	shift 26
+	BANG	shift 25
+	UNEQUAL	shift 24
+	EQUALOP	shift 23
+	VARASSIGN	shift 22
+	GREATERTHAN	shift 21
+	LESSTHAN	shift 20
+	GREATERTHANEQUAL	shift 19
+	LESSTHANEQUAL	shift 18
+	ORELSE	shift 17
+	ANDALSO	shift 16
+	HANDLE	shift 15
+	ID_NAME	shift 14
+
+	ID	goto 13
+
+	.	reduce by rule 34
+
+
+state 35:
+
+	EXP : EXP . ID EXP 
+	EXP : EXP . HANDLE MATCH 
+	EXP : EXP . ANDALSO EXP 
+	EXP : EXP . ORELSE EXP 
+	EXP : IF EXP . THEN EXP ELSE EXP 
+
+	PLUS	shift 33
+	TIMES	shift 32
+	INTDIV	shift 31
+	SUB	shift 30
+	REALDIV	shift 29
+	BAR	shift 27
+	COLON	shift 26
+	BANG	shift 25
+	UNEQUAL	shift 24
+	EQUALOP	shift 23
+	VARASSIGN	shift 22
+	GREATERTHAN	shift 21
+	LESSTHAN	shift 20
+	GREATERTHANEQUAL	shift 19
+	LESSTHANEQUAL	shift 18
+	THEN	shift 46
+	ORELSE	shift 17
+	ANDALSO	shift 16
+	HANDLE	shift 15
+	ID_NAME	shift 14
+
+	ID	goto 13
+
+	.	error
+
+
+state 36:
+
+	EXP : EXP . ID EXP 
+	EXP : EXP . HANDLE MATCH 
+	EXP : EXP . ANDALSO EXP 
+	EXP : EXP . ORELSE EXP 
+	EXP : WHILE EXP . DO EXP 
+
+	PLUS	shift 33
+	TIMES	shift 32
+	INTDIV	shift 31
+	SUB	shift 30
+	REALDIV	shift 29
+	BAR	shift 27
+	COLON	shift 26
+	BANG	shift 25
+	UNEQUAL	shift 24
+	EQUALOP	shift 23
+	VARASSIGN	shift 22
+	GREATERTHAN	shift 21
+	LESSTHAN	shift 20
+	GREATERTHANEQUAL	shift 19
+	LESSTHANEQUAL	shift 18
+	DO	shift 47
+	ORELSE	shift 17
+	ANDALSO	shift 16
+	HANDLE	shift 15
+	ID_NAME	shift 14
+
+	ID	goto 13
+
+	.	error
+
+
+state 37:
+
+	EXP : LBRACK EXP_LIST . RBRACK 
+
+	RBRACK	shift 48
 
 
 	.	error
 
-41 of 73 action table entries left after compaction
-10 goto table entries
+
+state 38:
+
+	EXP : EXP . ID EXP 
+	EXP : EXP . HANDLE MATCH 
+	EXP : EXP . ANDALSO EXP 
+	EXP : EXP . ORELSE EXP 
+	EXP_LIST : EXP .  (reduce by rule 24)
+	EXP_LIST : EXP . COMMA EXP_LIST 
+
+	COMMA	shift 49
+	PLUS	shift 33
+	TIMES	shift 32
+	INTDIV	shift 31
+	SUB	shift 30
+	REALDIV	shift 29
+	BAR	shift 27
+	COLON	shift 26
+	BANG	shift 25
+	UNEQUAL	shift 24
+	EQUALOP	shift 23
+	VARASSIGN	shift 22
+	GREATERTHAN	shift 21
+	LESSTHAN	shift 20
+	GREATERTHANEQUAL	shift 19
+	LESSTHANEQUAL	shift 18
+	ORELSE	shift 17
+	ANDALSO	shift 16
+	HANDLE	shift 15
+	ID_NAME	shift 14
+
+	ID	goto 13
+
+	.	reduce by rule 24
+
+
+state 39:
+
+	EXP : LPAREN EXP_SEQ . RPAREN 
+
+	RPAREN	shift 50
+
+
+	.	error
+
+
+state 40:
+
+	EXP : LPAREN EXP_LIST . RPAREN 
+
+	RPAREN	shift 51
+
+
+	.	error
+
+error:  state 41: reduce/reduce conflict between rule 26 and rule 24 on RPAREN
+error:  state 41: shift/reduce conflict (shift RPAREN, reduce by rule 24)
+
+state 41:
+
+	EXP : EXP . ID EXP 
+	EXP : LPAREN EXP . RPAREN 
+	EXP : EXP . HANDLE MATCH 
+	EXP : EXP . ANDALSO EXP 
+	EXP : EXP . ORELSE EXP 
+	EXP_LIST : EXP .  (reduce by rule 24)
+	EXP_LIST : EXP . COMMA EXP_LIST 
+	EXP_SEQ : EXP .  (reduce by rule 26)
+	EXP_SEQ : EXP . SEMICOLON EXP_SEQ 
+
+	COMMA	shift 49
+	PLUS	shift 33
+	TIMES	shift 32
+	INTDIV	shift 31
+	SUB	shift 30
+	RPAREN	shift 53
+	REALDIV	shift 29
+	SEMICOLON	shift 52
+	BAR	shift 27
+	COLON	shift 26
+	BANG	shift 25
+	UNEQUAL	shift 24
+	EQUALOP	shift 23
+	VARASSIGN	shift 22
+	GREATERTHAN	shift 21
+	LESSTHAN	shift 20
+	GREATERTHANEQUAL	shift 19
+	LESSTHANEQUAL	shift 18
+	ORELSE	shift 17
+	ANDALSO	shift 16
+	HANDLE	shift 15
+	ID_NAME	shift 14
+
+	ID	goto 13
+
+	.	error
+
+error:  state 42: shift/reduce conflict (shift ID_NAME, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift HANDLE, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift ANDALSO, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift ORELSE, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift LESSTHANEQUAL, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift GREATERTHANEQUAL, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift LESSTHAN, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift GREATERTHAN, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift VARASSIGN, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift EQUALOP, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift UNEQUAL, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift BANG, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift COLON, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift BAR, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift REALDIV, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift SUB, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift INTDIV, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift TIMES, reduce by rule 29)
+error:  state 42: shift/reduce conflict (shift PLUS, reduce by rule 29)
+
+state 42:
+
+	EXP : EXP . ID EXP 
+	EXP : EXP ID EXP .  (reduce by rule 29)
+	EXP : EXP . HANDLE MATCH 
+	EXP : EXP . ANDALSO EXP 
+	EXP : EXP . ORELSE EXP 
+
+	PLUS	shift 33
+	TIMES	shift 32
+	INTDIV	shift 31
+	SUB	shift 30
+	REALDIV	shift 29
+	BAR	shift 27
+	COLON	shift 26
+	BANG	shift 25
+	UNEQUAL	shift 24
+	EQUALOP	shift 23
+	VARASSIGN	shift 22
+	GREATERTHAN	shift 21
+	LESSTHAN	shift 20
+	GREATERTHANEQUAL	shift 19
+	LESSTHANEQUAL	shift 18
+	ORELSE	shift 17
+	ANDALSO	shift 16
+	HANDLE	shift 15
+	ID_NAME	shift 14
+
+	ID	goto 13
+
+	.	reduce by rule 29
+
+
+state 43:
+
+	EXP : EXP HANDLE MATCH .  (reduce by rule 35)
+
+
+
+	.	reduce by rule 35
+
+error:  state 44: shift/reduce conflict (shift ID_NAME, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift HANDLE, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift ANDALSO, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift ORELSE, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift LESSTHANEQUAL, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift GREATERTHANEQUAL, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift LESSTHAN, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift GREATERTHAN, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift VARASSIGN, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift EQUALOP, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift UNEQUAL, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift BANG, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift COLON, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift BAR, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift REALDIV, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift SUB, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift INTDIV, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift TIMES, reduce by rule 36)
+error:  state 44: shift/reduce conflict (shift PLUS, reduce by rule 36)
+
+state 44:
+
+	EXP : EXP . ID EXP 
+	EXP : EXP . HANDLE MATCH 
+	EXP : EXP . ANDALSO EXP 
+	EXP : EXP ANDALSO EXP .  (reduce by rule 36)
+	EXP : EXP . ORELSE EXP 
+
+	PLUS	shift 33
+	TIMES	shift 32
+	INTDIV	shift 31
+	SUB	shift 30
+	REALDIV	shift 29
+	BAR	shift 27
+	COLON	shift 26
+	BANG	shift 25
+	UNEQUAL	shift 24
+	EQUALOP	shift 23
+	VARASSIGN	shift 22
+	GREATERTHAN	shift 21
+	LESSTHAN	shift 20
+	GREATERTHANEQUAL	shift 19
+	LESSTHANEQUAL	shift 18
+	ORELSE	shift 17
+	ANDALSO	shift 16
+	HANDLE	shift 15
+	ID_NAME	shift 14
+
+	ID	goto 13
+
+	.	reduce by rule 36
+
+error:  state 45: shift/reduce conflict (shift ID_NAME, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift HANDLE, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift ANDALSO, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift ORELSE, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift LESSTHANEQUAL, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift GREATERTHANEQUAL, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift LESSTHAN, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift GREATERTHAN, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift VARASSIGN, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift EQUALOP, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift UNEQUAL, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift BANG, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift COLON, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift BAR, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift REALDIV, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift SUB, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift INTDIV, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift TIMES, reduce by rule 37)
+error:  state 45: shift/reduce conflict (shift PLUS, reduce by rule 37)
+
+state 45:
+
+	EXP : EXP . ID EXP 
+	EXP : EXP . HANDLE MATCH 
+	EXP : EXP . ANDALSO EXP 
+	EXP : EXP . ORELSE EXP 
+	EXP : EXP ORELSE EXP .  (reduce by rule 37)
+
+	PLUS	shift 33
+	TIMES	shift 32
+	INTDIV	shift 31
+	SUB	shift 30
+	REALDIV	shift 29
+	BAR	shift 27
+	COLON	shift 26
+	BANG	shift 25
+	UNEQUAL	shift 24
+	EQUALOP	shift 23
+	VARASSIGN	shift 22
+	GREATERTHAN	shift 21
+	LESSTHAN	shift 20
+	GREATERTHANEQUAL	shift 19
+	LESSTHANEQUAL	shift 18
+	ORELSE	shift 17
+	ANDALSO	shift 16
+	HANDLE	shift 15
+	ID_NAME	shift 14
+
+	ID	goto 13
+
+	.	reduce by rule 37
+
+
+state 46:
+
+	EXP : IF EXP THEN . EXP ELSE EXP 
+
+	INT	shift 12
+	LPAREN	shift 11
+	LBRACK	shift 10
+	WHILE	shift 9
+	IF	shift 8
+	RAISE	shift 7
+	WORD	shift 6
+	CHAR	shift 5
+	STRING	shift 4
+	REAL	shift 3
+
+	CON	goto 2
+	EXP	goto 54
+
+	.	error
+
+
+state 47:
+
+	EXP : WHILE EXP DO . EXP 
+
+	INT	shift 12
+	LPAREN	shift 11
+	LBRACK	shift 10
+	WHILE	shift 9
+	IF	shift 8
+	RAISE	shift 7
+	WORD	shift 6
+	CHAR	shift 5
+	STRING	shift 4
+	REAL	shift 3
+
+	CON	goto 2
+	EXP	goto 55
+
+	.	error
+
+
+state 48:
+
+	EXP : LBRACK EXP_LIST RBRACK .  (reduce by rule 32)
+
+
+
+	.	reduce by rule 32
+
+
+state 49:
+
+	EXP_LIST : EXP COMMA . EXP_LIST 
+
+	INT	shift 12
+	LPAREN	shift 11
+	LBRACK	shift 10
+	WHILE	shift 9
+	IF	shift 8
+	RAISE	shift 7
+	WORD	shift 6
+	CHAR	shift 5
+	STRING	shift 4
+	REAL	shift 3
+
+	CON	goto 2
+	EXP	goto 38
+	EXP_LIST	goto 56
+
+	.	error
+
+
+state 50:
+
+	EXP : LPAREN EXP_SEQ RPAREN .  (reduce by rule 33)
+
+
+
+	.	reduce by rule 33
+
+
+state 51:
+
+	EXP : LPAREN EXP_LIST RPAREN .  (reduce by rule 31)
+
+
+
+	.	reduce by rule 31
+
+
+state 52:
+
+	EXP_SEQ : EXP SEMICOLON . EXP_SEQ 
+
+	INT	shift 12
+	LPAREN	shift 11
+	LBRACK	shift 10
+	WHILE	shift 9
+	IF	shift 8
+	RAISE	shift 7
+	WORD	shift 6
+	CHAR	shift 5
+	STRING	shift 4
+	REAL	shift 3
+
+	CON	goto 2
+	EXP	goto 58
+	EXP_SEQ	goto 57
+
+	.	error
+
+
+state 53:
+
+	EXP : LPAREN EXP RPAREN .  (reduce by rule 30)
+
+
+
+	.	reduce by rule 30
+
+
+state 54:
+
+	EXP : EXP . ID EXP 
+	EXP : EXP . HANDLE MATCH 
+	EXP : EXP . ANDALSO EXP 
+	EXP : EXP . ORELSE EXP 
+	EXP : IF EXP THEN EXP . ELSE EXP 
+
+	PLUS	shift 33
+	TIMES	shift 32
+	INTDIV	shift 31
+	SUB	shift 30
+	REALDIV	shift 29
+	BAR	shift 27
+	COLON	shift 26
+	BANG	shift 25
+	UNEQUAL	shift 24
+	EQUALOP	shift 23
+	VARASSIGN	shift 22
+	GREATERTHAN	shift 21
+	LESSTHAN	shift 20
+	GREATERTHANEQUAL	shift 19
+	LESSTHANEQUAL	shift 18
+	ELSE	shift 59
+	ORELSE	shift 17
+	ANDALSO	shift 16
+	HANDLE	shift 15
+	ID_NAME	shift 14
+
+	ID	goto 13
+
+	.	error
+
+error:  state 55: shift/reduce conflict (shift ID_NAME, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift HANDLE, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift ANDALSO, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift ORELSE, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift LESSTHANEQUAL, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift GREATERTHANEQUAL, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift LESSTHAN, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift GREATERTHAN, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift VARASSIGN, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift EQUALOP, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift UNEQUAL, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift BANG, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift COLON, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift BAR, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift REALDIV, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift SUB, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift INTDIV, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift TIMES, reduce by rule 39)
+error:  state 55: shift/reduce conflict (shift PLUS, reduce by rule 39)
+
+state 55:
+
+	EXP : EXP . ID EXP 
+	EXP : EXP . HANDLE MATCH 
+	EXP : EXP . ANDALSO EXP 
+	EXP : EXP . ORELSE EXP 
+	EXP : WHILE EXP DO EXP .  (reduce by rule 39)
+
+	PLUS	shift 33
+	TIMES	shift 32
+	INTDIV	shift 31
+	SUB	shift 30
+	REALDIV	shift 29
+	BAR	shift 27
+	COLON	shift 26
+	BANG	shift 25
+	UNEQUAL	shift 24
+	EQUALOP	shift 23
+	VARASSIGN	shift 22
+	GREATERTHAN	shift 21
+	LESSTHAN	shift 20
+	GREATERTHANEQUAL	shift 19
+	LESSTHANEQUAL	shift 18
+	ORELSE	shift 17
+	ANDALSO	shift 16
+	HANDLE	shift 15
+	ID_NAME	shift 14
+
+	ID	goto 13
+
+	.	reduce by rule 39
+
+
+state 56:
+
+	EXP_LIST : EXP COMMA EXP_LIST .  (reduce by rule 25)
+
+
+
+	.	reduce by rule 25
+
+
+state 57:
+
+	EXP_SEQ : EXP SEMICOLON EXP_SEQ .  (reduce by rule 27)
+
+
+
+	.	reduce by rule 27
+
+
+state 58:
+
+	EXP : EXP . ID EXP 
+	EXP : EXP . HANDLE MATCH 
+	EXP : EXP . ANDALSO EXP 
+	EXP : EXP . ORELSE EXP 
+	EXP_SEQ : EXP .  (reduce by rule 26)
+	EXP_SEQ : EXP . SEMICOLON EXP_SEQ 
+
+	PLUS	shift 33
+	TIMES	shift 32
+	INTDIV	shift 31
+	SUB	shift 30
+	REALDIV	shift 29
+	SEMICOLON	shift 52
+	BAR	shift 27
+	COLON	shift 26
+	BANG	shift 25
+	UNEQUAL	shift 24
+	EQUALOP	shift 23
+	VARASSIGN	shift 22
+	GREATERTHAN	shift 21
+	LESSTHAN	shift 20
+	GREATERTHANEQUAL	shift 19
+	LESSTHANEQUAL	shift 18
+	ORELSE	shift 17
+	ANDALSO	shift 16
+	HANDLE	shift 15
+	ID_NAME	shift 14
+
+	ID	goto 13
+
+	.	reduce by rule 26
+
+
+state 59:
+
+	EXP : IF EXP THEN EXP ELSE . EXP 
+
+	INT	shift 12
+	LPAREN	shift 11
+	LBRACK	shift 10
+	WHILE	shift 9
+	IF	shift 8
+	RAISE	shift 7
+	WORD	shift 6
+	CHAR	shift 5
+	STRING	shift 4
+	REAL	shift 3
+
+	CON	goto 2
+	EXP	goto 60
+
+	.	error
+
+error:  state 60: shift/reduce conflict (shift ID_NAME, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift HANDLE, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift ANDALSO, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift ORELSE, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift LESSTHANEQUAL, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift GREATERTHANEQUAL, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift LESSTHAN, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift GREATERTHAN, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift VARASSIGN, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift EQUALOP, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift UNEQUAL, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift BANG, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift COLON, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift BAR, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift REALDIV, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift SUB, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift INTDIV, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift TIMES, reduce by rule 38)
+error:  state 60: shift/reduce conflict (shift PLUS, reduce by rule 38)
+
+state 60:
+
+	EXP : EXP . ID EXP 
+	EXP : EXP . HANDLE MATCH 
+	EXP : EXP . ANDALSO EXP 
+	EXP : EXP . ORELSE EXP 
+	EXP : IF EXP THEN EXP ELSE EXP .  (reduce by rule 38)
+
+	PLUS	shift 33
+	TIMES	shift 32
+	INTDIV	shift 31
+	SUB	shift 30
+	REALDIV	shift 29
+	BAR	shift 27
+	COLON	shift 26
+	BANG	shift 25
+	UNEQUAL	shift 24
+	EQUALOP	shift 23
+	VARASSIGN	shift 22
+	GREATERTHAN	shift 21
+	LESSTHAN	shift 20
+	GREATERTHANEQUAL	shift 19
+	LESSTHANEQUAL	shift 18
+	ORELSE	shift 17
+	ANDALSO	shift 16
+	HANDLE	shift 15
+	ID_NAME	shift 14
+
+	ID	goto 13
+
+	.	reduce by rule 38
+
+
+state 61:
+
+
+	EOF	accept
+
+
+	.	error
+
+280 of 462 action table entries left after compaction
+48 goto table entries

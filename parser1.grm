@@ -1,14 +1,13 @@
-
-fun lookup "bogus" = 10000
-  | lookup s = 0
-
 open String
+open Int
 val Conc: string ref = ref ""
 val outStream = TextIO.openOut "testOutput.sml"
 
+fun concatWith_(x, lis) = concatWith (x) (lis);
+
 %%
 
-%eop EOF SEMICOLON
+%eop EOF
 
 %pos int
 
@@ -18,64 +17,114 @@ val outStream = TextIO.openOut "testOutput.sml"
 
 
 %term 
-	  ID of string | INT of int | PRINT | EOF |
-	  PLUS of string | TIMES of string | INTDIV of string | SUB of string 
-    | REALDIV of string | CARAT of string | SEMICOLON of string
+	  INT of string | EOF | COMMA of string |  PLUS of string | TIMES  of string 
+    | INTDIV  of string | SUB of string | LPAREN of string | RPAREN of string 
+    | REALDIV of string | CARAT of string | SEMICOLON of string | LBRACK of string 
+    | RBRACK of string | ARROW of string | DARROW of string | BAR of string 
+    | COLON of string | BANG of string | COLONGT of string | COMPOSITION of string 
+    | UNEQUAL of string | EQUALOP of string | VARASSIGN of string | GREATERTHAN of string 
+    | LESSTHAN of string | GREATERTHANEQUAL of string | LESSTHANEQUAL of string 
+    | LET of string | IN of string | END of string | WHILE of string | DO of string 
+    | IF of string | THEN of string | ELSE of string | ORELSE of string 
+    | ANDALSO of string | HANDLE of string | RAISE of string | EXCEPTION of string
+    | WORD of string | CHAR of string | STRING of string | REAL of string | ID_NAME of string
 
+%nonterm START of string option 
+       | CON of string
+       | ID of string
+       | EXP of string | EXP_LIST of string | EXP_SEQ of string
+       | DEC of string
+       | MATCH of string
 
-%nonterm EXP of int | START of int option | NEWLINE of string
 
 %name Sample
 
-%subst PRINT for ID
 %prefer PLUS TIMES INTDIV SUB
-%keyword PRINT SEMICOLON
 
-%noshift
-%value ID ("bogus")
+%noshift EOF
 %verbose
 %%
 
 
-  START : PRINT EXP (print (Int.toString EXP);
-                     print "\n";
-                     SOME EXP)
-        | EXP (SOME EXP)
+  START : EXP (SOME (EXP ^ "\n")) 
+        | EXP SEMICOLON (SOME (EXP ^ ";\n")) 
         | (NONE)
-        | NEWLINE (!Conc)
 
-  EXP : INT             (let val _ = Conc := !Conc ^ Int.toString (INT) in 1 end)
-      | ID              (lookup ID)
+  CON : INT (INT) 
+      | WORD (WORD)
+      | REAL (REAL)
+      | CHAR (CHAR)
+      | STRING (STRING)
 
-      | EXP PLUS EXP    (let val _ = Conc := !Conc ^ Int.toString (EXP1) ^ " + " 
-                         ^ Int.toString (EXP2)
-                         in 1 end)
+  ID : ID_NAME (ID_NAME)
+     | UNEQUAL (UNEQUAL)
+     | EQUALOP (EQUALOP)
+     | VARASSIGN (VARASSIGN)
+     | GREATERTHAN (GREATERTHAN)
+     | LESSTHAN (LESSTHAN)
+     | GREATERTHANEQUAL (GREATERTHANEQUAL)
+     | LESSTHANEQUAL (LESSTHANEQUAL)
+     | BAR (BAR)
+     | COLON (COLON)
+     | BANG (BANG)
+     | PLUS (PLUS)
+     | TIMES (TIMES) 
+     | SUB (SUB) 
+     | INTDIV (INTDIV) 
+     | REALDIV (REALDIV) 
 
-      | EXP TIMES EXP   (let val _ = Conc := !Conc ^ Int.toString (EXP1) ^ " * " 
-                         ^ Int.toString (EXP2)
-                         in 1 end)
+  
+
+  EXP_LIST: EXP (EXP)
+        | EXP COMMA EXP_LIST (EXP ^ ", " ^ EXP_LIST)
+
+  EXP_SEQ: EXP (EXP)
+        | EXP SEMICOLON EXP_SEQ (EXP ^ ";\n " ^ EXP_SEQ)
+
+  EXP : CON (CON)
+
+      | EXP ID EXP  (concatWith_(" ", [EXP1, ID, EXP2]))
+
+      (* We add EXP and EXPLIST for parenthesis, since diff meanings
+        (Tuple or just an exp *)
+      | LPAREN EXP RPAREN (concatWith_(" ", [LPAREN, EXP, RPAREN]))
+
+      | LPAREN EXP_LIST RPAREN (concatWith_(" ", [LPAREN, EXP_LIST, RPAREN])) 
+
+      (* However for lists, we do not do the same as paren*)
+      | LBRACK EXP_LIST RBRACK (concatWith_(" ", [LBRACK, EXP_LIST, RBRACK])) 
       
-      | EXP INTDIV EXP  (let val _ = Conc := !Conc ^ Int.toString (EXP1) ^ " div " 
-                         ^ Int.toString (EXP2)
-                         in 1 end)
+      (* Might have to change later, since one just exp is not a sequence*)
+      (* However, one exp will always be matched to this cuz longest *)
+      | LPAREN EXP_SEQ RPAREN (concatWith_(" ", [LPAREN, EXP_SEQ, RPAREN]))
 
-      | EXP REALDIV EXP (let val _ = Conc := !Conc ^ Int.toString (EXP1) ^ " / " 
-                         ^ Int.toString (EXP2)
-                         in 1 end)
-      
-      | EXP SUB EXP     (let val _ = Conc := !Conc ^ Int.toString (EXP1) ^ " - " 
-                         ^ Int.toString (EXP2)
-                         in 1 end)
+      | LET DEC IN EXP_SEQ END (concatWith_(" ", [LET, DEC, IN, EXP_SEQ, END]))
 
-      | EXP CARAT EXP   (let fun e (m,0) = 1
-                                | e (m,l) = m*e(m,l-1)
-                             val _ = Conc := !Conc ^ Int.toString (e (EXP1, EXP2))
-                         in 1 end)
+      | EXP COLON TYP (concatWith_(" ", [EXP, COLON, TYP]))
 
-NEWLINE : NEWLINE        (let
-                            val _ = TextIO.output (outStream, !Conc ^ "\n")
-                            val _ = print (!Conc);
-                            val _ = TextIO.flushOut (outStream)
-                          in
-                            !Conc
-                          end)
+      | RAISE EXP (concatWith_(" ", [RAISE, EXP]))
+
+      | EXP HANDLE MATCH (concatWith_(" ", [EXP, HANDLE, MATCH]))
+
+      | EXP ANDALSO EXP (concatWith_(" ", [EXP1, ANDALSO, EXP2])) 
+
+      | EXP ORELSE EXP (concatWith_(" ", [EXP1, ORELSE, EXP2])) 
+
+      | IF EXP THEN EXP ELSE EXP (concatWith_(" ", [IF, EXP1, THEN, EXP2, ELSE, EXP3])) 
+
+      | WHILE EXP DO EXP (concatWith_(" ", [WHILE, EXP, DO, EXP])) 
+
+      | CASE EXP OF MATCH (concatWith_(" ", [CASE, EXP, "of\n", MATCH])) 
+
+      | FN MATCH (concatWith_(" ", [FN, MATCH]))
+
+
+  MATCH : PAT DARROW EXP (PAT ^ " => " EXP)
+
+        | PAT DARROW EXP BAR MATCH (PAT ^ " => " EXP ^ " | " ^ MATCH)
+
+ 
+
+
+
+
