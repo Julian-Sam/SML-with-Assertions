@@ -50,6 +50,7 @@ string_ = "\""{ascii}*"\"";
 "*"          => (Tokens.TIMES(yytext, !pos,!pos));
 "/"          => (Tokens.REALDIV(yytext, !pos,!pos));
 "div"	     => (Tokens.INTDIV(yytext, !pos,!pos));
+"mod"		 => (Tokens.MOD(yytext, !pos, !pos));
 "+"          => (Tokens.PLUS(yytext, !pos,!pos));
 "-"          => (Tokens.SUB(yytext, !pos,!pos));
 "^"          => (Tokens.CARAT(yytext, !pos,!pos));
@@ -63,8 +64,6 @@ string_ = "\""{ascii}*"\"";
 "!"		     => (Tokens.BANG(yytext, !pos,!pos));
 ":>"	     => (Tokens.COLONGT(yytext, !pos,!pos));
 "o"          => (Tokens.COMPOSITION(yytext, !pos,!pos));
-
-
 
 "["	 	     => (Tokens.LBRACK(yytext, !pos,!pos));
 "]"	 	     => (Tokens.RBRACK(yytext, !pos,!pos));
@@ -88,6 +87,13 @@ string_ = "\""{ascii}*"\"";
 "handle"     => (Tokens.HANDLE(yytext, !pos,!pos));
 "raise"	     => (Tokens.RAISE(yytext, !pos,!pos));
 "exception"	 => (Tokens.EXCEPTION(yytext, !pos,!pos));
+
+"val"		 => (Tokens.VAL(yytext, !pos, !pos));
+"and"		 => (Tokens.AND(yytext, !pos, !pos));
+"fn" 		 => (Tokens.FN(yytext, !pos, !pos));
+"case" 		 => (Tokens.CASE(yytext, !pos, !pos));
+"of"	     => (Tokens.OF(yytext, !pos, !pos));
+"_"			 => (Tokens.WILD(yytext, !pos, !pos));
 
 {id}		 => (Tokens.ID_NAME(yytext, !pos, !pos));
 

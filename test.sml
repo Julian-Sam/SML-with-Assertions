@@ -1,1 +1,5 @@
-if [1,2,3] then 1 else 4;
+fn x => (let
+		   val a = 4
+		 in
+		   a; a + 4
+		 end)
