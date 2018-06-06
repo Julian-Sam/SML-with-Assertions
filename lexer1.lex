@@ -69,12 +69,9 @@ string_ = "\""{ascii}*"\"";
 "o"          => (Tokens.COMPOSITION(yytext, !pos,!pos));
 "#"          => (Tokens.HASH(yytext, !pos,!pos));
 
-<<<<<<< HEAD
-=======
-
 "{"	 	     => (Tokens.LCURLY(yytext, !pos,!pos));
 "}"	 	     => (Tokens.RCURLY(yytext, !pos,!pos));
->>>>>>> e389fff6fc72b4b6dce91979f378d6e3229e4388
+
 "["	 	     => (Tokens.LBRACK(yytext, !pos,!pos));
 "]"	 	     => (Tokens.RBRACK(yytext, !pos,!pos));
 "("	 	     => (Tokens.LPAREN(yytext, !pos,!pos));
