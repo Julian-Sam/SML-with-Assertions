@@ -1,2 +1,6 @@
 .cm/
 
+lexer1.lex.sml
+parser1.grm.desc
+parser1.grm.sig
+parser1.grm.sml
