@@ -78,7 +78,7 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
   EXP_LIST: EXP (EXP)
         | EXP COMMA EXP_LIST (EXP ^ ", " ^ EXP_LIST)
 
-  EXP_SEQ: EXP (EXP)
+  EXP_SEQ: EXP SEMICOLON EXP (EXP ^ ";\n " ^ EXP)
         | EXP SEMICOLON EXP_SEQ (EXP ^ ";\n " ^ EXP_SEQ)
 
   EXP : CON (CON)
