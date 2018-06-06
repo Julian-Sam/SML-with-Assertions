@@ -17,7 +17,7 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
 
 %term 
-	  INT of string | EOF | COMMA of string |  PLUS of string | TIMES  of string 
+    INT of string | EOF | COMMA of string |  PLUS of string | TIMES  of string 
     | INTDIV  of string | SUB of string | LPAREN of string | RPAREN of string 
     | REALDIV of string | CARAT of string | SEMICOLON of string | LBRACK of string 
     | RBRACK of string | ARROW of string | DARROW of string | BAR of string 
@@ -124,7 +124,6 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
         | PAT DARROW EXP BAR MATCH (PAT ^ " => " EXP ^ " | " ^ MATCH)
 
  
-
 
 
 

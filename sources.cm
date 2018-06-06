@@ -7,8 +7,7 @@ Group is
   ml-yacc-lib.cm
 #endif
 
-  parser2.grm
-  lexer2.lex
+  parser1.grm
+  lexer1.lex
   glue.sml
-  absyn.sml
 

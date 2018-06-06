@@ -94,4 +94,3 @@ string_ = "\""{ascii}*"\"";
 "."          => (error ("ignoring bad character "^yytext,!pos,!pos);
              lex());
 
-
