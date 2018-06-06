@@ -9,6 +9,7 @@ structure Sample : sig
                  end = 
 struct
 
+
 (* 
  * We apply the functors generated from sample.lex and sample.grm to produce
  * the SampleParser structure.
@@ -53,11 +54,7 @@ struct
 	  val dummyEOF = SampleLrVals.Tokens.EOF(0,0)
 	  fun loop lexer =
 	      let val (result,lexer) = invoke lexer
-		  val (nextToken,lexer) = SampleParser.Stream.get lexer
-		  val _ = case result
-			    of SOME r =>
-				(TextIO.output(TextIO.stdOut, r); TextIO.flushOut TextIO.stdOut)
-			     | NONE => ()
+		        val (nextToken,lexer) = SampleParser.Stream.get lexer
 	       in if SampleParser.sameToken(nextToken,dummyEOF) then ()
 		  else loop lexer
 	      end
