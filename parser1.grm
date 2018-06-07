@@ -16,20 +16,24 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
 
 %term 
-    INT of string | EOF | COMMA of string |  PLUS of string | TIMES  of string 
+    INT of string | EOF | COMMA of string |  PLUS of string | TIMES of string 
     | INTDIV  of string | SUB of string | LPAREN of string | RPAREN of string 
-    | REALDIV of string | CARAT of string | SEMICOLON of string | LBRACK of string 
-    | RBRACK of string | ARROW of string | DARROW of string | BAR of string 
-    | COLON of string | BANG of string | COLONGT of string | COMPOSITION of string 
-    | UNEQUAL of string | EQUALOP of string | VARASSIGN of string | GREATERTHAN of string 
+    | REALDIV of string | CARAT of string | SEMICOLON of string 
+    | LBRACK of string     | RBRACK of string | ARROW of string 
+    | DARROW of string | BAR of string | COLON of string | BANG of string 
+    | COLONGT of string | COMPOSITION of string | UNEQUAL of string 
+    | EQUALOP of string | VARASSIGN of string | GREATERTHAN of string 
     | LESSTHAN of string | GREATERTHANEQUAL of string | LESSTHANEQUAL of string 
-    | LET of string | IN of string | END of string | WHILE of string | DO of string 
-    | IF of string | THEN of string | ELSE of string | ORELSE of string 
-    | ANDALSO of string | HANDLE of string | RAISE of string | EXCEPTION of string
-    | WORD of string | CHAR of string | STRING of string | REAL of string | ID_NAME of string
-    | MOD of string | AND of string | FN of string | VAL of string | CASE of string 
-    | OF of string | WILD of string | HASH of string | LCURLY of string 
-    | RCURLY of string | DOT of string | FUN of string
+
+    | LET of string | IN of string | END of string | WHILE of string 
+    | DO of string | IF of string | THEN of string | ELSE of string 
+    | ORELSE of string | ANDALSO of string | HANDLE of string | RAISE of string
+    | EXCEPTION of string | WORD of string | CHAR of string | STRING of string
+    | REAL of string | ID_NAME of string | MOD of string | AND of string 
+    | FN of string | VAL of string | CASE of string | OF of string 
+    | WILD of string | HASH of string | LCURLY of string | RCURLY of string 
+    | DOT of string | DCOLON of string | NIL of string | QUOTE_ID of string 
+    | DQUOTE_ID of string | FUN of string
 
 %nonterm START of string option 
        | ID of string | LONG_ID of string | CON of string 
@@ -85,7 +89,10 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
      | REALDIV (REALDIV) 
      | MOD (MOD)
 
-  LONG_ID : ID_NAME DOT ID_NAME (ID_NAME ^ "." ^ ID_NAME)  
+  VAR : QUOTE_ID (QUOTE_ID) 
+      | DQUOTE_ID (DQUOTE_ID)
+
+  LONG_ID : ID_NAME DOT ID_NAME (ID_NAME1 ^ "." ^ ID_NAME2)  
   			  | ID_NAME DOT LONG_ID (ID_NAME ^ "." ^ LONG_ID)
 
   LAB : ID (ID)
@@ -96,10 +103,12 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
   EXP_LIST : EXP (EXP)
            | EXP COMMA EXP_LIST (EXP ^ ", " ^ EXP_LIST)
 
-  EXP_SEQ : EXP SEMICOLON EXP (EXP ^ ";\n " ^ EXP)
+  EXP_SEQ : EXP SEMICOLON EXP (EXP1 ^ ";\n " ^ EXP2)
           | EXP SEMICOLON EXP_SEQ (EXP ^ ";\n " ^ EXP_SEQ)
 
   EXP : CON (CON)
+
+      | ID_NAME (ID_NAME)
 
       | EXP ID EXP  (concatWith_(" ", [EXP1, ID, EXP2]))
 
@@ -114,11 +123,20 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
       | HASH LAB (HASH ^ LAB)
 
       (* However for lists, we do not do the same as paren*)
+      | LBRACK RBRACK (LBRACK ^ RBRACK) 
+
+      | NIL (NIL) 
+
+      (* The second EXP should be a list, but we'll let sml deal with this *)
+      | EXP DCOLON EXP (concatWith_(" ", [EXP1, DCOLON, EXP2])) 
+
       | LBRACK EXP_LIST RBRACK (concatWith_(" ", [LBRACK, EXP_LIST, RBRACK])) 
       
       | LPAREN EXP_SEQ RPAREN (concatWith_(" ", [LPAREN, EXP_SEQ, RPAREN]))
 
-      | LET DEC IN EXP_SEQ END (concatWith_(" ", [LET, DEC, IN, EXP_SEQ, END]))
+      | LET DEC IN EXP END (concatWith_(" ", [LET, DEC, "in\n", EXP, END]))
+
+      | LET DEC IN EXP_SEQ END (concatWith_(" ", [LET, DEC, "in\n", EXP_SEQ, END]))
 
       (*| EXP COLON TYP (concatWith_(" ", [EXP, COLON, TYP]))*)
 
@@ -132,7 +150,7 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
       | IF EXP THEN EXP ELSE EXP (concatWith_(" ", [IF, EXP1, THEN, EXP2, ELSE, EXP3])) 
 
-      | WHILE EXP DO EXP (concatWith_(" ", [WHILE, EXP, DO, EXP])) 
+      | WHILE EXP DO EXP (concatWith_(" ", [WHILE, EXP1, DO, EXP2])) 
 
       | CASE EXP OF MATCH (concatWith_(" ", [CASE, EXP, "of\n", MATCH])) 
 
@@ -147,15 +165,7 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
   EXP_ROW : LAB EQUALOP EXP (LAB ^ " = " ^ EXP)
 
           | LAB EQUALOP EXP COMMA EXP_ROW (LAB ^ " = " ^ EXP ^ ", " ^ EXP_ROW)
-          
-
-  DEC : VAL VALBIND	(VAL ^ " " ^ VALBIND)
-
-      | FUN FUNBIND (FUN ^ " " ^ FUNBIND)
-
-  VALBIND : PAT EQUALOP EXP (concatWith_(" ", [PAT, EQUALOP, EXP]))
-
-  		    | PAT EQUALOP EXP AND VALBIND (concatWith_(" ", [PAT, EQUALOP, EXP, " and ", VALBIND]))
+ 
 
 	PAT : CON (CON)
 
@@ -163,18 +173,31 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
 	 	| ID (ID)
 
-	 	| PAT ID PAT (concatWith_(" ", [PAT, ID, PAT]))
+		| PAT ID_NAME PAT (concatWith_(" ", [PAT1, ID_NAME, PAT2]))
 
 	 	| LPAREN PAT_LIST RPAREN (concatWith_(" ", [LPAREN, PAT_LIST, RPAREN]))
 
 	 	| LBRACK PAT_LIST RBRACK (concatWith_(" ", [LBRACK, PAT_LIST, RBRACK]))
 
 
-		 	(*| PAT COLON TYP (PAT ^ " : " ^ TYP)*)
   PAT_LIST : PAT (PAT)
 
  		   | PAT COMMA PAT_LIST (PAT ^ ", " ^ PAT_LIST)
-  		    	
+  		
+  	  
+  TYP: 
+
+
+  DEC : VAL VALBIND (VAL ^ " " ^ VALBIND)
+
+      | FUN FUNBIND (FUN ^ " " ^ FUNBIND)
+
+
+  VALBIND : PAT EQUALOP EXP (concatWith_(" ", [PAT, EQUALOP, EXP]))
+
+          | PAT EQUALOP EXP AND VALBIND (concatWith_(" ", [PAT, EQUALOP, EXP, " and ", VALBIND]))
+
+
   FUNBIND : FUNMATCH (FUNMATCH)
 
   		  | FUNMATCH AND FUNBIND (FUNMATCH ^ " and " ^ FUNBIND)
@@ -183,15 +206,5 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
   FUNMATCH : ID PAT EQUALOP EXP (concatWith_(" ", [ID, PAT, EQUALOP, EXP]))
 
   		   | ID PAT EQUALOP EXP BAR FUNMATCH (concatWith_(" ", [ID, PAT, EQUALOP, EXP]) ^ "\n  " ^ BAR ^ " " ^ FUNMATCH)
-  	  
 
-
-
-
-
-
-
-
-
- 
 
