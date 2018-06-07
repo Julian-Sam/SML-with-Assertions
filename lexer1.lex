@@ -98,6 +98,7 @@ string_ = "\""{ascii}*"\"";
 "val"		 => (Tokens.VAL(yytext, !pos, !pos));
 "and"		 => (Tokens.AND(yytext, !pos, !pos));
 "fn" 		 => (Tokens.FN(yytext, !pos, !pos));
+"fun"		 => (Tokens.FUN(yytext, !pos, !pos));
 "case" 		 => (Tokens.CASE(yytext, !pos, !pos));
 "of"	     => (Tokens.OF(yytext, !pos, !pos));
 "_"			 => (Tokens.WILD(yytext, !pos, !pos));

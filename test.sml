@@ -1,5 +1,3 @@
-fn x => (let
-		   val a = 4
-		 in
-		   a; a + 4
-		 end)
+fun solid (_, 0) = 0
+  | solid (0, _) = 0
+  | solid (x, y) = x + y;
