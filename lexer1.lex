@@ -39,6 +39,7 @@ string_ = "\""{ascii}*"\"";
 {char_}		 => (Tokens.CHAR(yytext, !pos, !pos));
 {string_}	 => (Tokens.STRING(yytext, !pos, !pos));
 
+"'"{idchars}+
 
 "<>"	     => (Tokens.UNEQUAL(yytext, !pos,!pos));
 "="	         => (Tokens.EQUALOP(yytext, !pos,!pos));
@@ -64,6 +65,7 @@ string_ = "\""{ascii}*"\"";
 "=>"	     => (Tokens.DARROW(yytext, !pos,!pos));
 "|"		     => (Tokens.BAR(yytext, !pos,!pos));
 ":"		     => (Tokens.COLON(yytext, !pos,!pos));
+"::"		 => (Tokens.DCOLON(yytext, !pos,!pos));
 "!"		     => (Tokens.BANG(yytext, !pos,!pos));
 ":>"	     => (Tokens.COLONGT(yytext, !pos,!pos));
 "o"          => (Tokens.COMPOSITION(yytext, !pos,!pos));
@@ -72,10 +74,13 @@ string_ = "\""{ascii}*"\"";
 "{"	 	     => (Tokens.LCURLY(yytext, !pos,!pos));
 "}"	 	     => (Tokens.RCURLY(yytext, !pos,!pos));
 
+
 "["	 	     => (Tokens.LBRACK(yytext, !pos,!pos));
 "]"	 	     => (Tokens.RBRACK(yytext, !pos,!pos));
 "("	 	     => (Tokens.LPAREN(yytext, !pos,!pos));
 ")"	 	     => (Tokens.RPAREN(yytext, !pos,!pos));
+
+"nil"	 	 => (Tokens.NIL(yytext, !pos,!pos));
 
 "if"	     => (Tokens.IF(yytext, !pos,!pos));
 "then"	     => (Tokens.THEN(yytext, !pos,!pos));
