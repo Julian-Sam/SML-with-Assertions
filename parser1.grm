@@ -32,8 +32,9 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
     | REAL of string | ID_NAME of string | MOD of string | AND of string 
     | FN of string | VAL of string | CASE of string | OF of string 
     | WILD of string | HASH of string | LCURLY of string | RCURLY of string 
-    | DOT of string | DCOLON of string | NIL of string | QUOTE_ID of string 
-    | DQUOTE_ID of string | FUN of string
+    | DOT of string | DCOLON of string | NIL of string | FUN of string
+    | TYPE of string | DATATYPE of string | ABSTYPE of string
+    | WITHTYPE of string 
 
 %nonterm START of string option 
        | ID of string | LONG_ID of string | CON of string 
@@ -41,7 +42,8 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
        | DEC of string | VALBIND of string | ID_LIST of string
        | MATCH of string | PAT of string | PAT_LIST of string
        | EXP_ROW of string | LAB of string | PROG of string
-       | FUNBIND of string | FUNMATCH of string
+       | FUNBIND of string | FUNMATCH of string 
+       | TYPBIND of string | PAT_ROW of string
 
 
 %name Sample
@@ -88,9 +90,9 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
      | INTDIV (INTDIV) 
      | REALDIV (REALDIV) 
      | MOD (MOD)
-
+(*
   VAR : QUOTE_ID (QUOTE_ID) 
-      | DQUOTE_ID (DQUOTE_ID)
+      | DQUOTE_ID (DQUOTE_ID)*)
 
   LONG_ID : ID_NAME DOT ID_NAME (ID_NAME1 ^ "." ^ ID_NAME2)  
   			  | ID_NAME DOT LONG_ID (ID_NAME ^ "." ^ LONG_ID)
@@ -173,6 +175,10 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
 	 	| ID (ID)
 
+	 	| LCURLY RCURLY (LCURLY ^ RCURLY)
+
+	 	| LCURLY PAT_ROW RCURLY (LCURLY ^ " " ^ PATROW ^ " " ^ RCURLY)
+
 		| PAT ID_NAME PAT (concatWith_(" ", [PAT1, ID_NAME, PAT2]))
 
 	 	| LPAREN PAT_LIST RPAREN (concatWith_(" ", [LPAREN, PAT_LIST, RPAREN]))
@@ -180,18 +186,26 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 	 	| LBRACK PAT_LIST RBRACK (concatWith_(" ", [LBRACK, PAT_LIST, RBRACK]))
 
 
+  PAT_ROW : LAB EQUALOP PAT (LAB ^ " = " ^ PAT)
+
+          | LAB EQUALOP PAT COMMA PAT_ROW (LAB ^ " = " ^ PAT ^ ", " ^ PAT_ROW)
+ 
+
   PAT_LIST : PAT (PAT)
 
  		   | PAT COMMA PAT_LIST (PAT ^ ", " ^ PAT_LIST)
-  		
-  	  
-  TYP: 
 
 
   DEC : VAL VALBIND (VAL ^ " " ^ VALBIND)
 
       | FUN FUNBIND (FUN ^ " " ^ FUNBIND)
 
+      | TYPE TYPBIND (TYP ^ " " ^ TYPBIND)
+(*
+      | DATATYPE DATBIND (DATATYPE ^ " " ^ DATBIND)
+
+      | DATATYPE DATBIND WITHTYPE TYPBIND (concatWith_(" ", [DATATYPE, DATBIND, WITHTYPE, TYPBIND]))
+*)
 
   VALBIND : PAT EQUALOP EXP (concatWith_(" ", [PAT, EQUALOP, EXP]))
 
@@ -207,4 +221,22 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
   		   | ID PAT EQUALOP EXP BAR FUNMATCH (concatWith_(" ", [ID, PAT, EQUALOP, EXP]) ^ "\n  " ^ BAR ^ " " ^ FUNMATCH)
 
+
+  TYPBIND : ID EQUALOP TYP (concatWith_(" ", [ID, EQUALOP, TYP]))
+
+  		  | ID EQUALOP TYP AND TYPBIND (concatWith_(" ", [ID, EQUALOP, TYP, AND, TYPBIND]))
+
+(*  DATBIND : ID EQUALOP CONBIND 
+
+  		  | ID EQUALOP CONBIND AND DATBIND
+
+  CONBIND : ID 
+
+  		  | ID OF TYP 
+
+  		  | ID BAR CONBIND
+
+  		  | ID OF TYP BAR CONBIND
+
+  EXNBIND : *)
 

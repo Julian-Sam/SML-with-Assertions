@@ -108,6 +108,11 @@ string_ = "\""{ascii}*"\"";
 "of"	     => (Tokens.OF(yytext, !pos, !pos));
 "_"			 => (Tokens.WILD(yytext, !pos, !pos));
 
+"type" 		 => (Tokens.TYPE(yytext, !pos, !pos));
+"datatype"   => (Tokens.DATATYPE(yytext, !pos, !pos));
+"abstype"	 => (Tokens.ABSTYPE(yytext, !pos, !pos));
+"withtype"	 => (Tokens.WITHTYPE(yytext, !pos, !pos));
+
 {id}		 => (Tokens.ID_NAME(yytext, !pos, !pos));
 
 "."          => (error ("ignoring bad character "^yytext,!pos,!pos);
