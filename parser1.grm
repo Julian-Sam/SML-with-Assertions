@@ -24,7 +24,6 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
     | COLONGT of string | COMPOSITION of string | UNEQUAL of string 
     | EQUALOP of string | VARASSIGN of string | GREATERTHAN of string 
     | LESSTHAN of string | GREATERTHANEQUAL of string | LESSTHANEQUAL of string 
-
     | LET of string | IN of string | END of string | WHILE of string 
     | DO of string | IF of string | THEN of string | ELSE of string 
     | ORELSE of string | ANDALSO of string | HANDLE of string | RAISE of string
@@ -33,7 +32,7 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
     | FN of string | VAL of string | CASE of string | OF of string 
     | WILD of string | HASH of string | LCURLY of string | RCURLY of string 
     | DOT of string | DCOLON of string | NIL of string | QUOTE_ID of string 
-    | DQUOTE_ID of string | FUN of string
+    | DQUOTE_ID of string | FUN of string | AT of string
 
 %nonterm START of string option 
        | ID of string | LONG_ID of string | CON of string 
@@ -41,7 +40,9 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
        | DEC of string | VALBIND of string | ID_LIST of string
        | MATCH of string | PAT of string | PAT_LIST of string
        | EXP_ROW of string | LAB of string | PROG of string
-       | FUNBIND of string | FUNMATCH of string
+       | FUNBIND of string | FUNMATCH of string | TYP_ROW of string 
+       | TYP of string | MULT_ID of string | VAR of string 
+       | TYP_TUPLE of string
 
 
 %name Sample
@@ -52,15 +53,12 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 %verbose
 %%
 
-
   START : PROG (SOME (PROG))
         | (NONE)
 	
-	PROG : EXP (EXP)
-	     | DEC (DEC)
-			 | EXP SEMICOLON (EXP ^ ";\n")
-			 | DEC SEMICOLON (DEC ^ ";\n")
-		   | PROG SEMICOLON PROG (PROG1 ^ ";\n" ^ PROG2)
+	PROG : EOF ("")
+			 | DEC SEMICOLON PROG (DEC ^ ";\n" ^ PROG)
+		   | EXP SEMICOLON PROG (EXP ^ ";\n" ^ PROG)
 
   CON : INT (INT) 
       | WORD (WORD)
@@ -89,10 +87,12 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
      | REALDIV (REALDIV) 
      | MOD (MOD)
 
-  VAR : QUOTE_ID (QUOTE_ID) 
+  (* Stuff like 'a or ''a. (Generic Types) *)
+  VAR : QUOTE_ID (QUOTE_ID)
       | DQUOTE_ID (DQUOTE_ID)
 
-  LONG_ID : ID_NAME DOT ID_NAME (ID_NAME1 ^ "." ^ ID_NAME2)  
+  (* Stuff that might be from a structure. Ex. String.maxSize *)
+  LONG_ID : ID_NAME (ID_NAME)  
   			  | ID_NAME DOT LONG_ID (ID_NAME ^ "." ^ LONG_ID)
 
   LAB : ID (ID)
@@ -108,7 +108,7 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
   EXP : CON (CON)
 
-      | ID_NAME (ID_NAME)
+      | LONG_ID (LONG_ID)
 
       | EXP ID EXP  (concatWith_(" ", [EXP1, ID, EXP2]))
 
@@ -127,18 +127,21 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
       | NIL (NIL) 
 
-      (* The second EXP should be a list, but we'll let sml deal with this *)
+      (* Both EXPs should be of a' list type, but let sml deal with this *)
+      | EXP AT EXP (concatWith_(" ", [EXP1, AT, EXP2]))
+
+      (* EXP2 should be of a' list type, but let sml deal with this *)
       | EXP DCOLON EXP (concatWith_(" ", [EXP1, DCOLON, EXP2])) 
 
       | LBRACK EXP_LIST RBRACK (concatWith_(" ", [LBRACK, EXP_LIST, RBRACK])) 
       
       | LPAREN EXP_SEQ RPAREN (concatWith_(" ", [LPAREN, EXP_SEQ, RPAREN]))
 
-      | LET DEC IN EXP END (concatWith_(" ", [LET, DEC, "in\n", EXP, END]))
+      | LET DEC IN EXP END (concatWith_(" ", [LET, DEC, IN, "\n", EXP, "\n"]) ^ END)
 
-      | LET DEC IN EXP_SEQ END (concatWith_(" ", [LET, DEC, "in\n", EXP_SEQ, END]))
+      | LET DEC IN EXP_SEQ END (concatWith_(" ", [LET, DEC, IN, "\n", EXP_SEQ, "\n"]) ^ END)
 
-      (*| EXP COLON TYP (concatWith_(" ", [EXP, COLON, TYP]))*)
+      | EXP COLON TYP (concatWith_(" ", [EXP, COLON, TYP]))
 
       | RAISE EXP (concatWith_(" ", [RAISE, EXP]))
 
@@ -181,11 +184,29 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
 
   PAT_LIST : PAT (PAT)
-
- 		   | PAT COMMA PAT_LIST (PAT ^ ", " ^ PAT_LIST)
+ 		       | PAT COMMA PAT_LIST (PAT ^ ", " ^ PAT_LIST)
   		
   	  
-  TYP: 
+  TYP_TUPLE : TYP TIMES TYP (concatWith_(" ", [TYP1, TIMES, TYP2]))
+            | TYP TIMES TYP_TUPLE (concatWith_(" ", [TYP1, TIMES, TYP_TUPLE]))
+
+  (* Space seperated names for types. For example: 'a list list *)
+  MULT_ID : LONG_ID (LONG_ID)
+            | LONG_ID MULT_ID (LONG_ID ^ " " ^ MULT_ID)
+
+  TYP : VAR MULT_ID (VAR ^ " " ^ MULT_ID)
+      | MULT_ID (MULT_ID)
+
+      (* TYPE CONSTRUCTOR GOES HERE (NOT SURE WHAT IT DOES) 
+          ⟨typ⟩(,) longid constructor *)
+  
+      | LPAREN VAR RPAREN (LPAREN ^ VAR ^ RPAREN)
+      | TYP ARROW TYP (concatWith_(" ", [TYP1, ARROW, TYP2]))
+      | TYP_TUPLE (TYP_TUPLE)
+      | LCURLY TYP_ROW RCURLY (concatWith_(" ", [LCURLY, TYP_ROW, RCURLY]))
+
+  TYP_ROW : LAB COLON TYP (LAB ^ " : " ^ TYP)
+          | LAB COLON TYP COMMA TYP_ROW (LAB ^ " : " ^ TYP ^ ", " ^ TYP_ROW)
 
 
   DEC : VAL VALBIND (VAL ^ " " ^ VALBIND)
