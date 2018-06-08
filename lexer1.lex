@@ -112,6 +112,18 @@ string_ = "\""{ascii}*"\"";
 "datatype"   => (Tokens.DATATYPE(yytext, !pos, !pos));
 "abstype"	 => (Tokens.ABSTYPE(yytext, !pos, !pos));
 "withtype"	 => (Tokens.WITHTYPE(yytext, !pos, !pos));
+"as"		 => (Tokens.AS(yytext, !pos, !pos));
+"open"		 => (Tokens.OPEN(yytext, !pos, !pos));
+"local"		 => (Tokens.LOCAL(yytext, !pos, !pos));
+"infix" 	 => (Tokens.INFIX(yytext, !pos, !pos));
+"infixr"	 => (Tokens.INFIXR(yytext, !pos, !pos));
+"nonfix"	 => (Tokens.NONFIX(yytext, !pos, !pos));
+
+"struct"	 => (Tokens.STRUCT(yytext, !pos, !pos));
+"structure"	 => (Tokens.STRUCTURE(yytext, !pos, !pos));
+
+"ref"	 	 => (Tokens.REF(yytext, !pos, !pos));
+
 
 "'"{id}+     => (Tokens.QUOTE_ID(yytext, !pos, !pos));
 "''"{id}+    => (Tokens.DQUOTE_ID(yytext, !pos, !pos));

@@ -32,9 +32,12 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
     | FN of string | VAL of string | CASE of string | OF of string 
     | WILD of string | HASH of string | LCURLY of string | RCURLY of string 
     | DOT of string | DCOLON of string | NIL of string | QUOTE_ID of string 
-    | DQUOTE_ID of string | FUN of string | AT of string | FUN of string
-    | TYPE of string | DATATYPE of string | ABSTYPE of string
-    | WITHTYPE of string 
+    | DQUOTE_ID of string | FUN of string | AT of string | TYPE of string 
+    | DATATYPE of string | ABSTYPE of string | WITHTYPE of string | STRUCT of string 
+    | AS of string | STRUCTURE of string | NONFIX of string | INFIX of string 
+    | INFIXR of string | OPEN of string | LOCAL of string | WITH of string 
+    | REF of string
+
 
 %nonterm START of string option 
        | ID of string | LONG_ID of string | CON of string 
@@ -45,7 +48,9 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
        | FUNBIND of string | FUNMATCH of string | TYP_ROW of string 
        | TYP of string | MULT_ID of string | VAR of string 
        | TYP_TUPLE of string | TYPBIND of string | PAT_ROW of string
-
+       | STR of string | STRBIND_BASE of string | STRBIND of string
+       | SIG of string | ID_CURRY of string | PAT_CURRY of string
+       | LONG_ID_LIST of string | EXNBIND of string | DATBIND of string
 
 %name Sample
 
@@ -70,6 +75,9 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
   ID_LIST : ID_NAME (ID_NAME)
   		  | ID_NAME COMMA ID_LIST (ID_NAME ^ ", " ^ ID_LIST)
+
+  ID_CURRY : ID (ID)
+           | ID ID_CURRY (ID ^ " " ^ ID_CURRY)
 
   ID : ID_NAME (ID_NAME)
      | UNEQUAL (UNEQUAL)
@@ -96,6 +104,9 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
   (* Stuff that might be from a structure. Ex. String.maxSize *)
   LONG_ID : ID_NAME (ID_NAME)  
   			  | ID_NAME DOT LONG_ID (ID_NAME ^ "." ^ LONG_ID)
+
+  LONG_ID_LIST : LONG_ID (LONG_ID)
+               | LONG_ID LONG_ID_LIST (LONG_ID ^ " " ^ LONG_ID_LIST)
 
   LAB : ID (ID)
       | INT (if sub(INT, 0) = #"~" orelse sub(INT,0) = #"0" then 
@@ -161,6 +172,13 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
       | FN MATCH (concatWith_(" ", [FN, MATCH]))
 
+      (* REFERENCE CELL GRAMMAR *)
+      | REF EXP (REF ^ " " ^ EXP)
+
+      | ID_NAME VARASSIGN EXP (ID_NAME ^ " " ^ VARASSIGN ^ " " ^ EXP)
+
+      | BANG EXP (BANG ^ EXP)
+
 
   MATCH : PAT DARROW EXP (concatWith_(" ", [PAT, DARROW, EXP]))
 
@@ -172,34 +190,60 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
           | LAB EQUALOP EXP COMMA EXP_ROW (LAB ^ " = " ^ EXP ^ ", " ^ EXP_ROW)
  
 
-	PAT : CON (CON)
+  PAT : CON (CON)
 
-	 	| WILD (WILD)
+    | WILD (WILD)
 
-	 	| ID (ID)
+    | ID (ID)
 
-	 	| LCURLY RCURLY (LCURLY ^ RCURLY)
+    | LCURLY RCURLY (LCURLY ^ " " ^ RCURLY)
 
-	 	| LCURLY PAT_ROW RCURLY (LCURLY ^ " " ^ PATROW ^ " " ^ RCURLY)
+    | LCURLY PAT_ROW RCURLY (LCURLY ^ " " ^ PAT_ROW ^ " " ^ RCURLY)
 
-		| PAT ID_NAME PAT (concatWith_(" ", [PAT1, ID_NAME, PAT2]))
+    | PAT ID_NAME PAT (concatWith_(" ", [PAT1, ID_NAME, PAT2]))
 
-	 	| LPAREN PAT_LIST RPAREN (concatWith_(" ", [LPAREN, PAT_LIST, RPAREN]))
+    | LPAREN PAT RPAREN (concatWith_(" ", [LPAREN, PAT1, RPAREN]))
 
-	 	| LBRACK PAT_LIST RBRACK (concatWith_(" ", [LBRACK, PAT_LIST, RBRACK]))
+    | LPAREN PAT_LIST RPAREN (concatWith_(" ", [LPAREN, PAT_LIST, RPAREN]))
+
+    | LBRACK PAT_LIST RBRACK (concatWith_(" ", [LBRACK, PAT_LIST, RBRACK]))
+
+    | PAT COLON TYP (concatWith_(" ", [PAT1, COLON, TYP]))
+
+    | ID AS PAT (concatWith_(" ", [ID, AS, PAT1]))
+
+    | ID COLON TYP AS PAT (concatWith_(" ", [ID, COLON, TYP, AS, PAT1]))
 
 
   PAT_ROW : LAB EQUALOP PAT (LAB ^ " = " ^ PAT)
 
           | LAB EQUALOP PAT COMMA PAT_ROW (LAB ^ " = " ^ PAT ^ ", " ^ PAT_ROW)
+
+          | ID (ID)
+
+          | ID AS PAT  (concatWith_(" ", [ID, AS, PAT]))
+
+          | ID COLON TYP  (concatWith_(" ", [ID, COLON, TYP]))
+
+          | ID COMMA PAT_ROW (concatWith_(" ", [ID, COMMA, PAT_ROW]))
+
+          | ID COLON TYP AS PAT (concatWith_(" ", [ID, COLON, TYP, AS, PAT]))
+
+          | ID AS PAT COMMA PAT_ROW (concatWith_(" ", [ID, AS, PAT, COMMA, PAT_ROW]))
+
+          | ID COLON TYP COMMA PAT_ROW (concatWith_(" ", [ID, COLON, TYP, COMMA, PAT_ROW]))
+
+          | ID COLON TYP AS PAT COMMA PAT_ROW (concatWith_(" ", [ID, COLON, TYP, AS, PAT, COMMA, PAT_ROW]))
  
 
   PAT_LIST : PAT (PAT)
  		       | PAT COMMA PAT_LIST (PAT ^ ", " ^ PAT_LIST)
   		
-  	  
+  PAT_CURRY : PAT (PAT)
+            | PAT PAT_CURRY (PAT ^ " " ^ PAT_CURRY)
+
   TYP_TUPLE : TYP TIMES TYP (concatWith_(" ", [TYP1, TIMES, TYP2]))
-            | TYP TIMES TYP_TUPLE (concatWith_(" ", [TYP1, TIMES, TYP_TUPLE]))
+            | TYP TIMES TYP_TUPLE (concatWith_(" ", [TYP, TIMES, TYP_TUPLE]))
 
   (* Space seperated names for types. For example: 'a list list *)
   MULT_ID : LONG_ID (LONG_ID)
@@ -224,12 +268,54 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
       | FUN FUNBIND (FUN ^ " " ^ FUNBIND)
 
-      | TYPE TYPBIND (TYP ^ " " ^ TYPBIND)
+      | TYPE TYPBIND (TYPE ^ " " ^ TYPBIND)
+
 (*
       | DATATYPE DATBIND (DATATYPE ^ " " ^ DATBIND)
 
       | DATATYPE DATBIND WITHTYPE TYPBIND (concatWith_(" ", [DATATYPE, DATBIND, WITHTYPE, TYPBIND]))
 *)
+
+
+  DEC : VAL VALBIND (VAL ^ " " ^ VALBIND)
+
+      | FUN FUNBIND (FUN ^ " " ^ FUNBIND)
+
+      | TYPE TYPBIND (TYPE ^ " " ^ TYPBIND)
+
+      | DATATYPE DATBIND (DATATYPE ^ " " ^ DATBIND)
+
+      | DATATYPE DATBIND WITHTYPE TYPBIND (concatWith_(" ", [DATATYPE, DATBIND, WITHTYPE, TYPBIND]))
+
+      | DATATYPE ID EQUALOP DATATYPE LONG_ID (concatWith_(" ", [DATATYPE, ID, EQUALOP, DATATYPE, LONG_ID]))
+
+      | ABSTYPE DATBIND WITH DEC END (concatWith_(" ", [ABSTYPE, DATBIND, WITH, DEC, END]))
+
+      | ABSTYPE DATBIND WITHTYPE TYPBIND WITH DEC END (concatWith_(" ", [ABSTYPE, DATBIND, WITHTYPE, TYPBIND, WITH, DEC, END]))
+
+      | EXCEPTION EXNBIND (concatWith_(" ", [EXCEPTION, EXNBIND]))
+
+      (* SAMEER WHY IS THIS HERE, IS THIS EVEN A RULE? SAMIR U R BREAKING DA GRAMMAR*)
+      | DEC DEC (DEC1 ^ "\n" ^ DEC2)
+
+      | STRUCTURE STRBIND (STRUCTURE ^ " " ^ STRBIND)
+
+      | DEC SEMICOLON DEC (concatWith_(" ", [DEC1, SEMICOLON, DEC2]))
+
+      | LOCAL DEC IN DEC END (concatWith_(" ", [LOCAL, DEC1, IN, DEC2, END]))
+
+      | OPEN LONG_ID_LIST (OPEN ^ " " ^ LONG_ID_LIST)
+
+      | NONFIX ID_CURRY (NONFIX ^ " " ^ ID_CURRY)
+
+      | INFIX ID_CURRY (INFIX ^ " " ^ ID_CURRY)
+
+      | INFIX INT ID_CURRY (INFIX ^ " " ^ INT ^ " " ^ ID_CURRY)
+
+      | INFIXR ID_CURRY (INFIXR ^ " " ^ ID_CURRY)
+
+      | INFIXR INT ID_CURRY (INFIXR ^ " " ^ INT ^ " " ^ ID_CURRY)
+
 
   VALBIND : PAT EQUALOP EXP (concatWith_(" ", [PAT, EQUALOP, EXP]))
 
@@ -241,14 +327,28 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
   		  | FUNMATCH AND FUNBIND (FUNMATCH ^ " and " ^ FUNBIND)
 
 
-  FUNMATCH : ID PAT EQUALOP EXP (concatWith_(" ", [ID, PAT, EQUALOP, EXP]))
+  FUNMATCH : ID PAT_CURRY EQUALOP EXP (concatWith_(" ", [ID, PAT_CURRY, EQUALOP, EXP]))
 
-  		   | ID PAT EQUALOP EXP BAR FUNMATCH (concatWith_(" ", [ID, PAT, EQUALOP, EXP]) ^ "\n  " ^ BAR ^ " " ^ FUNMATCH)
+           | ID PAT_CURRY COLON TYP EQUALOP EXP (concatWith_(" ", [ID, PAT_CURRY, COLON, TYP, EQUALOP, EXP]))
+
+           | ID PAT_CURRY EQUALOP EXP BAR FUNMATCH (concatWith_(" ", [ID, PAT_CURRY, EQUALOP, EXP, BAR, FUNMATCH]))
+
+           | ID PAT_CURRY COLON TYP EQUALOP EXP BAR FUNMATCH (concatWith_(" ", [ID, PAT_CURRY, COLON, TYP, EQUALOP, EXP, BAR, FUNMATCH]))
+
+           | ID PAT EQUALOP EXP BAR FUNMATCH (concatWith_(" ", [ID, PAT, EQUALOP, EXP]) ^ "\n  " ^ BAR ^ " " ^ FUNMATCH)
+
+           | PAT ID PAT EQUALOP EXP (concatWith_(" ", [PAT1, ID, PAT2, EQUALOP, EXP]))
+
+           | PAT ID PAT COLON TYP EQUALOP EXP  (concatWith_(" ", [PAT1, ID, PAT2, COLON, TYP, EQUALOP, EXP]))
+
+           | PAT ID PAT EQUALOP EXP BAR FUNMATCH  (concatWith_(" ", [PAT1, ID, PAT2, EQUALOP, EXP, BAR, FUNMATCH]))
+
+           | PAT ID PAT COLON TYP EQUALOP EXP BAR FUNMATCH (concatWith_(" ", [PAT1, ID, PAT2, COLON, TYP, EQUALOP, EXP, BAR, FUNMATCH]))
 
 
   TYPBIND : ID EQUALOP TYP (concatWith_(" ", [ID, EQUALOP, TYP]))
 
-  		  | ID EQUALOP TYP AND TYPBIND (concatWith_(" ", [ID, EQUALOP, TYP, AND, TYPBIND]))
+  		    | ID EQUALOP TYP AND TYPBIND (concatWith_(" ", [ID, EQUALOP, TYP, AND, TYPBIND]))
 
 (*  DATBIND : ID EQUALOP CONBIND 
 
@@ -264,3 +364,21 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
   EXNBIND : *)
 
+  STR : LONG_ID (LONG_ID)
+      | STRUCT DEC END (concatWith_("\n", [STRUCT, DEC, END]))
+      | STR COLON SIG (concatWith_(" ", [STR, COLON, SIG]))
+      | STR COLONGT SIG (concatWith_(" ", [STR, COLONGT, SIG]))
+      | ID_NAME LPAREN STR RPAREN (concatWith_(" ", [ID_NAME, LPAREN, STR, RPAREN]))
+      | ID_NAME LPAREN DEC RPAREN (concatWith_(" ", [ID_NAME, LPAREN, DEC, RPAREN]))
+      | LET DEC IN STR END (concatWith_("\n", [LET, DEC, IN, STR, END]))
+
+  STRBIND_BASE : ID_NAME EQUALOP STR (concatWith_(" ",[ID_NAME, EQUALOP, STR]))
+               | ID_NAME COLON SIG EQUALOP STR (concatWith_(" ", [ID_NAME, COLON, SIG, EQUALOP, STR]))
+               | ID_NAME COLONGT SIG EQUALOP STR (concatWith_(" ", [ID_NAME, COLONGT, SIG, EQUALOP, STR]))
+
+  STRBIND : STRBIND_BASE (STRBIND_BASE)
+          | STRBIND_BASE AND STRBIND (concatWith_(" ",[STRBIND_BASE, "\n", AND, "\n", STRBIND]))
+
+
+  (* TODO: SIG*)
+  SIG: ID_NAME (ID_NAME)
