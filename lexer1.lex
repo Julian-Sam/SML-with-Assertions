@@ -39,7 +39,6 @@ string_ = "\""{ascii}*"\"";
 {char_}		 => (Tokens.CHAR(yytext, !pos, !pos));
 {string_}	 => (Tokens.STRING(yytext, !pos, !pos));
 
-"'"{idchars}+
 
 "<>"	     => (Tokens.UNEQUAL(yytext, !pos,!pos));
 "="	         => (Tokens.EQUALOP(yytext, !pos,!pos));
@@ -70,6 +69,7 @@ string_ = "\""{ascii}*"\"";
 ":>"	     => (Tokens.COLONGT(yytext, !pos,!pos));
 "o"          => (Tokens.COMPOSITION(yytext, !pos,!pos));
 "#"          => (Tokens.HASH(yytext, !pos,!pos));
+"@"          => (Tokens.AT(yytext, !pos,!pos));
 
 "{"	 	     => (Tokens.LCURLY(yytext, !pos,!pos));
 "}"	 	     => (Tokens.RCURLY(yytext, !pos,!pos));
@@ -112,6 +112,9 @@ string_ = "\""{ascii}*"\"";
 "datatype"   => (Tokens.DATATYPE(yytext, !pos, !pos));
 "abstype"	 => (Tokens.ABSTYPE(yytext, !pos, !pos));
 "withtype"	 => (Tokens.WITHTYPE(yytext, !pos, !pos));
+
+"'"{id}+     => (Tokens.QUOTE_ID(yytext, !pos, !pos));
+"''"{id}+    => (Tokens.DQUOTE_ID(yytext, !pos, !pos));
 
 {id}		 => (Tokens.ID_NAME(yytext, !pos, !pos));
 
