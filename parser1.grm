@@ -36,7 +36,7 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
     | DATATYPE of string | ABSTYPE of string | WITHTYPE of string | STRUCT of string 
     | AS of string | STRUCTURE of string | NONFIX of string | INFIX of string 
     | INFIXR of string | OPEN of string | LOCAL of string | WITH of string 
-    | REF of string
+    | REF of string | WHERE of string | EQTYPE of string | SHARING of string
 
 
 %nonterm START of string option 
@@ -364,6 +364,8 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
   EXNBIND : *)
 
+
+
   STR : LONG_ID (LONG_ID)
       | STRUCT DEC END (concatWith_("\n", [STRUCT, DEC, END]))
       | STR COLON SIG (concatWith_(" ", [STR, COLON, SIG]))
@@ -381,4 +383,51 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
 
   (* TODO: SIG*)
-  SIG: ID_NAME (ID_NAME)
+  SIG : ID_NAME (ID_NAME)
+      | SIG SPEC END (SIG ^ "\n " ^ END)
+      | SIG WHERE TYPE TYPREFIN (concatWith_(" ", [SIG, "\n", WHERE, TYPE, TYPE]))
+
+  TYPREFIN: TODO;
+  
+  LONG_ID_EQUAL_LIST : LONG_ID EQUALOP LONG_ID (LONG_ID ^ " " ^ EQUALOP ^ " " ^ LONG_ID)
+                     | LONG_ID EQUALOP LONG_ID_EQUAL_LIST (LONG_ID ^ " " ^ EQUALOP ^ " " ^ LONG_ID_EQUAL_LIST)
+
+  SPEC : VAL VALDESC (VAL ^ " " ^ VALDESC)
+       | TYPE TYPDESC (TYPE ^ " " ^ TYPDESC)
+       | EQTYPE TYPDESC (EQTYPE ^ " " ^ TYPDESC)
+       | TYPE TYPBIND (TYPE ^ " " ^ TYPBIND)
+       | DATATYPE DATDESC (DATATYPE ^ " " ^ DATDESC)
+       | DATATYPE ID_NAME EQUALOP DATATYPE LONG_ID (concatWith_(" ", [DATATYPE, ID_NAME, EQUALOP, DATATYPE, LONG_ID]))
+       | EXCEPTION EXNDESC (EXCEPTION ^ " " ^ EXNDESC)
+       | STRUCTURE STRDESC (STRUCTURE ^ " " ^ STRDESC)
+       | SPEC SEMICOLON SPEC (SPEC ^ SEMICOLON ^ "\n" ^ SPEC)
+       | SPEC SPEC (SPEC ^ " " ^ SPEC)
+       | INCLUDE SIG (INCLUDE ^ " " ^ SIG)
+       | SPEC SHARING TYPE LONG_ID_EQUAL_LIST (SPEC ^ " " ^ SHARING ^ " " ^ LONG_ID_EQUAL_LIST)
+
+  VALDESC : ID COLON TYP (ID ^ COLON ^ " " ^ TYP)
+          | ID COLON TYP AND TYPDESC (ID ^ COLON ^ " " ^ TYP ^ AND ^ " " ^ TYPDESC)
+
+  TYPDESC : ID_NAME (ID_NAME)
+          | VAR_ID_LIST ID_NAME (VAR_ID_LIST ^ " " ^ ID_NAME)
+          | TYPDESC AND TYPDESC (TYPDESC ^ " " ^ AND ^ " " ^ TYPDESC)
+
+  DATDESC : ID_NAME EQUALOP CONDESC (ID_NAME ^ " " ^ EQUALOP ^ " " ^ CONDESC)
+          | VAR_ID_LIST ID_NAME EQUALOP CONDESC (VAR_ID_LIST ^ " " ^ ID_NAME ^ " " ^ EQUALOP ^ " " ^ CONDESC)
+          | TYPDESC AND TYPDESC (TYPDESC ^ " " ^ AND ^ " " ^ TYPDESC)
+  
+  CONDESC_BASE : ID_NAME (ID_NAME)
+               | ID_NAME OF TYP (ID_NAME ^ " " ^ OF ^ " " ^ TYP)
+
+  CONDESC : CONDESC_BASE (EXNDESC_BASE)
+          | CONDESC_BASE BAR EXNDESC  (EXNDESC_BASE ^ " " ^ BAR ^ " " ^ EXNDESC)
+
+
+  EXNDESC_BASE : ID_NAME (ID_NAME)
+               | ID_NAME OF TYP (ID_NAME ^ " " ^ OF ^ " " ^ TYP)
+
+  EXNDESC : EXNDESC_BASE (EXNDESC_BASE)
+          | EXNDESC_BASE AND EXNDESC  (EXNDESC_BASE ^ " " ^ AND ^ " " ^ EXNDESC)
+
+  STRDESC : ID_NAME COLON SIG (ID_NAME ^ COLON ^ " " ^ SIG)
+          | ID_NAME COLON SIG AND STRDESC (ID_NAME ^ COLON ^ " " ^ SIG ^ " " ^ AND ^ " " ^ STRDESC)

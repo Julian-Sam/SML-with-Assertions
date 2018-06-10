@@ -1,4 +1,2 @@
-structure M = 
-struct
-	val g = 3;
-end
+(*(*ss*)
+1+3;

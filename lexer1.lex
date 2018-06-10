@@ -1,18 +1,25 @@
-structure Tokens = Tokens
 
+structure Tokens = Tokens
 type pos = int
 type svalue = Tokens.svalue
 type ('a,'b) token = ('a,'b) Tokens.token
 type lexresult= (svalue,pos) token
 
+exception UnmatchedComments
 val pos = ref 0
-fun eof () = Tokens.EOF(!pos,!pos)
+val unmatched_comments = ref 0
+fun inc(x) = x := (!x + 1)
+fun dec(x) = x := (!x - 1)
+fun eof () = (if (!unmatched_comments) <> 0 
+			 then (print("Error: Unmatched Comment Bracket"); raise UnmatchedComments)
+			 else Tokens.EOF(!pos,!pos))
 fun error (e,l : int,_) = print ( String.concat[
 	"line ", (Int.toString l), ": ", e, "\n"
       ])
 
 %%
 %header (functor SampleLexFun(structure Tokens: Sample_TOKENS));
+%s COMMENT;
 idchars=[A-Za-z'_0-9];
 id=[A-Za-z]{idchars}*;
 ws=("\012"|[\t\ ])*;
@@ -30,106 +37,115 @@ char_ = "#\""{ascii}"\"";
 string_ = "\""{ascii}*"\"";
 
 %%
-"\n"         => (pos := (!pos) + 1; lex());
-{ws}+        => (lex());
-{integer}    => (Tokens.INT(yytext, !pos, !pos));
-{hex}        => (Tokens.INT(yytext, !pos, !pos));
-{real_}		 => (Tokens.REAL(yytext, !pos, !pos));
-{word_}      => (Tokens.WORD(yytext, !pos,!pos));
-{char_}		 => (Tokens.CHAR(yytext, !pos, !pos));
-{string_}	 => (Tokens.STRING(yytext, !pos, !pos));
+<INITIAL>"\n"        => (pos := (!pos) + 1; lex());
+<INITIAL>{ws}+       => (lex());
+<INITIAL>{integer}   => (Tokens.INT(yytext, !pos, !pos));
+<INITIAL>{hex}       => (Tokens.INT(yytext, !pos, !pos));
+<INITIAL>{real_}	 => (Tokens.REAL(yytext, !pos, !pos));
+<INITIAL>{word_}     => (Tokens.WORD(yytext, !pos,!pos));
+<INITIAL>{char_}	 => (Tokens.CHAR(yytext, !pos, !pos));
+<INITIAL>{string_}	 => (Tokens.STRING(yytext, !pos, !pos));
 
 
-"<>"	     => (Tokens.UNEQUAL(yytext, !pos,!pos));
-"="	         => (Tokens.EQUALOP(yytext, !pos,!pos));
-":="	     => (Tokens.VARASSIGN(yytext, !pos,!pos));
-">"		     => (Tokens.GREATERTHAN(yytext, !pos,!pos));
-"<"		     => (Tokens.LESSTHAN(yytext, !pos,!pos));
-">="	     => (Tokens.GREATERTHANEQUAL(yytext, !pos,!pos));
-"<="	     => (Tokens.LESSTHANEQUAL(yytext, !pos,!pos));
+<INITIAL>"<>"	     => (Tokens.UNEQUAL(yytext, !pos,!pos));
+<INITIAL>"="	     => (Tokens.EQUALOP(yytext, !pos,!pos));
+<INITIAL>":="	     => (Tokens.VARASSIGN(yytext, !pos,!pos));
+<INITIAL>">"		 => (Tokens.GREATERTHAN(yytext, !pos,!pos));
+<INITIAL>"<"		 => (Tokens.LESSTHAN(yytext, !pos,!pos));
+<INITIAL>">="	     => (Tokens.GREATERTHANEQUAL(yytext, !pos,!pos));
+<INITIAL>"<="	     => (Tokens.LESSTHANEQUAL(yytext, !pos,!pos));
 
-"*"          => (Tokens.TIMES(yytext, !pos,!pos));
-"/"          => (Tokens.REALDIV(yytext, !pos,!pos));
-"div"	     => (Tokens.INTDIV(yytext, !pos,!pos));
-"mod"		 => (Tokens.MOD(yytext, !pos, !pos));
-"+"          => (Tokens.PLUS(yytext, !pos,!pos));
-"-"          => (Tokens.SUB(yytext, !pos,!pos));
-"^"          => (Tokens.CARAT(yytext, !pos,!pos));
-";"			 => (Tokens.SEMICOLON (yytext, !pos, !pos));
-","          => (Tokens.COMMA(yytext, !pos,!pos));
-"."			 => (Tokens.DOT (yytext, !pos, !pos));
+<INITIAL>"*"         => (Tokens.TIMES(yytext, !pos,!pos));
+<INITIAL>"/"         => (Tokens.REALDIV(yytext, !pos,!pos));
+<INITIAL>"div"	     => (Tokens.INTDIV(yytext, !pos,!pos));
+<INITIAL>"mod"		 => (Tokens.MOD(yytext, !pos, !pos));
+<INITIAL>"+"         => (Tokens.PLUS(yytext, !pos,!pos));
+<INITIAL>"-"         => (Tokens.SUB(yytext, !pos,!pos));
+<INITIAL>"^"         => (Tokens.CARAT(yytext, !pos,!pos));
+<INITIAL>";"		 => (Tokens.SEMICOLON (yytext, !pos, !pos));
+<INITIAL>","         => (Tokens.COMMA(yytext, !pos,!pos));
+<INITIAL>"."		 => (Tokens.DOT (yytext, !pos, !pos));
 
+<INITIAL>"->"	     => (Tokens.ARROW(yytext, !pos,!pos));
+<INITIAL>"=>"	     => (Tokens.DARROW(yytext, !pos,!pos));
+<INITIAL>"|"		 => (Tokens.BAR(yytext, !pos,!pos));
+<INITIAL>":"		 => (Tokens.COLON(yytext, !pos,!pos));
+<INITIAL>"::"		 => (Tokens.DCOLON(yytext, !pos,!pos));
+<INITIAL>"!"		 => (Tokens.BANG(yytext, !pos,!pos));
+<INITIAL>":>"	     => (Tokens.COLONGT(yytext, !pos,!pos));
+<INITIAL>"o"         => (Tokens.COMPOSITION(yytext, !pos,!pos));
+<INITIAL>"#"         => (Tokens.HASH(yytext, !pos,!pos));
+<INITIAL>"@"         => (Tokens.AT(yytext, !pos,!pos));
 
-"->"	     => (Tokens.ARROW(yytext, !pos,!pos));
-"=>"	     => (Tokens.DARROW(yytext, !pos,!pos));
-"|"		     => (Tokens.BAR(yytext, !pos,!pos));
-":"		     => (Tokens.COLON(yytext, !pos,!pos));
-"::"		 => (Tokens.DCOLON(yytext, !pos,!pos));
-"!"		     => (Tokens.BANG(yytext, !pos,!pos));
-":>"	     => (Tokens.COLONGT(yytext, !pos,!pos));
-"o"          => (Tokens.COMPOSITION(yytext, !pos,!pos));
-"#"          => (Tokens.HASH(yytext, !pos,!pos));
-"@"          => (Tokens.AT(yytext, !pos,!pos));
+<INITIAL>"{"	 	 => (Tokens.LCURLY(yytext, !pos,!pos));
+<INITIAL>"}"	 	 => (Tokens.RCURLY(yytext, !pos,!pos));
 
-"{"	 	     => (Tokens.LCURLY(yytext, !pos,!pos));
-"}"	 	     => (Tokens.RCURLY(yytext, !pos,!pos));
+<INITIAL>"(*"		 => (YYBEGIN COMMENT; unmatched_comments := 1; lex());
+<INITIAL>"*)"		 => (error("Error: unmatched close comment", !pos, !pos); lex());
 
+<COMMENT>"(*"		 => (inc unmatched_comments; lex());
+<COMMENT>"*)"		 => (dec unmatched_comments; 
+						 if (!unmatched_comments) = 0
+						 then YYBEGIN INITIAL else (); 
+						 lex());
 
-"["	 	     => (Tokens.LBRACK(yytext, !pos,!pos));
-"]"	 	     => (Tokens.RBRACK(yytext, !pos,!pos));
-"("	 	     => (Tokens.LPAREN(yytext, !pos,!pos));
-")"	 	     => (Tokens.RPAREN(yytext, !pos,!pos));
+<COMMENT>\n  		 => (lex());
+<COMMENT>.  		 => (lex());
 
-"nil"	 	 => (Tokens.NIL(yytext, !pos,!pos));
+<INITIAL>"["	 	 => (Tokens.LBRACK(yytext, !pos,!pos));
+<INITIAL>"]"	 	 => (Tokens.RBRACK(yytext, !pos,!pos));
+<INITIAL>"("	 	 => (Tokens.LPAREN(yytext, !pos,!pos));
+<INITIAL>")"	 	 => (Tokens.RPAREN(yytext, !pos,!pos));
 
-"if"	     => (Tokens.IF(yytext, !pos,!pos));
-"then"	     => (Tokens.THEN(yytext, !pos,!pos));
-"else"	     => (Tokens.ELSE(yytext, !pos,!pos));
+<INITIAL>"nil"	 	 => (Tokens.NIL(yytext, !pos,!pos));
 
-"while"	     => (Tokens.WHILE(yytext, !pos,!pos));
-"do"	     => (Tokens.DO(yytext, !pos,!pos));
+<INITIAL>"if"	     => (Tokens.IF(yytext, !pos,!pos));
+<INITIAL>"then"	     => (Tokens.THEN(yytext, !pos,!pos));
+<INITIAL>"else"	     => (Tokens.ELSE(yytext, !pos,!pos));
 
-"let"	     => (Tokens.LET(yytext, !pos,!pos));
-"in"	     => (Tokens.IN(yytext, !pos,!pos));
-"end"	     => (Tokens.END(yytext, !pos,!pos));
+<INITIAL>"while"	 => (Tokens.WHILE(yytext, !pos,!pos));
+<INITIAL>"do"	     => (Tokens.DO(yytext, !pos,!pos));
 
-"orelse"     => (Tokens.ORELSE(yytext, !pos,!pos));
-"andalso"    => (Tokens.ANDALSO(yytext, !pos,!pos));
+<INITIAL>"let"	     => (Tokens.LET(yytext, !pos,!pos));
+<INITIAL>"in"	     => (Tokens.IN(yytext, !pos,!pos));
+<INITIAL>"end"	     => (Tokens.END(yytext, !pos,!pos));
 
-"handle"     => (Tokens.HANDLE(yytext, !pos,!pos));
-"raise"	     => (Tokens.RAISE(yytext, !pos,!pos));
-"exception"	 => (Tokens.EXCEPTION(yytext, !pos,!pos));
+<INITIAL>"orelse"    => (Tokens.ORELSE(yytext, !pos,!pos));
+<INITIAL>"andalso"   => (Tokens.ANDALSO(yytext, !pos,!pos));
 
-"val"		 => (Tokens.VAL(yytext, !pos, !pos));
-"and"		 => (Tokens.AND(yytext, !pos, !pos));
-"fn" 		 => (Tokens.FN(yytext, !pos, !pos));
-"fun"		 => (Tokens.FUN(yytext, !pos, !pos));
-"case" 		 => (Tokens.CASE(yytext, !pos, !pos));
-"of"	     => (Tokens.OF(yytext, !pos, !pos));
-"_"			 => (Tokens.WILD(yytext, !pos, !pos));
+<INITIAL>"handle"    => (Tokens.HANDLE(yytext, !pos,!pos));
+<INITIAL>"raise"	 => (Tokens.RAISE(yytext, !pos,!pos));
+<INITIAL>"exception" => (Tokens.EXCEPTION(yytext, !pos,!pos));
 
-"type" 		 => (Tokens.TYPE(yytext, !pos, !pos));
-"datatype"   => (Tokens.DATATYPE(yytext, !pos, !pos));
-"abstype"	 => (Tokens.ABSTYPE(yytext, !pos, !pos));
-"withtype"	 => (Tokens.WITHTYPE(yytext, !pos, !pos));
-"as"		 => (Tokens.AS(yytext, !pos, !pos));
-"open"		 => (Tokens.OPEN(yytext, !pos, !pos));
-"local"		 => (Tokens.LOCAL(yytext, !pos, !pos));
-"infix" 	 => (Tokens.INFIX(yytext, !pos, !pos));
-"infixr"	 => (Tokens.INFIXR(yytext, !pos, !pos));
-"nonfix"	 => (Tokens.NONFIX(yytext, !pos, !pos));
+<INITIAL>"val"		 => (Tokens.VAL(yytext, !pos, !pos));
+<INITIAL>"and"		 => (Tokens.AND(yytext, !pos, !pos));
+<INITIAL>"fn" 		 => (Tokens.FN(yytext, !pos, !pos));
+<INITIAL>"fun"		 => (Tokens.FUN(yytext, !pos, !pos));
+<INITIAL>"case" 	 => (Tokens.CASE(yytext, !pos, !pos));
+<INITIAL>"of"	     => (Tokens.OF(yytext, !pos, !pos));
+<INITIAL>"_"		 => (Tokens.WILD(yytext, !pos, !pos));
 
-"struct"	 => (Tokens.STRUCT(yytext, !pos, !pos));
-"structure"	 => (Tokens.STRUCTURE(yytext, !pos, !pos));
+<INITIAL>"type" 	 => (Tokens.TYPE(yytext, !pos, !pos));
+<INITIAL>"datatype"  => (Tokens.DATATYPE(yytext, !pos, !pos));
+<INITIAL>"abstype"	 => (Tokens.ABSTYPE(yytext, !pos, !pos));
+<INITIAL>"withtype"	 => (Tokens.WITHTYPE(yytext, !pos, !pos));
+<INITIAL>"as"		 => (Tokens.AS(yytext, !pos, !pos));
+<INITIAL>"open"		 => (Tokens.OPEN(yytext, !pos, !pos));
+<INITIAL>"local"	 => (Tokens.LOCAL(yytext, !pos, !pos));
+<INITIAL>"infix" 	 => (Tokens.INFIX(yytext, !pos, !pos));
+<INITIAL>"infixr"	 => (Tokens.INFIXR(yytext, !pos, !pos));
+<INITIAL>"nonfix"	 => (Tokens.NONFIX(yytext, !pos, !pos));
 
-"ref"	 	 => (Tokens.REF(yytext, !pos, !pos));
+<INITIAL>"struct"	 => (Tokens.STRUCT(yytext, !pos, !pos));
+<INITIAL>"structure" => (Tokens.STRUCTURE(yytext, !pos, !pos));
 
+<INITIAL>"where" 	 => (Tokens.WHERE(yytext, !pos, !pos));
 
-"'"{id}+     => (Tokens.QUOTE_ID(yytext, !pos, !pos));
-"''"{id}+    => (Tokens.DQUOTE_ID(yytext, !pos, !pos));
+<INITIAL>"ref"	 	 => (Tokens.REF(yytext, !pos, !pos));
 
-{id}		 => (Tokens.ID_NAME(yytext, !pos, !pos));
+<INITIAL>"'"{id}+    => (Tokens.QUOTE_ID(yytext, !pos, !pos));
+<INITIAL>"''"{id}+   => (Tokens.DQUOTE_ID(yytext, !pos, !pos));
 
-"."          => (error ("ignoring bad character "^yytext,!pos,!pos);
-             lex());
+<INITIAL>{id}		 => (Tokens.ID_NAME(yytext, !pos, !pos));
+<INITIAL>.           => (error ("ignoring bad character "^yytext,!pos,!pos); lex());
 
