@@ -1,0 +1,1 @@
+fun nice (1: string, 1: int): char = x + y;
