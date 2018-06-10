@@ -1,6 +1,5 @@
 open String
 open Int
-val Conc: string ref = ref ""
 exception LabError
 fun concatWith_(x, lis) = concatWith (x) (lis);
 
@@ -31,13 +30,13 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
     | REAL of string | ID_NAME of string | MOD of string | AND of string 
     | FN of string | VAL of string | CASE of string | OF of string 
     | WILD of string | HASH of string | LCURLY of string | RCURLY of string 
-    | DOT of string | DCOLON of string | NIL of string | QUOTE_ID of string 
+    | DOT of string | DCOLON of string | QUOTE_ID of string 
     | DQUOTE_ID of string | FUN of string | AT of string | TYPE of string 
     | DATATYPE of string | ABSTYPE of string | WITHTYPE of string | STRUCT of string 
     | AS of string | STRUCTURE of string | NONFIX of string | INFIX of string 
     | INFIXR of string | OPEN of string | LOCAL of string | WITH of string 
     | REF of string | WHERE of string | EQTYPE of string | SHARING of string
-    | INCLUDE of string
+    | INCLUDE of string | SIGNATURE of string | SIG of string | OP of string
 
 
 %nonterm START of string option 
@@ -50,7 +49,7 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
        | TYP of string | MULT_ID of string | VAR_ID of string 
        | TYP_TUPLE of string | TYPBIND of string | PAT_ROW of string
        | STR of string | STRBIND_BASE of string | STRBIND of string
-       | SIG of string | ID_CURRY of string | PAT_CURRY of string
+       | SIG_EXP of string | ID_CURRY of string | PAT_CURRY of string
        | LONG_ID_LIST of string | EXNBIND of string | DATBIND of string
        | ID_NAMES of string | EXNBIND_BASE of string | CONBIND of string
        | FUNMATCH_BASE of string | VAR_ID_LIST of string
@@ -59,6 +58,7 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
        | SPEC of string | VALDESC of string | TYPDESC of string
        | DATDESC of string | CONDESC_BASE of string | CONDESC of string
        | EXNDESC_BASE of string | EXNDESC of string | STRDESC of string
+       | SIGBIND of string | SPEC_BASE of string
 
 %name Sample
 
@@ -71,11 +71,13 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
   START : PROG (SOME (PROG))
         | (NONE)
 	
-	PROG : EOF ("")
-			 | DEC SEMICOLON PROG (DEC ^ ";\n" ^ PROG)
-		   | EXP SEMICOLON PROG (EXP ^ ";\n" ^ PROG)
-
-  CON : INT ((*print (" <int> ");*) INT) 
+	PROG : EOF ("\n")
+        | SEMICOLON PROG (SEMICOLON ^ "\n" ^ PROG)
+        | DEC PROG (DEC ^ " " ^ PROG)
+        | EXP PROG (EXP ^ " " ^ PROG)
+        | SIGNATURE SIGBIND PROG (SIGNATURE ^ " " ^ SIGBIND ^ " " ^ PROG)
+  
+  CON : INT (INT) 
       | WORD (WORD)
       | REAL (REAL)
       | CHAR (CHAR)
@@ -120,7 +122,7 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
   (* Stuff that might be from a structure. Ex. String.maxSize *)
   LONG_ID : ID_NAME (ID_NAME)  
 
-  		  | ID_NAME DOT LONG_ID (ID_NAME ^ "." ^ LONG_ID)
+  		    | ID_NAME DOT LONG_ID (ID_NAME ^ "." ^ LONG_ID)
 
   LONG_ID_LIST : LONG_ID (LONG_ID)
 
@@ -144,6 +146,8 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
       | LONG_ID (LONG_ID)
 
+      | OP LONG_ID (OP ^ " " ^ LONG_ID)
+
       | EXP ID EXP  (concatWith_(" ", [EXP1, ID, EXP2]))
 
       (* We add EXP and EXPLIST for parenthesis, since diff meanings
@@ -158,8 +162,6 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
       (* However for lists, we do not do the same as paren*)
       | LBRACK RBRACK (LBRACK ^ RBRACK) 
-
-      | NIL (NIL) 
 
       (* Both EXPs should be of a' list type, but let sml deal with this *)
       | EXP AT EXP (concatWith_(" ", [EXP1, AT, EXP2]))
@@ -284,13 +286,12 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
           | LONG_ID MULT_ID (LONG_ID ^ " " ^ MULT_ID)
 
 
-  TYP : VAR_ID MULT_ID (VAR_ID ^ " " ^ MULT_ID)
+  TYP : VAR_ID (VAR_ID)
+
+      | VAR_ID MULT_ID (VAR_ID ^ " " ^ MULT_ID)
 
       | MULT_ID (MULT_ID)
 
-      (* TYPE CONSTRUCTOR GOES HERE (NOT SURE WHAT IT DOES) 
-          ⟨typ⟩(,) longid constructor *)
-  
       | LPAREN VAR_ID RPAREN (LPAREN ^ VAR_ID ^ RPAREN)
       
       | TYP ARROW TYP (concatWith_(" ", [TYP1, ARROW, TYP2]))
@@ -420,9 +421,9 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
       | STRUCT DEC END (concatWith_("\n", [STRUCT, DEC, END]))
   
-      | STR COLON SIG (concatWith_(" ", [STR, COLON, SIG]))
+      | STR COLON SIG_EXP (concatWith_(" ", [STR, COLON, SIG_EXP]))
   
-      | STR COLONGT SIG (concatWith_(" ", [STR, COLONGT, SIG]))
+      | STR COLONGT SIG_EXP (concatWith_(" ", [STR, COLONGT, SIG_EXP]))
   
       | ID_NAME LPAREN STR RPAREN (concatWith_(" ", [ID_NAME, LPAREN, STR, RPAREN]))
   
@@ -433,9 +434,9 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
   STRBIND_BASE : ID_NAME EQUALOP STR (concatWith_(" ",[ID_NAME, EQUALOP, STR]))
   
-               | ID_NAME COLON SIG EQUALOP STR (concatWith_(" ", [ID_NAME, COLON, SIG, EQUALOP, STR]))
+               | ID_NAME COLON SIG_EXP EQUALOP STR (concatWith_(" ", [ID_NAME, COLON, SIG_EXP, EQUALOP, STR]))
   
-               | ID_NAME COLONGT SIG EQUALOP STR (concatWith_(" ", [ID_NAME, COLONGT, SIG, EQUALOP, STR]))
+               | ID_NAME COLONGT SIG_EXP EQUALOP STR (concatWith_(" ", [ID_NAME, COLONGT, SIG_EXP, EQUALOP, STR]))
 
 
   STRBIND : STRBIND_BASE (STRBIND_BASE)
@@ -443,27 +444,32 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
           | STRBIND_BASE AND STRBIND (concatWith_(" ",[STRBIND_BASE, "\n", AND, "\n", STRBIND]))
 
 
-  (* TODO: SIG*)
-  SIG : ID_NAME (ID_NAME)
-      | SIG SPEC END (SIG ^ "\n " ^ END)
-      | SIG WHERE TYPE TYPREFIN (concatWith_(" ", [SIG, "\n", WHERE, TYPE, TYPE]))
+  SIGBIND : ID_NAME EQUALOP SIG_EXP (ID_NAME ^ " " ^ EQUALOP ^ " " ^ SIG_EXP)
+          | ID_NAME EQUALOP SIG_EXP AND SIGBIND (concatWith_(" ", [ID_NAME, EQUALOP, SIG_EXP, AND, SIGBIND]))
+
+  SIG_EXP : ID_NAME (ID_NAME)
+          | SIG SPEC END (SIG ^ "\n" ^ SPEC ^ "\n" ^ END)
+          | SIG WHERE TYPE TYPREFIN (concatWith_(" ", [SIG, "\n", WHERE, TYPE, TYPREFIN]))
 
   TYPREFIN: ID_NAME (ID_NAME)
   
   LONG_ID_EQUAL_LIST : LONG_ID EQUALOP LONG_ID (LONG_ID ^ " " ^ EQUALOP ^ " " ^ LONG_ID)
                      | LONG_ID EQUALOP LONG_ID_EQUAL_LIST (LONG_ID ^ " " ^ EQUALOP ^ " " ^ LONG_ID_EQUAL_LIST)
 
-  SPEC : VAL VALDESC (VAL ^ " " ^ VALDESC)
-       | TYPE TYPDESC (TYPE ^ " " ^ TYPDESC)
-       | EQTYPE TYPDESC (EQTYPE ^ " " ^ TYPDESC)
-       | TYPE TYPBIND (TYPE ^ " " ^ TYPBIND)
-       | DATATYPE DATDESC (DATATYPE ^ " " ^ DATDESC)
-       | DATATYPE ID_NAME EQUALOP DATATYPE LONG_ID (concatWith_(" ", [DATATYPE, ID_NAME, EQUALOP, DATATYPE, LONG_ID]))
-       | EXCEPTION EXNDESC (EXCEPTION ^ " " ^ EXNDESC)
-       | STRUCTURE STRDESC (STRUCTURE ^ " " ^ STRDESC)
-       | SPEC SEMICOLON SPEC (SPEC ^ SEMICOLON ^ "\n" ^ SPEC)
-       | SPEC SPEC (SPEC ^ " " ^ SPEC)
-       | INCLUDE SIG (INCLUDE ^ " " ^ SIG)
+  SPEC_BASE : SEMICOLON (SEMICOLON)
+            | VAL VALDESC (VAL ^ " " ^ VALDESC)
+            | TYPE TYPDESC (TYPE ^ " " ^ TYPDESC)
+            | EQTYPE TYPDESC (EQTYPE ^ " " ^ TYPDESC)
+            | TYPE TYPBIND (TYPE ^ " " ^ TYPBIND)
+            | DATATYPE DATDESC (DATATYPE ^ " " ^ DATDESC)
+            | DATATYPE ID_NAME EQUALOP DATATYPE LONG_ID (concatWith_(" ", [DATATYPE, ID_NAME, EQUALOP, DATATYPE, LONG_ID]))
+            | EXCEPTION EXNDESC (EXCEPTION ^ " " ^ EXNDESC)
+            | STRUCTURE STRDESC (STRUCTURE ^ " " ^ STRDESC)
+            | INCLUDE SIG_EXP (INCLUDE ^ " " ^ SIG_EXP)
+
+  SPEC : SPEC_BASE (SPEC_BASE)
+       | SPEC_BASE SPEC (SPEC_BASE ^ "\n" ^ SPEC)
+       | SPEC_BASE SEMICOLON SPEC (SPEC_BASE ^ SEMICOLON ^ "\n" ^ SPEC)
        | SPEC SHARING TYPE LONG_ID_EQUAL_LIST (SPEC ^ " " ^ SHARING ^ " " ^ LONG_ID_EQUAL_LIST)
 
   VALDESC : ID COLON TYP (ID ^ COLON ^ " " ^ TYP)
@@ -490,5 +496,7 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
   EXNDESC : EXNDESC_BASE (EXNDESC_BASE)
           | EXNDESC_BASE AND EXNDESC  (EXNDESC_BASE ^ " " ^ AND ^ " " ^ EXNDESC)
 
-  STRDESC : ID_NAME COLON SIG (ID_NAME ^ COLON ^ " " ^ SIG)
-          | ID_NAME COLON SIG AND STRDESC (ID_NAME ^ COLON ^ " " ^ SIG ^ " " ^ AND ^ " " ^ STRDESC)
+  STRDESC : ID_NAME COLON SIG_EXP (ID_NAME ^ COLON ^ " " ^ SIG_EXP)
+          | ID_NAME COLON SIG_EXP AND STRDESC (ID_NAME ^ COLON ^ " " ^ SIG_EXP ^ " " ^ AND ^ " " ^ STRDESC)
+
+
