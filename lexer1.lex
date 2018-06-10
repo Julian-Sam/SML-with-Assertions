@@ -139,7 +139,10 @@ string_ = "\""{ascii}*"\"";
 <INITIAL>"struct"	 => (Tokens.STRUCT(yytext, !pos, !pos));
 <INITIAL>"structure" => (Tokens.STRUCTURE(yytext, !pos, !pos));
 
+<INITIAL>"include" 	 => (Tokens.INCLUDE(yytext, !pos, !pos));
 <INITIAL>"where" 	 => (Tokens.WHERE(yytext, !pos, !pos));
+<INITIAL>"eqtype" 	 => (Tokens.EQTYPE(yytext, !pos, !pos));
+<INITIAL>"sharing" 	 => (Tokens.SHARING(yytext, !pos, !pos));
 
 <INITIAL>"ref"	 	 => (Tokens.REF(yytext, !pos, !pos));
 
