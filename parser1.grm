@@ -75,11 +75,11 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 			 | DEC SEMICOLON PROG (DEC ^ ";\n" ^ PROG)
 		   | EXP SEMICOLON PROG (EXP ^ ";\n" ^ PROG)
 
-  CON : INT ((*print (" <int> ");*) INT) 
-      | WORD (WORD)
-      | REAL (REAL)
-      | CHAR (CHAR)
-      | STRING (STRING)
+  CON : INT (print (" <int> "); INT) 
+      | WORD (print (" <word> "); WORD)
+      | REAL (print (" <real> "); REAL)
+      | CHAR (print (" <char> "); CHAR)
+      | STRING (print (" <str> "); STRING)
 
   ID_NAMES : ID_NAME (ID_NAME)
 
@@ -142,9 +142,9 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
   EXP : CON (CON)
 
-      | LONG_ID (LONG_ID)
+      | LONG_ID (print (" <long_id> "); LONG_ID)
 
-      | EXP ID EXP  (concatWith_(" ", [EXP1, ID, EXP2]))
+      | EXP ID EXP  (print (" <exp id exp> "); concatWith_(" ", [EXP1, ID, EXP2]))
 
       (* We add EXP and EXPLIST for parenthesis, since diff meanings
         (Tuple or just an exp *)
@@ -211,75 +211,80 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
           | LAB EQUALOP EXP COMMA EXP_ROW (LAB ^ " = " ^ EXP ^ ", " ^ EXP_ROW)
  
 
-  PAT : CON ((*print (" <con> ");*) CON)
+  PAT : CON (print (" <con> "); CON)
 
-      | WILD (WILD)
+      | WILD (print (" <_> "); WILD)
 
-      | ID_NAME ((*print (" <id> ");*) ID_NAME)
+      | ID_NAME (print (" <id> "); ID_NAME)
 
-      | LONG_ID (LONG_ID)
+      | LONG_ID (print (" <l_id> "); LONG_ID)
 
-      | LONG_ID PAT (LONG_ID ^ " " ^ PAT)
+      | LONG_ID PAT (print (" <l_id pat> "); LONG_ID ^ " " ^ PAT)
 
-      | PAT ID PAT (concatWith_(" ", [PAT1, ID, PAT2]))
+      | PAT ID PAT (print (" <pat id pat> "); concatWith_(" ", [PAT1, ID, PAT2]))
 
-      | LCURLY RCURLY (LCURLY ^ " " ^ RCURLY)
+      | LCURLY RCURLY (print (" <{}> "); LCURLY ^ " " ^ RCURLY)
 
-      | LCURLY PAT_ROW RCURLY (LCURLY ^ " " ^ PAT_ROW ^ " " ^ RCURLY)
+      | LCURLY PAT_ROW RCURLY (print (" <{ patrow }> "); LCURLY ^ " " ^ PAT_ROW ^ " " ^ RCURLY)
 
-      | LPAREN PAT RPAREN ((*print (" <( pat )> ");*) concatWith_(" ", [LPAREN, PAT1, RPAREN]))
+      | LPAREN PAT RPAREN (print (" <( pat )> "); concatWith_(" ", [LPAREN, PAT1, RPAREN]))
 
-      | LPAREN PAT_LIST RPAREN ((*print (" <( pats... )> ");*) concatWith_(" ", [LPAREN, PAT_LIST, RPAREN]))
+      | LPAREN PAT_LIST RPAREN (print (" <( pats... )> "); concatWith_(" ", [LPAREN, PAT_LIST, RPAREN]))
 
-      | LBRACK PAT_LIST RBRACK (concatWith_(" ", [LBRACK, PAT_LIST, RBRACK]))
+      | LBRACK PAT_LIST RBRACK (print (" <[ pat_list ]> "); concatWith_(" ", [LBRACK, PAT_LIST, RBRACK]))
 
-      | PAT COLON TYP ((*print (" <pat:typ> ");*) concatWith_(" ", [PAT, COLON, TYP]))
+      | PAT COLON TYP (print (" <pat : typ> "); concatWith_(" ", [PAT, COLON, TYP]))
 
-      | ID_NAME COLON TYP ((*print (" <id:typ> ");*) concatWith_(" ", [ID_NAME, COLON, TYP]))
+      | ID_NAME COLON TYP (print (" <id : typ> "); concatWith_(" ", [ID_NAME, COLON, TYP]))
       
-      | ID_NAME AS PAT (concatWith_(" ", [ID_NAME, AS, PAT1]))
+      | ID_NAME AS PAT (print (" <id as pat> "); concatWith_(" ", [ID_NAME, AS, PAT1]))
 
-      | ID_NAME COLON TYP AS PAT (concatWith_(" ", [ID_NAME, COLON, TYP, AS, PAT1]))
+      | ID_NAME COLON TYP AS PAT (print (" <id : typ as pat > "); concatWith_(" ", [ID_NAME, COLON, TYP, AS, PAT1]))
 
 
-  PAT_ROW : LAB EQUALOP PAT (LAB ^ " = " ^ PAT)
+  PAT_ROW : LAB EQUALOP PAT (print (" <lab = pat> "); LAB ^ " = " ^ PAT)
 
-          | LAB EQUALOP PAT COMMA PAT_ROW (LAB ^ " = " ^ PAT ^ ", " ^ PAT_ROW)
+          | LAB EQUALOP PAT COMMA PAT_ROW (print (" <lab = pat, patrow> "); LAB ^ " = " ^ PAT ^ ", " ^ PAT_ROW)
 
-          | ID (ID)
+          | ID (print (" <patrow -> id> "); ID)
 
-          | ID AS PAT  (concatWith_(" ", [ID, AS, PAT]))
+          | ID AS PAT  (print (" <patrow -> id as pat> "); concatWith_(" ", [ID, AS, PAT]))
 
-          | ID COLON TYP  (concatWith_(" ", [ID, COLON, TYP]))
+          | ID COLON TYP  (print (" <patrow -> id : typ> "); concatWith_(" ", [ID, COLON, TYP]))
 
-          | ID COMMA PAT_ROW (concatWith_(" ", [ID, COMMA, PAT_ROW]))
+          | ID COMMA PAT_ROW (print (" <patrow -> id, patrow> "); concatWith_(" ", [ID, COMMA, PAT_ROW]))
 
-          | ID COLON TYP AS PAT (concatWith_(" ", [ID, COLON, TYP, AS, PAT]))
+          | ID COLON TYP AS PAT (print (" <patrow -> id : typ as pat> "); concatWith_(" ", [ID, COLON, TYP, AS, PAT]))
 
-          | ID AS PAT COMMA PAT_ROW (concatWith_(" ", [ID, AS, PAT, COMMA, PAT_ROW]))
+          | ID AS PAT COMMA PAT_ROW (print (" <patrow -> id as pat, patrow> "); concatWith_(" ", [ID, AS, PAT, COMMA, PAT_ROW]))
 
-          | ID COLON TYP COMMA PAT_ROW (concatWith_(" ", [ID, COLON, TYP, COMMA, PAT_ROW]))
+          | ID COLON TYP COMMA PAT_ROW (print (" <patrow -> id : typ, patrow> "); concatWith_(" ", [ID, COLON, TYP, COMMA, PAT_ROW]))
 
-          | ID COLON TYP AS PAT COMMA PAT_ROW (concatWith_(" ", [ID, COLON, TYP, AS, PAT, COMMA, PAT_ROW]))
+          | ID COLON TYP AS PAT COMMA PAT_ROW (print (" <patrow -> id : typ as pat, patrow> "); concatWith_(" ", [ID, COLON, TYP, AS, PAT, COMMA, PAT_ROW]))
  
 
-  PAT_LIST : PAT (PAT)
+  PAT_LIST : PAT (print (" <plist -> pat> "); PAT)
 
- 		       | PAT COMMA PAT_LIST (PAT ^ ", " ^ PAT_LIST)
+ 		       | PAT COMMA PAT_LIST (print (" <plist -> pat, plist> "); PAT ^ ", " ^ PAT_LIST)
   		
 
-  PAT_CURRY : PAT (PAT)
+  PAT_CURRY : PAT (print (" <pcurry -> pat> "); PAT)
 
-            | PAT PAT_CURRY (PAT ^ " " ^ PAT_CURRY)
+            | PAT PAT_CURRY (print (" <pcurry -> pat pcurry> "); PAT ^ " " ^ PAT_CURRY)
 
 
-  TYP_TUPLE : TYP TIMES TYP (concatWith_(" ", [TYP1, TIMES, TYP2]))
+  TYP_TUPLE : TYP TIMES TYP (print (" <typ * typ> "); concatWith_(" ", [TYP1, TIMES, TYP2]))
 
-            | TYP TIMES TYP_TUPLE (concatWith_(" ", [TYP, TIMES, TYP_TUPLE]))
+            | TYP TIMES TYP_TUPLE (print (" <typ * ty_tuple> "); concatWith_(" ", [TYP, TIMES, TYP_TUPLE]))
 
 
   (* Space seperated names for types. For example: 'a list list *)
+
   MULT_ID : LONG_ID (LONG_ID)
+
+          | REF (REF)
+
+          | REF MULT_ID (REF ^ " " ^ MULT_ID)
 
           | LONG_ID MULT_ID (LONG_ID ^ " " ^ MULT_ID)
 
@@ -307,7 +312,7 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
   DEC : VAL VALBIND (VAL ^ " " ^ VALBIND)
 
-      | FUN FUNBIND ((*print (" <fun fbind> ");*) FUN ^ " " ^ FUNBIND)
+      | FUN FUNBIND (print (" <fun fbind> "); FUN ^ " " ^ FUNBIND)
 
       | VAL VAR_ID_LIST VALBIND (VAL ^ " " ^ VAR_ID_LIST ^ " " ^ VALBIND)
 
@@ -327,70 +332,74 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
       | EXCEPTION EXNBIND (concatWith_(" ", [EXCEPTION, EXNBIND]))
 
-      | DEC DEC (DEC1 ^ "\n" ^ DEC2)
+      | DEC DEC (print (" <dec1 dec2> "); DEC1 ^ "\n" ^ DEC2)
 
-      | STRUCTURE STRBIND (STRUCTURE ^ " " ^ STRBIND)
+      | STRUCTURE STRBIND (print (" <struct stbind> "); STRUCTURE ^ " " ^ STRBIND)
 
-      | DEC SEMICOLON DEC (concatWith_(" ", [DEC1, SEMICOLON, DEC2]))
+      | DEC SEMICOLON (print (" <dec;> "); DEC ^ ";\n")
 
-      | LOCAL DEC IN DEC END (concatWith_(" ", [LOCAL, DEC1, IN, DEC2, END]))
+      | DEC SEMICOLON DEC (print (" <dec1; dec2> "); concatWith_(" ", [DEC1, ";\n", DEC2]))
 
-      | OPEN LONG_ID_LIST (OPEN ^ " " ^ LONG_ID_LIST)
+      | LOCAL DEC IN DEC END (print (" <lcl dec in dec end> "); concatWith_(" ", [LOCAL, DEC1, IN, DEC2, END]))
 
-      | NONFIX ID_CURRY (NONFIX ^ " " ^ ID_CURRY)
+      | OPEN LONG_ID_LIST (print (" <open lgidlist> "); OPEN ^ " " ^ LONG_ID_LIST)
 
-      | INFIX ID_CURRY (INFIX ^ " " ^ ID_CURRY)
+      | NONFIX ID_CURRY (print (" <nonfix idcurry> "); NONFIX ^ " " ^ ID_CURRY)
 
-      | INFIX INT ID_CURRY (INFIX ^ " " ^ INT ^ " " ^ ID_CURRY)
+      | INFIX ID_CURRY (print (" <infix idcurry> "); INFIX ^ " " ^ ID_CURRY)
 
-      | INFIXR ID_CURRY (INFIXR ^ " " ^ ID_CURRY)
+      | INFIX INT ID_CURRY (print (" <infix int idcurry> "); INFIX ^ " " ^ INT ^ " " ^ ID_CURRY)
 
-      | INFIXR INT ID_CURRY (INFIXR ^ " " ^ INT ^ " " ^ ID_CURRY)
+      | INFIXR ID_CURRY (print (" <infixr idcurry> "); INFIXR ^ " " ^ ID_CURRY)
 
-
-  VALBIND : PAT EQUALOP EXP (concatWith_(" ", [PAT, EQUALOP, EXP]))
-
-          | PAT EQUALOP EXP AND VALBIND (concatWith_(" ", [PAT, EQUALOP, EXP, " and ", VALBIND]))
+      | INFIXR INT ID_CURRY (print (" <infixr int idcurry> "); INFIXR ^ " " ^ INT ^ " " ^ ID_CURRY)
 
 
-  FUNBIND : FUNMATCH ((*print (" <fmatch> ");*) FUNMATCH)
+  VALBIND : PAT EQUALOP EXP (print (" <pat = exp> "); concatWith_(" ", [PAT, EQUALOP, EXP]))
 
-  		  | FUNMATCH AND FUNBIND (FUNMATCH ^ " and " ^ FUNBIND)
+          | PAT EQUALOP EXP AND VALBIND (print (" <pat = exp and vbind> "); concatWith_(" ", [PAT, EQUALOP, EXP, " and ", VALBIND]))
+
+
+  FUNBIND : FUNMATCH (print (" <fmatch> "); FUNMATCH)
+
+  		    | FUNMATCH AND FUNBIND (print (" <fmatch and fbind> "); FUNMATCH ^ " and " ^ FUNBIND)
 
   (* Easier pattern matching for functions *)
 
-  FUNMATCH_BASE : ID_NAME PAT EQUALOP EXP ((*print (" <id pat=exp> ");*) concatWith_(" ", [ID_NAME, PAT, EQUALOP, EXP]))
+  FUNMATCH_BASE : ID_NAME PAT EQUALOP EXP (print (" <id pat = exp> "); concatWith_(" ", [ID_NAME, PAT, EQUALOP, EXP]))
 
-                (*| ID_NAME PAT COLON TYP EQUALOP EXP ( print ("NAISU <:> "); concatWith_(" ", [ID_NAME, PAT, COLON, TYP, EQUALOP, EXP]))*)
+                | ID_NAME PAT COLON TYP EQUALOP EXP ( print (" <if pat : typ = exp> "); concatWith_(" ", [ID_NAME, PAT, COLON, TYP, EQUALOP, EXP]))
+
+  (* Infix function declarations *)              
 
                (* | PAT ID PAT EQUALOP EXP (concatWith_(" ", [PAT1, ID, PAT2, EQUALOP, EXP]))
 
                 | PAT ID PAT COLON TYP EQUALOP EXP  (concatWith_(" ", [PAT1, ID, PAT2, COLON, TYP, EQUALOP, EXP]))
 *)
   
-  FUNMATCH : FUNMATCH_BASE ((*print (" <fmatchb> ");*) FUNMATCH_BASE)
+  FUNMATCH : FUNMATCH_BASE (print (" <fmatchb> "); FUNMATCH_BASE)
 
-           | FUNMATCH_BASE AND FUNMATCH (FUNMATCH_BASE ^ " " ^ AND ^ " " ^ FUNMATCH)
+           | FUNMATCH_BASE BAR FUNMATCH (print (" <| fmatchb> "); FUNMATCH_BASE ^ " " ^ BAR ^ " " ^ FUNMATCH)
 
 
   TYPBIND_BASE : ID EQUALOP TYP (concatWith_(" ", [ID, EQUALOP, TYP]))
 
-  		  	   | ID EQUALOP TYP AND TYPBIND (concatWith_(" ", [ID, EQUALOP, TYP, AND, TYPBIND]))
+  		  	     | ID EQUALOP TYP AND TYPBIND (concatWith_(" ", [ID, EQUALOP, TYP, AND, TYPBIND]))
 
 
   TYPBIND : TYPBIND_BASE (TYPBIND_BASE)
 
-  		  | VAR_ID_LIST TYPBIND_BASE (VAR_ID_LIST ^ " " ^ TYPBIND_BASE)
+  		    | VAR_ID_LIST TYPBIND_BASE (VAR_ID_LIST ^ " " ^ TYPBIND_BASE)
 
 
   DATBIND_BASE : ID_NAMES EQUALOP CONBIND (ID_NAMES ^ " " ^ EQUALOP ^ " " ^ CONBIND)
 
-  		       | ID_NAMES EQUALOP CONBIND AND DATBIND (concatWith_(" ", [ID_NAMES, EQUALOP, CONBIND, AND, DATBIND]))
+  		         | ID_NAMES EQUALOP CONBIND AND DATBIND (concatWith_(" ", [ID_NAMES, EQUALOP, CONBIND, AND, DATBIND]))
 
 
   DATBIND : DATBIND_BASE (DATBIND_BASE)
 
-  		  | VAR_ID_LIST DATBIND_BASE (VAR_ID_LIST ^ " " ^ DATBIND_BASE)
+  		    | VAR_ID_LIST DATBIND_BASE (VAR_ID_LIST ^ " " ^ DATBIND_BASE)
 
 
   CONBIND : ID (ID)
