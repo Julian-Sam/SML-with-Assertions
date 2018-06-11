@@ -97,8 +97,6 @@ string_ = "\""{ascii}*"\"";
 <INITIAL>"("	 	 => (Tokens.LPAREN(yytext, !pos,!pos));
 <INITIAL>")"	 	 => (Tokens.RPAREN(yytext, !pos,!pos));
 
-<INITIAL>"nil"	 	 => (Tokens.NIL(yytext, !pos,!pos));
-
 <INITIAL>"if"	     => (Tokens.IF(yytext, !pos,!pos));
 <INITIAL>"then"	     => (Tokens.THEN(yytext, !pos,!pos));
 <INITIAL>"else"	     => (Tokens.ELSE(yytext, !pos,!pos));
@@ -124,6 +122,7 @@ string_ = "\""{ascii}*"\"";
 <INITIAL>"case" 	 => (Tokens.CASE(yytext, !pos, !pos));
 <INITIAL>"of"	     => (Tokens.OF(yytext, !pos, !pos));
 <INITIAL>"_"		 => (Tokens.WILD(yytext, !pos, !pos));
+<INITIAL>"op"		 => (Tokens.OP(yytext, !pos, !pos));
 
 <INITIAL>"type" 	 => (Tokens.TYPE(yytext, !pos, !pos));
 <INITIAL>"datatype"  => (Tokens.DATATYPE(yytext, !pos, !pos));
@@ -138,6 +137,8 @@ string_ = "\""{ascii}*"\"";
 
 <INITIAL>"struct"	 => (Tokens.STRUCT(yytext, !pos, !pos));
 <INITIAL>"structure" => (Tokens.STRUCTURE(yytext, !pos, !pos));
+<INITIAL>"sig" 		 => (Tokens.SIG(yytext, !pos, !pos));
+<INITIAL>"signature" => (Tokens.SIGNATURE(yytext, !pos, !pos));
 
 <INITIAL>"include" 	 => (Tokens.INCLUDE(yytext, !pos, !pos));
 <INITIAL>"where" 	 => (Tokens.WHERE(yytext, !pos, !pos));
