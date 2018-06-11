@@ -37,6 +37,7 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
     | INFIXR of string | OPEN of string | LOCAL of string | WITH of string 
     | REF of string | WHERE of string | EQTYPE of string | SHARING of string
     | INCLUDE of string | SIGNATURE of string | SIG of string | OP of string
+    | FUNCTOR of string
 
 
 %nonterm START of string option 
@@ -59,7 +60,8 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
        | DATDESC of string | CONDESC_BASE of string | CONDESC of string
        | EXNDESC_BASE of string | EXNDESC of string | STRDESC of string
        | SIGBIND of string | SPEC_BASE of string | TYPREFIN_BASE of string
-       | ATPAT of string | PAT_TUPLE of string 
+       | ATPAT of string | PAT_TUPLE of string | FCTBIND of string 
+       | FCTBIND_BASE of string  
 
 %name Sample
 
@@ -77,7 +79,8 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
         | DEC PROG (DEC ^ " " ^ PROG)
         | EXP PROG (EXP ^ " " ^ PROG)
         | SIGNATURE SIGBIND PROG (SIGNATURE ^ " " ^ SIGBIND ^ " " ^ PROG)
-  
+        | FUNCTOR FCTBIND PROG (FUNCTOR ^ " " ^ FCTBIND ^ " " ^ PROG)
+
   CON : INT ((*print (" <int> ");*) INT) 
       | WORD ((*print (" <word> ");*) WORD)
       | REAL ((*print (" <real> ");*) REAL)
@@ -95,22 +98,7 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
            | ID ID_CURRY (ID ^ " " ^ ID_CURRY)
 
   ID : ID_NAME (ID_NAME)
-     | UNEQUAL (UNEQUAL)
-     | EQUALOP (EQUALOP)
-     | VARASSIGN (VARASSIGN)
-     | GREATERTHAN (GREATERTHAN)
-     | LESSTHAN (LESSTHAN)
-     | GREATERTHANEQUAL (GREATERTHANEQUAL)
-     | LESSTHANEQUAL (LESSTHANEQUAL)
-     | BAR (BAR)
-     | COLON (COLON)
-     | BANG (BANG)
-     | PLUS (PLUS)
-     | TIMES (TIMES) 
-     | SUB (SUB) 
-     | INTDIV (INTDIV) 
-     | REALDIV (REALDIV) 
-     | MOD (MOD)
+
 
   (* Stuff like 'a or ''a. (Generic Types) *)
   VAR_ID : QUOTE_ID (QUOTE_ID)
@@ -149,13 +137,26 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
       | EXP EXP (EXP1 ^ " " ^ EXP2)
 
-      | EXP ID EXP  ((*print (" <exp id exp> ");*) concatWith_(" ", [EXP1, ID, EXP2]))
+      | EXP LONG_ID EXP  ((*print (" <exp id exp> ");*) 
+                          concatWith_(" ", [EXP1, LONG_ID, EXP2]))
+
+      | EXP GREATERTHAN EXP  (EXP1 ^ " " ^ GREATERTHAN ^ " " ^ EXP2)
+      | EXP LESSTHAN EXP  (EXP1 ^ " " ^ LESSTHAN ^ " " ^ EXP2)
+      | EXP GREATERTHANEQUAL EXP  (EXP1 ^ " " ^ GREATERTHANEQUAL ^ " " ^ EXP2)
+      | EXP LESSTHANEQUAL EXP  (EXP1 ^ " " ^ LESSTHANEQUAL ^ " " ^ EXP2)
+      | EXP UNEQUAL EXP  (EXP1 ^ " " ^ UNEQUAL ^ " " ^ EXP2)
+      | EXP EQUALOP EXP  (EXP1 ^ " " ^ EQUALOP ^ " " ^ EXP2)
+      | EXP PLUS EXP  (EXP1 ^ " " ^ PLUS ^ " " ^ EXP2)
+      | EXP TIMES EXP  (EXP1 ^ " " ^ TIMES ^ " " ^ EXP2) 
+      | EXP SUB EXP  (EXP1 ^ " " ^ SUB ^ " " ^ EXP2) 
+      | EXP INTDIV EXP  (EXP1 ^ " " ^ INTDIV ^ " " ^ EXP2) 
+      | EXP REALDIV EXP  (EXP1 ^ " " ^ REALDIV ^ " " ^ EXP2) 
+      | EXP MOD EXP  (EXP1 ^ " " ^ MOD ^ " " ^ EXP2)
+      | EXP VARASSIGN EXP  (EXP1 ^ " " ^ VARASSIGN ^ " " ^ EXP2)
 
       | OP LONG_ID (OP ^ " " ^ LONG_ID)
 
-      (* We add EXP and EXPLIST for parenthesis, since diff meanings
-        (Tuple or just an exp *)
-      | LPAREN EXP RPAREN (concatWith_(" ", [LPAREN, EXP, RPAREN]))
+      | LPAREN RPAREN (LPAREN ^ RPAREN) 
 
       | LPAREN EXP_LIST RPAREN (concatWith_(" ", [LPAREN, EXP_LIST, RPAREN])) 
 
@@ -207,7 +208,7 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
   MATCH : PAT DARROW EXP (concatWith_(" ", [PAT, DARROW, EXP]))
 
-        | PAT DARROW EXP BAR MATCH (concatWith_(" ", [PAT, DARROW, EXP, BAR, MATCH]))
+        | PAT DARROW EXP BAR MATCH (concatWith_(" ", [PAT, DARROW, EXP, "\n", BAR, MATCH]))
 
 
   EXP_ROW : LAB EQUALOP EXP (LAB ^ " = " ^ EXP)
@@ -231,9 +232,9 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
         | LCURLY PAT_ROW RCURLY ("{ " ^ PAT_ROW ^ " }")
 
-        | LPAREN PAT RPAREN (concatWith_(" ", [LPAREN, PAT, RPAREN]))
-
         | LPAREN PAT_TUPLE RPAREN (concatWith_(" ", [LPAREN, PAT_TUPLE, RPAREN]))
+
+        | LPAREN PAT RPAREN (concatWith_(" ", [LPAREN, PAT, RPAREN]))
 
         | LBRACK PAT_LIST RBRACK (concatWith_(" ", [LBRACK, PAT_LIST, RBRACK]))
 
@@ -259,21 +260,21 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
           | LAB EQUALOP PAT COMMA PAT_ROW (LAB ^ " = " ^ PAT ^ ", " ^ PAT_ROW)
 
-          | ID (ID)
+          | VAR_ID (VAR_ID)
 
-          | ID AS PAT  (concatWith_(" ", [ID, AS, PAT]))
+          | VAR_ID AS PAT  (concatWith_(" ", [VAR_ID, AS, PAT]))
 
-          | ID COLON TYP  (concatWith_(" ", [ID, COLON, TYP]))
+          | VAR_ID COLON TYP  (concatWith_(" ", [VAR_ID, COLON, TYP]))
 
-          | ID COMMA PAT_ROW (concatWith_(" ", [ID, COMMA, PAT_ROW]))
+          | VAR_ID COMMA PAT_ROW (concatWith_(" ", [VAR_ID, COMMA, PAT_ROW]))
 
-          | ID COLON TYP AS PAT (concatWith_(" ", [ID, COLON, TYP, AS, PAT]))
+          | VAR_ID COLON TYP AS PAT (concatWith_(" ", [VAR_ID, COLON, TYP, AS, PAT]))
 
-          | ID AS PAT COMMA PAT_ROW (concatWith_(" ", [ID, AS, PAT, COMMA, PAT_ROW]))
+          | VAR_ID AS PAT COMMA PAT_ROW (concatWith_(" ", [VAR_ID, AS, PAT, COMMA, PAT_ROW]))
 
-          | ID COLON TYP COMMA PAT_ROW (concatWith_(" ", [ID, COLON, TYP, COMMA, PAT_ROW]))
+          | VAR_ID COLON TYP COMMA PAT_ROW (concatWith_(" ", [VAR_ID, COLON, TYP, COMMA, PAT_ROW]))
 
-          | ID COLON TYP AS PAT COMMA PAT_ROW (concatWith_(" ", [ID, COLON, TYP, AS, PAT, COMMA, PAT_ROW]))
+          | VAR_ID COLON TYP AS PAT COMMA PAT_ROW (concatWith_(" ", [VAR_ID, COLON, TYP, AS, PAT, COMMA, PAT_ROW]))
  
 
   PAT_LIST : PAT (PAT)
@@ -305,18 +306,18 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
           | LONG_ID MULT_ID (LONG_ID ^ " " ^ MULT_ID)
 
 
-  TYP : VAR_ID (VAR_ID)
+  TYP :  VAR_ID_LIST (VAR_ID_LIST)
 
-      | VAR_ID MULT_ID (VAR_ID ^ " " ^ MULT_ID)
+      | VAR_ID_LIST MULT_ID (VAR_ID_LIST ^ " " ^ MULT_ID)
 
       | MULT_ID (MULT_ID)
 
-      | LPAREN VAR_ID RPAREN (LPAREN ^ VAR_ID ^ RPAREN)
+      | LPAREN TYP RPAREN (LPAREN ^ TYP ^ RPAREN)
       
       | TYP ARROW TYP (concatWith_(" ", [TYP1, ARROW, TYP2]))
       
       | TYP_TUPLE (TYP_TUPLE)
-      
+
       | LCURLY TYP_ROW RCURLY (concatWith_(" ", [LCURLY, TYP_ROW, RCURLY]))
 
 
@@ -325,13 +326,13 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
           | LAB COLON TYP COMMA TYP_ROW (LAB ^ " : " ^ TYP ^ ", " ^ TYP_ROW)
 
 
-  DEC : VAL VALBIND (VAL ^ " " ^ VALBIND)
+  DEC : VAL VALBIND ("\n\n" ^ VAL ^ " " ^ VALBIND)
 
-      | FUN FUNBIND ((*print (" <fun fbind> ");*) FUN ^ " " ^ FUNBIND)
+      | FUN FUNBIND ((*print (" <fun fbind> ");*)"\n\n" ^ FUN ^ " " ^ FUNBIND)
 
-      | VAL VAR_ID_LIST VALBIND (VAL ^ " " ^ VAR_ID_LIST ^ " " ^ VALBIND)
+      | VAL VAR_ID_LIST VALBIND ("\n\n" ^ VAL ^ " " ^ VAR_ID_LIST ^ " " ^ VALBIND)
 
-      | FUN VAR_ID_LIST FUNBIND (FUN ^ " " ^ VAR_ID_LIST ^ " " ^ FUNBIND)
+      | FUN VAR_ID_LIST FUNBIND ("\n\n" ^ FUN ^ " " ^ VAR_ID_LIST ^ " " ^ FUNBIND)
 
       | TYPE TYPBIND (TYPE ^ " " ^ TYPBIND)
 
@@ -538,4 +539,18 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
   STRDESC : ID_NAME COLON SIG_EXP (ID_NAME ^ COLON ^ " " ^ SIG_EXP)
           | ID_NAME COLON SIG_EXP AND STRDESC (ID_NAME ^ COLON ^ " " ^ SIG_EXP ^ " " ^ AND ^ " " ^ STRDESC)
 
+  FCTBIND_BASE : ID_NAME LPAREN ID_NAME COLON SIG_EXP RPAREN EQUALOP STR (concatWith_(" ", [ID_NAME, LPAREN, ID_NAME, COLON, SIG_EXP, RPAREN, EQUALOP, STR]))
 
+               | ID_NAME LPAREN ID_NAME COLON SIG_EXP RPAREN COLON SIG_EXP EQUALOP STR (concatWith_(" ", [ID_NAME, LPAREN, ID_NAME, COLON, SIG_EXP, RPAREN, COLON, SIG_EXP, EQUALOP, STR]))
+
+               | ID_NAME LPAREN ID_NAME COLON SIG_EXP RPAREN COLONGT SIG_EXP EQUALOP STR (concatWith_(" ", [ID_NAME, LPAREN, ID_NAME, COLON, SIG_EXP, RPAREN, COLONGT, SIG_EXP, EQUALOP, STR]))
+
+               | ID_NAME LPAREN SPEC RPAREN EQUALOP STR (concatWith_(" ", [ID_NAME, LPAREN, SPEC, RPAREN, EQUALOP, STR]))
+
+               | ID_NAME LPAREN SPEC RPAREN COLON SIG_EXP EQUALOP STR (concatWith_(" ", [ID_NAME, LPAREN, SPEC, RPAREN, COLON, SIG_EXP, EQUALOP, STR]))
+
+               | ID_NAME LPAREN SPEC RPAREN COLONGT SIG_EXP EQUALOP STR  (concatWith_(" ", [ID_NAME, LPAREN, SPEC, RPAREN, COLONGT, SIG_EXP, EQUALOP, STR]))
+
+  FCTBIND : FCTBIND_BASE (FCTBIND_BASE)
+
+          | FCTBIND_BASE AND FCTBIND (concatWith_(" ", [FCTBIND_BASE, AND, FCTBIND]))
