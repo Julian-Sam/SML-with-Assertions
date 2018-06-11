@@ -122,6 +122,7 @@ string_ = "\""{ascii}*"\"";
 <INITIAL>"case" 	 => (Tokens.CASE(yytext, !pos, !pos));
 <INITIAL>"of"	     => (Tokens.OF(yytext, !pos, !pos));
 <INITIAL>"_"		 => (Tokens.WILD(yytext, !pos, !pos));
+<INITIAL>"op"		 => (Tokens.OP(yytext, !pos, !pos));
 
 <INITIAL>"type" 	 => (Tokens.TYPE(yytext, !pos, !pos));
 <INITIAL>"datatype"  => (Tokens.DATATYPE(yytext, !pos, !pos));

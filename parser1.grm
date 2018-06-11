@@ -58,7 +58,7 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
        | SPEC of string | VALDESC of string | TYPDESC of string
        | DATDESC of string | CONDESC_BASE of string | CONDESC of string
        | EXNDESC_BASE of string | EXNDESC of string | STRDESC of string
-       | SIGBIND of string | SPEC_BASE of string
+       | SIGBIND of string | SPEC_BASE of string | TYPREFIN_BASE of string
 
 %name Sample
 
@@ -451,7 +451,11 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
           | SIG SPEC END (SIG ^ "\n" ^ SPEC ^ "\n" ^ END)
           | SIG WHERE TYPE TYPREFIN (concatWith_(" ", [SIG, "\n", WHERE, TYPE, TYPREFIN]))
 
-  TYPREFIN: ID_NAME (ID_NAME)
+  TYPREFIN_BASE : LONG_ID EQUALOP TYP (LONG_ID ^ " " ^ EQUALOP ^ " " ^ TYP)
+                | VAR_ID_LIST LONG_ID EQUALOP TYP (VAR_ID_LIST ^ " " ^ LONG_ID ^ " " ^ EQUALOP ^ " " ^ TYP)
+
+  TYPREFIN : TYPREFIN_BASE (TYPREFIN_BASE)
+           | TYPREFIN_BASE AND TYPE TYPREFIN (TYPREFIN_BASE ^ " " ^ AND ^ " " ^ TYPE ^ " " ^ TYPREFIN)
   
   LONG_ID_EQUAL_LIST : LONG_ID EQUALOP LONG_ID (LONG_ID ^ " " ^ EQUALOP ^ " " ^ LONG_ID)
                      | LONG_ID EQUALOP LONG_ID_EQUAL_LIST (LONG_ID ^ " " ^ EQUALOP ^ " " ^ LONG_ID_EQUAL_LIST)
