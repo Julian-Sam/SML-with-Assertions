@@ -1,1 +1,3 @@
-val (a:''x) (c:int) = 3;
+Control.Print.printDepth  := 50;
+Control.Print.printLength := 50;
+

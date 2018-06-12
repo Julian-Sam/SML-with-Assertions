@@ -151,6 +151,6 @@ string_ = "\""{ascii}*"\"";
 <INITIAL>"'"{id}+    => (Tokens.QUOTE_ID(yytext, !pos, !pos));
 <INITIAL>"''"{id}+   => (Tokens.DQUOTE_ID(yytext, !pos, !pos));
 
-<INITIAL>{id}		 => (Tokens.ID_NAME(yytext, !pos, !pos));
+<INITIAL>{id}		 => (Tokens.ID(yytext, !pos, !pos));
 <INITIAL>.           => (error ("ignoring bad character "^yytext,!pos,!pos); lex());
 
