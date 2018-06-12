@@ -139,6 +139,7 @@ string_ = "\""{ascii}*"\"";
 <INITIAL>"structure" => (Tokens.STRUCTURE(yytext, !pos, !pos));
 <INITIAL>"sig" 		 => (Tokens.SIG(yytext, !pos, !pos));
 <INITIAL>"signature" => (Tokens.SIGNATURE(yytext, !pos, !pos));
+<INITIAL>"functor"   => (Tokens.FUNCTOR(yytext, !pos, !pos));
 
 <INITIAL>"include" 	 => (Tokens.INCLUDE(yytext, !pos, !pos));
 <INITIAL>"where" 	 => (Tokens.WHERE(yytext, !pos, !pos));

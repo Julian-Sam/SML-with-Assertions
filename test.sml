@@ -4,10 +4,4 @@ case (A) of
 	| (NONE, SOME (y)) =>  SOME (y)
 	| (SOME (x), SOME (y)) =>  SOME (x + y)
 
-(*fun f () =
-  let
-    fun a () = b ()
-    and b () = a ()
-  in
-    a ()
-  end*)
+val (a:''x) (c:int) = 3;
