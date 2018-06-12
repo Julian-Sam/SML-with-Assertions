@@ -1,3 +1,4 @@
+(* Grammar file *)
 open String
 open Int
 exception LabError
