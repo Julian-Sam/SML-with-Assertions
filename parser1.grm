@@ -102,7 +102,6 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
      | LESSTHAN (LESSTHAN)
      | GREATERTHANEQUAL (GREATERTHANEQUAL)
      | LESSTHANEQUAL (LESSTHANEQUAL)
-     | BAR (BAR)
      | COLON (COLON)
      | BANG (BANG)
      | PLUS (PLUS)
@@ -145,69 +144,69 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
   EXP : CON (CON)
 
-      | LONG_ID ((*print (" <long_id> ");*) LONG_ID)
+      | LONG_ID (print (" <long_id> "); LONG_ID)
 
-      | EXP EXP (EXP1 ^ " " ^ EXP2)
+      | EXP EXP (print (" <exp1 exp2> "); EXP1 ^ " " ^ EXP2)
 
-      | EXP ID EXP  ((*print (" <exp id exp> ");*) concatWith_(" ", [EXP1, ID, EXP2]))
+      | EXP ID EXP  (print (" <exp id exp> "); concatWith_(" ", [EXP1, ID, EXP2]))
 
-      | OP LONG_ID (OP ^ " " ^ LONG_ID)
+      | OP LONG_ID (print (" <op lg_id> "); OP ^ " " ^ LONG_ID)
 
       (* We add EXP and EXPLIST for parenthesis, since diff meanings
         (Tuple or just an exp *)
-      | LPAREN EXP RPAREN (concatWith_(" ", [LPAREN, EXP, RPAREN]))
+      | LPAREN EXP RPAREN (print (" <(exp)> "); concatWith_(" ", [LPAREN, EXP, RPAREN]))
 
-      | LPAREN EXP_LIST RPAREN (concatWith_(" ", [LPAREN, EXP_LIST, RPAREN])) 
+      | LPAREN EXP_LIST RPAREN (print (" <(elist)> "); concatWith_(" ", [LPAREN, EXP_LIST, RPAREN])) 
 
-      | LCURLY EXP_ROW RCURLY (concatWith_(" ", [LCURLY, EXP_ROW, RCURLY]))
+      | LCURLY EXP_ROW RCURLY (print (" <{erow}> "); concatWith_(" ", [LCURLY, EXP_ROW, RCURLY]))
 
-      | HASH LAB (HASH ^ LAB)
+      | HASH LAB (print (" <#lab> "); HASH ^ LAB)
 
       (* However for lists, we do not do the same as paren*)
-      | LBRACK RBRACK (LBRACK ^ RBRACK) 
+      | LBRACK RBRACK (print (" <[]> "); LBRACK ^ RBRACK) 
 
       (* Both EXPs should be of a' list type, but let sml deal with this *)
-      | EXP AT EXP (concatWith_(" ", [EXP1, AT, EXP2]))
+      | EXP AT EXP (print (" <exp1@exp2> "); concatWith_(" ", [EXP1, AT, EXP2]))
 
       (* EXP2 should be of a' list type, but let sml deal with this *)
-      | EXP DCOLON EXP (concatWith_(" ", [EXP1, DCOLON, EXP2])) 
+      | EXP DCOLON EXP (print (" <exp1::exp2> "); concatWith_(" ", [EXP1, DCOLON, EXP2])) 
 
-      | LBRACK EXP_LIST RBRACK (concatWith_(" ", [LBRACK, EXP_LIST, RBRACK])) 
+      | LBRACK EXP_LIST RBRACK (print (" <[elist]> "); concatWith_(" ", [LBRACK, EXP_LIST, RBRACK])) 
       
-      | LPAREN EXP_SEQ RPAREN (concatWith_(" ", [LPAREN, EXP_SEQ, RPAREN]))
+      | LPAREN EXP_SEQ RPAREN (print (" <(eseq)> "); concatWith_(" ", [LPAREN, EXP_SEQ, RPAREN]))
 
-      | LET DEC IN EXP END (concatWith_(" ", [LET, DEC, IN, "\n", EXP, "\n"]) ^ END)
+      | LET DEC IN EXP END (print (" <let dec in exp end> "); concatWith_(" ", [LET, DEC, IN, "\n", EXP, "\n"]) ^ END)
 
-      | LET DEC IN EXP_SEQ END (concatWith_(" ", [LET, DEC, IN, "\n", EXP_SEQ, "\n"]) ^ END)
+      | LET DEC IN EXP_SEQ END (print (" <let dec in eseq end> "); concatWith_(" ", [LET, DEC, IN, "\n", EXP_SEQ, "\n"]) ^ END)
 
-      | EXP COLON TYP (concatWith_(" ", [EXP, COLON, TYP]))
+      | EXP COLON TYP (print (" <exp : typ> "); concatWith_(" ", [EXP, COLON, TYP]))
 
-      | RAISE EXP (concatWith_(" ", [RAISE, EXP]))
+      | RAISE EXP (print (" <raise exp> "); concatWith_(" ", [RAISE, EXP]))
 
-      | EXP HANDLE MATCH (concatWith_(" ", [EXP, HANDLE, MATCH]))
+      | EXP HANDLE MATCH (print (" <exp handle match> "); concatWith_(" ", [EXP, HANDLE, MATCH]))
 
-      | EXP ANDALSO EXP (concatWith_(" ", [EXP1, ANDALSO, EXP2])) 
+      | EXP ANDALSO EXP (print (" <exp andalso exp> "); concatWith_(" ", [EXP1, ANDALSO, EXP2])) 
 
-      | EXP ORELSE EXP (concatWith_(" ", [EXP1, ORELSE, EXP2])) 
+      | EXP ORELSE EXP (print (" <exp orelse exp> "); concatWith_(" ", [EXP1, ORELSE, EXP2])) 
 
-      | IF EXP THEN EXP ELSE EXP (concatWith_(" ", [IF, EXP1, THEN, EXP2, ELSE, EXP3])) 
+      | IF EXP THEN EXP ELSE EXP (print (" <if then else> "); concatWith_(" ", [IF, EXP1, THEN, EXP2, ELSE, EXP3])) 
 
-      | WHILE EXP DO EXP (concatWith_(" ", [WHILE, EXP1, DO, EXP2])) 
+      | WHILE EXP DO EXP (print (" <while do> "); concatWith_(" ", [WHILE, EXP1, DO, EXP2])) 
 
-      | CASE EXP OF MATCH (concatWith_(" ", [CASE, EXP, "of\n", MATCH])) 
+      | CASE EXP OF MATCH (print (" <case of> "); concatWith_(" ", [CASE, EXP, "of\n", MATCH])) 
 
-      | FN MATCH (concatWith_(" ", [FN, MATCH]))
+      | FN MATCH (print (" <fn> "); concatWith_(" ", [FN, MATCH]))
 
       (* REFERENCE CELL GRAMMAR *)
-      | REF EXP (REF ^ " " ^ EXP)
+      | REF EXP (print (" <ref exp> "); REF ^ " " ^ EXP)
 
-      | ID_NAME VARASSIGN EXP (ID_NAME ^ " " ^ VARASSIGN ^ " " ^ EXP)
+      | ID_NAME VARASSIGN EXP (print (" <id := exp> "); ID_NAME ^ " " ^ VARASSIGN ^ " " ^ EXP)
 
-      | BANG EXP (BANG ^ EXP)
+      | BANG EXP (print (" <!exp> "); BANG ^ EXP)
 
-  MATCH : PAT DARROW EXP (concatWith_(" ", [PAT, DARROW, EXP]))
+  MATCH : PAT DARROW EXP (print (" <pat => exp> "); concatWith_(" ", [PAT, DARROW, EXP]))
 
-        | PAT DARROW EXP BAR MATCH (concatWith_(" ", [PAT, DARROW, EXP, BAR, MATCH]))
+        | PAT DARROW EXP BAR MATCH (print (" <pat => exp | match> "); concatWith_(" ", [PAT, DARROW, EXP, BAR, MATCH]))
 
 
   EXP_ROW : LAB EQUALOP EXP (LAB ^ " = " ^ EXP)
