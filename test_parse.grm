@@ -76,7 +76,7 @@ fun spacer(lis) = concatWith(" ",lis);
 
 
 
-  (* HELPERS *)
+  (* HELPERS, eventually delete *)
   ID_NAMES : ID (ID)
            | LPAREN ID_LIST RPAREN (LPAREN ^ " " ^ ID_LIST ^ " " ^ RPAREN)
 
