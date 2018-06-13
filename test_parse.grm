@@ -1,16 +1,17 @@
- Grammar file *)
+(* Grammar file *)
 open String
 open Int
 exception LabError
 fun concatWith_(x, lis) = concatWith (x) (lis);
-fun spacer(lis) = concatWith(" ",lis);
+fun spacer(lis) = concatWith_(" ",lis);
 %%
 
 %eop EOF
 
 %pos int
 
-%term INT of string
+%term EOF
+    | INT of string
     | REAL of string
     | WORD of string
     | CHAR of string
@@ -55,9 +56,11 @@ fun spacer(lis) = concatWith(" ",lis);
     | OF of string
     | WILD of string
     | OP of string
+    | REC of string
     | TYPE of string
     | DATATYPE of string
     | ABSTYPE of string
+    | WITH of string
     | WITHTYPE of string
     | AS of string
     | OPEN of string
@@ -75,12 +78,16 @@ fun spacer(lis) = concatWith(" ",lis);
     | EQTYPE of string
     | SHARING of string
     | DOTTED_WILDCARD of string
+    | LASSERT of string
+    | RASSERT of string
+    | REQUIRES of string
+    | ENSURES of string
     | SYMBOLS of string
     | QUOTE_ID of string
     | ID of string
 
 
-%nonterm   START of string
+%nonterm   START of string option
          | CON of string
          | VID of string
          | LONG_VID of string
@@ -101,6 +108,23 @@ fun spacer(lis) = concatWith(" ",lis);
          | EXP of string
          | MRULE of string
          | MATCH of string
+         | TYP_VAR_COMMAS of string
+         | TYP_VAR_SEQ of string
+         | ASSERT_EXP of string
+         | ASSERTIONS of string
+         | LONG_STR_ID_LIST of string
+         | VID_LIST of string
+         | DEC of string
+         | VAL_BIND of string
+         | AT_PAT_LIST of string
+         | FVALBIND_BASE of string
+         | FVAL_BIND of string
+         | TYP_BIND of string
+         | DAT_BIND of string
+         | CONBIND_BASE of string
+         | CON_BIND of string
+         | EX_BIND_BASE of string
+         | EX_BIND of string
          | TYP_TUPLE of string
          | TYP_SEQ of string
          | TYP of string
@@ -112,16 +136,12 @@ fun spacer(lis) = concatWith(" ",lis);
          | PAT of string
          | STR_EXP of string
          | STR_DEC of string
-         | STR_BIND of string'
+         | STR_BIND' of string
          | STR_BIND of string
-         | TYP_VAR_COMMAS of string
-         | TYP_VAR_SEQ of string
-         | TYP_REFINE of string'
+         | TYP_REFINE' of string
          | TYP_REFINE of string
          | LONG_TY_CON_EQ_SEQ of string
          | LONG_STR_ID_EQ_SEQ of string
-         | TYP_BIND of string'
-         | TYP_BIND of string
          | SIG_ID_SPCE_SEQ of string
          | SIG_EXP of string
          | SIG_DEC of string
@@ -135,9 +155,9 @@ fun spacer(lis) = concatWith(" ",lis);
          | STR_DESC of string
          | FUN_DEC of string
          | FUN_BIND of string
-         | TOP_DEC of string'
+         | TOP_DEC' of string
          | TOP_DEC of string
-         | PROGRAM of string'
+         | PROGRAM' of string
          | PROGRAM of string
 
 %name Sample
@@ -184,7 +204,7 @@ fun spacer(lis) = concatWith(" ",lis);
 
     (* Long Type Constructor*)
   LONG_TYP_CON : TYP_CON (TYP_CON)
-               | TYP_CON DOT LONG_VID (TYP_CON ^ DOT ^ LONG_TYP_CON)
+               | TYP_CON DOT LONG_TYP_CON (TYP_CON ^ DOT ^ LONG_TYP_CON)
 
   LAB : ID (ID)
       | SYMBOLS (SYMBOLS)
@@ -236,7 +256,7 @@ fun spacer(lis) = concatWith(" ",lis);
           | LAB EQUALOP EXP COMMA EXP_ROW (LAB ^ " = " ^ EXP ^ ", " ^ EXP_ROW)
 
   APP_EXP : AT_EXP (AT_EXP)
-          : APP_EXP AT_EXP (APP_EXP ^ " " ^ AT_EXP)
+          | APP_EXP AT_EXP (APP_EXP ^ " " ^ AT_EXP)
 
   INF_EXP : APP_EXP (APP_EXP)
           | INF_EXP VID INF_EXP (INF_EXP1 ^ " " ^ VID ^ " " ^ INF_EXP2)
@@ -259,13 +279,100 @@ fun spacer(lis) = concatWith(" ",lis);
 
   (*******************************************************************)
 
+  (* Declarations *)
+
+  TYP_VAR_COMMAS : TYP_VAR (TYP_VAR)
+                 | TYP_VAR COMMA TYP_VAR_COMMAS (TYP_VAR ^ COMMA ^ " " ^ TYP_VAR_COMMAS)
+
+  TYP_VAR_SEQ : (* Empty *) ("")
+              | TYP_VAR (TYP_VAR)
+              | LPAREN TYP_VAR_COMMAS RPAREN (LPAREN ^ TYP_VAR_COMMAS ^ RPAREN)
+
+  ASSERT_EXP : REQUIRES COLON EXP (spacer(["\n", REQUIRES, COLON, EXP])) 
+             | REQUIRES COLON EXP ASSERT_EXP (spacer(["\n", REQUIRES, COLON, EXP, ASSERT_EXP])) 
+             | ENSURES COLON EXP (spacer(["\n", ENSURES, COLON, EXP])) 
+             | ENSURES COLON EXP ASSERT_EXP (spacer(["\n", ENSURES, COLON, EXP, ASSERT_EXP]))
+
+  ASSERTIONS : LASSERT ASSERT_EXP RASSERT (spacer([LASSERT, ASSERT_EXP, RASSERT]))
+
+  LONG_STR_ID_LIST : LONG_STR_ID (LONG_STR_ID)
+                   | LONG_STR_ID LONG_STR_ID_LIST (spacer([LONG_STR_ID, LONG_STR_ID_LIST]))
+
+  VID_LIST : VID (VID)
+           | VID VID_LIST (VID ^ " " ^ VID_LIST)
+
+  DEC : VAL TYP_VAR_SEQ VAL_BIND (spacer([VAL, TYP_VAR_SEQ, VAL_BIND]))
+      | ASSERTIONS FUN TYP_VAR_SEQ FVAL_BIND (spacer([FUN, TYP_VAR_SEQ, FVAL_BIND]))
+      | FUN TYP_VAR_SEQ FVAL_BIND (spacer([FUN, TYP_VAR_SEQ, FVAL_BIND]))
+      | TYPE TYP_BIND (spacer([TYPE, TYP_BIND]))
+      | DATATYPE DAT_BIND (spacer([DATATYPE, DAT_BIND])) 
+      | DATATYPE DAT_BIND WITHTYPE TYP_BIND (spacer([DATATYPE, DAT_BIND, WITHTYPE, TYP_BIND]))
+      | DATATYPE TYP_CON EQUALOP DATATYPE LONG_TYP_CON (spacer([DATATYPE, TYP_CON, EQUALOP, DATATYPE, LONG_TYP_CON]))
+      | ABSTYPE DAT_BIND WITH DEC END (spacer([ABSTYPE, DAT_BIND, WITH, DEC, END]))
+      | ABSTYPE DAT_BIND WITHTYPE TYP_BIND WITH DEC END (spacer([ABSTYPE, DAT_BIND, WITHTYPE, TYP_BIND, WITH, DEC, END]))
+      | EXCEPTION EX_BIND (spacer([EXCEPTION, EX_BIND]))
+      | LOCAL DEC IN DEC END (spacer([LOCAL, DEC1, IN, DEC2, END]))
+      | OPEN LONG_STR_ID_LIST (spacer([OPEN, LONG_STR_ID_LIST]))
+      | (* EMPTY *) ("\n") 
+      | DEC DEC (spacer([DEC1, DEC2])) 
+      | DEC SEMICOLON DEC (spacer([DEC1, SEMICOLON, "\n", DEC2]))
+      | INFIX VID_LIST (spacer([INFIX, VID_LIST]))
+      | INFIXR VID_LIST (spacer([INFIXR, VID_LIST]))
+      | INFIX INT VID_LIST (spacer([INFIX, INT, VID_LIST]))
+      | INFIXR INT VID_LIST (spacer([INFIXR, INT, VID_LIST]))
+      | NONFIX VID_LIST (spacer([NONFIX, VID_LIST]))
+
+  VAL_BIND : PAT EQUALOP EXP (spacer([PAT, EQUALOP, EXP]))
+           | PAT EQUALOP EXP AND VAL_BIND (spacer([PAT, EQUALOP, EXP, AND, VAL_BIND]))
+           | REC VAL_BIND (spacer([REC, VAL_BIND]))
+
+  AT_PAT_LIST : AT_PAT (AT_PAT)
+              | AT_PAT AT_PAT_LIST (AT_PAT ^ " " ^ AT_PAT_LIST)
+
+  FVALBIND_BASE : VID AT_PAT_LIST EQUALOP EXP (spacer([VID, AT_PAT_LIST, EQUALOP, EXP]))
+                | VID AT_PAT_LIST COLON TYP EQUALOP EXP (spacer([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, EXP]))
+                | OP VID AT_PAT_LIST EQUALOP EXP (spacer([OP, VID, AT_PAT_LIST, EQUALOP, EXP]))
+                | OP VID AT_PAT_LIST COLON TYP EQUALOP EXP (spacer([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, EXP]))
+  
+  FVAL_BIND : FVALBIND_BASE (spacer([FVALBIND_BASE]))
+            | FVALBIND_BASE BAR FVAL_BIND (spacer([FVALBIND_BASE, BAR, FVAL_BIND]))
+            | FVALBIND_BASE AND FVAL_BIND (spacer([FVALBIND_BASE, AND, FVAL_BIND]))
+
+  TYP_BIND : TYP_VAR_SEQ TYP_CON EQUALOP TYP (spacer([TYP_VAR_SEQ, TYP_CON, EQUALOP, TYP]))
+           | TYP_VAR_SEQ TYP_CON EQUALOP TYP AND TYP_BIND (spacer([TYP_VAR_SEQ, TYP_CON, EQUALOP, TYP, AND, TYP_BIND]))
+
+  DAT_BIND : TYP_VAR_SEQ TYP_CON EQUALOP CON_BIND (spacer([TYP_VAR_SEQ, TYP_CON, EQUALOP, CON_BIND]))
+           | TYP_VAR_SEQ TYP_CON EQUALOP CON_BIND AND DAT_BIND (spacer([TYP_VAR_SEQ, TYP_CON, EQUALOP, CON_BIND, AND, DAT_BIND]))
+
+  CONBIND_BASE : VID (VID)
+               | VID OF TYP (spacer([VID, OF, TYP]))
+               | OP VID (OP ^ " " ^ VID)
+               | OP VID OF TYP (spacer([OP, VID, OF, TYP]))  
+
+  CON_BIND : CONBIND_BASE (CONBIND_BASE)
+           | CONBIND_BASE BAR CON_BIND (spacer([CONBIND_BASE, BAR, CON_BIND]))
+
+  EX_BIND_BASE : VID (VID)
+               | VID OF TYP (spacer([VID, OF, TYP]))
+               | OP VID (OP ^ " " ^ VID)
+               | OP VID OF TYP (spacer([VID, OF, TYP]))
+               | VID EQUALOP LONG_VID (spacer([VID, EQUALOP, LONG_VID]))
+               | VID EQUALOP OP LONG_VID (spacer([VID, EQUALOP, OP, LONG_VID]))
+               | OP VID EQUALOP LONG_VID (spacer([OP, VID, EQUALOP, LONG_VID]))
+               | OP VID EQUALOP OP LONG_VID (spacer([OP, VID, EQUALOP, OP, LONG_VID]))
+
+  EX_BIND : EX_BIND_BASE (EX_BIND_BASE)
+          | EX_BIND_BASE AND EX_BIND (spacer([EX_BIND_BASE, AND, EX_BIND]))
+
+  (*******************************************************************)
+  
   (* Types *)
 
   TYP_TUPLE : TYP TIMES TYP (spacer([TYP1, TIMES, TYP2]))
             | TYP TIMES TYP_TUPLE (spacer([TYP, TIMES, TYP_TUPLE]))
 
-  TYP_SEQ : TY COMMA TY (TY ^ COMMA ^ " " ^ TY)
-          | TY COMMA TYP_SEQ (TY ^ COMMA ^ TYP_SEQ)
+  TYP_SEQ : TYP COMMA TYP (TYP1 ^ COMMA ^ " " ^ TYP2)
+          | TYP COMMA TYP_SEQ (TYP ^ COMMA ^ TYP_SEQ)
 
   TYP : TYP_VAR (TYP_VAR)
       | LCURLY RCURLY (LCURLY ^ RCURLY)
@@ -317,10 +424,10 @@ fun spacer(lis) = concatWith(" ",lis);
           | VID COLON TYP COMMA PAT_ROW (spacer([VID, COLON, TYP, COMMA, PAT_ROW]))
           | VID COLON TYP AS PAT COMMA PAT_ROW (spacer([VID, COLON, TYP, AS, PAT, COMMA, PAT_ROW]))
 
-  PAT : ATPAT (ATPAT)
-      | LONG_VID ATPAT (LONG_VID ^ " " ^ ATPAT)
-      | OP LONG_VID ATPAT (spacer(OP, LONG_VID, ATPAT))
-      | PAT VID PAT (spacer(PAT1, VID, PAT2))
+  PAT : AT_PAT (AT_PAT)
+      | LONG_VID AT_PAT (LONG_VID ^ " " ^ AT_PAT)
+      | OP LONG_VID AT_PAT (spacer([OP, LONG_VID, AT_PAT]))
+      | PAT VID PAT (spacer([PAT1, VID, PAT2]))
       | PAT COLON TYP (spacer([PAT, COLON, TYP]))
       | VID AS PAT (spacer([VID, AS, PAT]))
       | VID COLON TYP AS PAT (spacer([VID, COLON, TYP, AS, PAT]))
@@ -354,20 +461,13 @@ fun spacer(lis) = concatWith(" ",lis);
                                                                           EQUALOP, STR_EXP]))
 
   STR_BIND : STR_BIND' (STR_BIND')
-           | STR_BIND' AND STRBIND (spacer([STR_BIND', AND, STR_BIND]))
+           | STR_BIND' AND STR_BIND (spacer([STR_BIND', AND, STR_BIND]))
 
 
   (*******************************************************************)
 
   (* Signatures *)
   
-  TYP_VAR_COMMAS : TYP_VAR (TYP_VAR)
-                 | TYP_VAR COMMA TYP_VAR_COMMAS (TYP_VAR ^ COMMA ^ " " ^ TYP_VAR_COMMAS)
-
-  TYP_VAR_SEQ : (* Empty *) ("")
-              | TYP_VAR (TYP_VAR)
-              | LPAREN TYP_VAR_COMMAS RPAREN (LPAREN ^ TYP_VAR_COMMAS ^ RPAREN)
-
   TYP_REFINE' : TYP_VAR_SEQ LONG_TYP_CON EQUALOP TYP (spacer([TYP_VAR_SEQ, LONG_TYP_CON, 
                                                               EQUALOP, TYP]))
 
@@ -380,11 +480,6 @@ fun spacer(lis) = concatWith(" ",lis);
   LONG_STR_ID_EQ_SEQ : LONG_STR_ID EQUALOP LONG_STR_ID (spacer([LONG_STR_ID, EQUALOP, LONG_STR_ID]))
                      | LONG_STR_ID EQUALOP LONG_STR_ID_EQ_SEQ (spacer([LONG_STR_ID, EQUALOP, LONG_STR_ID_EQ_SEQ]))
 
-  TYP_BIND' : TYP_VAR_SEQ TYP_CON EQUALOP TY (spacer([TYP_VAR_SEQ, TYP_CON, EQUALOP, TY]))
-
-  TYP_BIND : TYP_BIND' (TYP_BIND')
-           | TYP_BIND' AND TYP_BIND (spacer([TYP_BIND',AND ,TYP_BIND]))
-
   SIG_ID_SPCE_SEQ : SIG_ID (SIG_ID)
                   | SIG_ID SIG_ID_SPCE_SEQ (SIG_ID ^ " " ^ SIG_ID_SPCE_SEQ) 
 
@@ -392,7 +487,7 @@ fun spacer(lis) = concatWith(" ",lis);
           | SIG_ID (SIG_ID)
           | SIG_EXP WHERE TYPE TYP_REFINE (spacer([SIG_EXP, WHERE, TYPE, TYP_REFINE]))
 
-  SIG_DEC : SIGNATURE SIG_BIND (SIGNATURE ^ " " ^ SIGBIND)
+  SIG_DEC : SIGNATURE SIG_BIND (SIGNATURE ^ " " ^ SIG_BIND)
 
   SIG_BIND : SIG_ID EQUALOP SIG_EXP (spacer([SIG_ID, EQUALOP, SIG_EXP]))
            | SIG_ID EQUALOP SIG_EXP AND SIG_BIND (spacer([SIG_ID, EQUALOP, SIG_EXP, AND, SIG_BIND]))
@@ -451,12 +546,12 @@ fun spacer(lis) = concatWith(" ",lis);
                                                                                 SIG_EXP, RPAREN, 
                                                                                 EQUALOP, STR_EXP])) 
 
-           | FUN_ID LPAREN STR_ID COLON SIG_EXP RPAREN EQUALOP STR_EXP AND FUNBIND (
+           | FUN_ID LPAREN STR_ID COLON SIG_EXP RPAREN EQUALOP STR_EXP AND FUN_BIND (
                                                                           spacer([FUN_ID, LPAREN, 
                                                                                   STR_ID, COLON, 
                                                                                   SIG_EXP, RPAREN, 
                                                                                   EQUALOP, STR_EXP,
-                                                                                  AND, FUNBIND]))
+                                                                                  AND, FUN_BIND]))
 
   (*******************************************************************)
 
@@ -467,13 +562,17 @@ fun spacer(lis) = concatWith(" ",lis);
            | FUN_DEC (FUN_DEC)
 
   TOP_DEC : TOP_DEC' (TOP_DEC')
-          | TOP_DEC' TOP_DEC (spacer(TOP_DEC', TOP_DEC))
+          | TOP_DEC' TOP_DEC (spacer([TOP_DEC', TOP_DEC]))
 
-  PROGRAM' : EXP (EXP ^ SEMICOLON)
-           | TOP_DEC (TOP_DEC ^ SEMICOLON)
+  PROGRAM' : EXP (EXP)
+           | TOP_DEC (TOP_DEC)
 
-  PROGRAM : PROGRAM' (PROGRAM')
-          | PROGRAM' SEMICOLON PROGRAM (PROGRAM' SEMICOLON PROGRAM)
+  PROGRAM : EOF ("")
+          | PAT EQUALOP EXP SEMICOLON (spacer([PAT, EQUALOP, EXP]))  
 
+(*  PROGRAM : EOF ("")
+          | PROGRAM' (PROGRAM')
+          | PROGRAM' SEMICOLON PROGRAM (PROGRAM' ^ SEMICOLON ^ "\n" ^ PROGRAM)
+*)
 
   (*******************************************************************)

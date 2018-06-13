@@ -113,10 +113,12 @@ string_ = "\""{ascii}*"\"";
 <INITIAL>"of"	     => (Tokens.OF(yytext, !pos, !pos));
 <INITIAL>"_"		 => (Tokens.WILD(yytext, !pos, !pos));
 <INITIAL>"op"		 => (Tokens.OP(yytext, !pos, !pos));
+<INITIAL>"rec"		 => (Tokens.REC(yytext, !pos, !pos));
 
 <INITIAL>"type" 	 => (Tokens.TYPE(yytext, !pos, !pos));
 <INITIAL>"datatype"  => (Tokens.DATATYPE(yytext, !pos, !pos));
 <INITIAL>"abstype"	 => (Tokens.ABSTYPE(yytext, !pos, !pos));
+<INITIAL>"with"	 	 => (Tokens.WITH(yytext, !pos, !pos));
 <INITIAL>"withtype"	 => (Tokens.WITHTYPE(yytext, !pos, !pos));
 <INITIAL>"as"		 => (Tokens.AS(yytext, !pos, !pos));
 <INITIAL>"open"		 => (Tokens.OPEN(yytext, !pos, !pos));
@@ -138,11 +140,16 @@ string_ = "\""{ascii}*"\"";
 
 <INITIAL>"..."		 => (Tokens.DOTTED_WILDCARD(yytext, !pos, !pos));
 
+<INITIAL>"(*!"       => (Tokens.LASSERT(yytext, !pos, !pos));
+<INITIAL>"!*)"       => (Tokens.RASSERT(yytext, !pos, !pos));
+<INITIAL>"REQUIRES"  => (Tokens.REQUIRES(yytext, !pos, !pos));
+<INITIAL>"ENSURES"   => (Tokens.ENSURES(yytext, !pos, !pos));
+
 <INITIAL>{symbol}+   => (if yytext = ":" orelse
 							yytext = "|" orelse
 							yytext = "=" orelse
 							yytext = "#" then REJECT()
-						else Tokens.SYMBOLS(yytext, !pos, !pos))
+						else Tokens.SYMBOLS(yytext, !pos, !pos));
 
 <INITIAL>"'"{idchars}+    => (Tokens.QUOTE_ID(yytext, !pos, !pos));
 
