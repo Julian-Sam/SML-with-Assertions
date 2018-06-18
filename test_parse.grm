@@ -1,4 +1,3 @@
-(* Grammar file *)
 open String
 open Int
 exception LabError
@@ -99,6 +98,8 @@ fun spacer(lis) = concatWith_(" ",lis);
          | LONG_STR_ID of string
          | SIG_ID of string
          | FUN_ID of string
+         | ID_NO_EQ of string
+         | LONG_ID_NO_EQ of string
          | EXP_LIST of string
          | EXP_SEQ of string
          | AT_EXP of string
@@ -114,12 +115,15 @@ fun spacer(lis) = concatWith_(" ",lis);
          | ASSERTIONS of string
          | LONG_STR_ID_LIST of string
          | VID_LIST of string
+         | DEC' of string
          | DEC of string
          | VAL_BIND of string
          | AT_PAT_LIST of string
          | FVALBIND_BASE of string
          | FVAL_BIND of string
+         | TYP_BIND' of string
          | TYP_BIND of string
+         | DAT_BIND' of string
          | DAT_BIND of string
          | CONBIND_BASE of string
          | CON_BIND of string
@@ -148,7 +152,9 @@ fun spacer(lis) = concatWith_(" ",lis);
          | SIG_BIND of string
          | SPEC of string
          | VAL_DESC of string
+         | TYP_DESC' of string
          | TYP_DESC of string
+         | DAT_DESC' of string
          | DAT_DESC of string
          | CON_DESC of string
          | EX_DESC of string
@@ -228,6 +234,15 @@ fun spacer(lis) = concatWith_(" ",lis);
     (* Functor Identifier *)
   FUN_ID : ID (ID)
 
+    (* Identifiers without the EQ operator *)
+  ID_NO_EQ : ID (ID)
+           | SYMBOLS (SYMBOLS)
+           | TIMES (TIMES)
+
+    (* Long Identifiers without the EQ operator *)
+  LONG_ID_NO_EQ : ID_NO_EQ (ID_NO_EQ)
+                | ID_NO_EQ DOT LONG_ID_NO_EQ (ID_NO_EQ ^ DOT ^ LONG_ID_NO_EQ)
+
 
   (*******************************************************************)
 
@@ -284,8 +299,7 @@ fun spacer(lis) = concatWith_(" ",lis);
   TYP_VAR_COMMAS : TYP_VAR (TYP_VAR)
                  | TYP_VAR COMMA TYP_VAR_COMMAS (TYP_VAR ^ COMMA ^ " " ^ TYP_VAR_COMMAS)
 
-  TYP_VAR_SEQ : (* Empty *) ("")
-              | TYP_VAR (TYP_VAR)
+  TYP_VAR_SEQ : TYP_VAR (TYP_VAR)
               | LPAREN TYP_VAR_COMMAS RPAREN (LPAREN ^ TYP_VAR_COMMAS ^ RPAREN)
 
   ASSERT_EXP : REQUIRES COLON EXP (spacer(["\n", REQUIRES, COLON, EXP])) 
@@ -301,26 +315,32 @@ fun spacer(lis) = concatWith_(" ",lis);
   VID_LIST : VID (VID)
            | VID VID_LIST (VID ^ " " ^ VID_LIST)
 
-  DEC : VAL TYP_VAR_SEQ VAL_BIND (spacer([VAL, TYP_VAR_SEQ, VAL_BIND]))
-      | ASSERTIONS FUN TYP_VAR_SEQ FVAL_BIND (spacer([FUN, TYP_VAR_SEQ, FVAL_BIND]))
-      | FUN TYP_VAR_SEQ FVAL_BIND (spacer([FUN, TYP_VAR_SEQ, FVAL_BIND]))
-      | TYPE TYP_BIND (spacer([TYPE, TYP_BIND]))
-      | DATATYPE DAT_BIND (spacer([DATATYPE, DAT_BIND])) 
-      | DATATYPE DAT_BIND WITHTYPE TYP_BIND (spacer([DATATYPE, DAT_BIND, WITHTYPE, TYP_BIND]))
-      | DATATYPE TYP_CON EQUALOP DATATYPE LONG_TYP_CON (spacer([DATATYPE, TYP_CON, EQUALOP, DATATYPE, LONG_TYP_CON]))
-      | ABSTYPE DAT_BIND WITH DEC END (spacer([ABSTYPE, DAT_BIND, WITH, DEC, END]))
-      | ABSTYPE DAT_BIND WITHTYPE TYP_BIND WITH DEC END (spacer([ABSTYPE, DAT_BIND, WITHTYPE, TYP_BIND, WITH, DEC, END]))
-      | EXCEPTION EX_BIND (spacer([EXCEPTION, EX_BIND]))
-      | LOCAL DEC IN DEC END (spacer([LOCAL, DEC1, IN, DEC2, END]))
-      | OPEN LONG_STR_ID_LIST (spacer([OPEN, LONG_STR_ID_LIST]))
-      | (* EMPTY *) ("\n") 
-      | DEC DEC (spacer([DEC1, DEC2])) 
-      | DEC SEMICOLON DEC (spacer([DEC1, SEMICOLON, "\n", DEC2]))
-      | INFIX VID_LIST (spacer([INFIX, VID_LIST]))
-      | INFIXR VID_LIST (spacer([INFIXR, VID_LIST]))
-      | INFIX INT VID_LIST (spacer([INFIX, INT, VID_LIST]))
-      | INFIXR INT VID_LIST (spacer([INFIXR, INT, VID_LIST]))
-      | NONFIX VID_LIST (spacer([NONFIX, VID_LIST]))
+  DEC' : VAL VAL_BIND (spacer([VAL, VAL_BIND]))
+       | VAL TYP_VAR_SEQ VAL_BIND (spacer([VAL, TYP_VAR_SEQ, VAL_BIND]))
+       | ASSERTIONS FUN FVAL_BIND (spacer([FUN, FVAL_BIND]))
+       | ASSERTIONS FUN TYP_VAR_SEQ FVAL_BIND (spacer([FUN, TYP_VAR_SEQ, FVAL_BIND]))
+       | FUN FVAL_BIND (spacer([FUN, FVAL_BIND]))
+       | FUN TYP_VAR_SEQ FVAL_BIND (spacer([FUN, TYP_VAR_SEQ, FVAL_BIND]))
+       | TYPE TYP_BIND (spacer([TYPE, TYP_BIND]))
+       | DATATYPE DAT_BIND (spacer([DATATYPE, DAT_BIND])) 
+       | DATATYPE DAT_BIND WITHTYPE TYP_BIND (spacer([DATATYPE, DAT_BIND, WITHTYPE, TYP_BIND]))
+       | DATATYPE TYP_CON EQUALOP DATATYPE LONG_TYP_CON (spacer([DATATYPE, TYP_CON, EQUALOP, DATATYPE, LONG_TYP_CON]))
+       | ABSTYPE DAT_BIND WITH DEC END (spacer([ABSTYPE, DAT_BIND, WITH, DEC, END]))
+       | ABSTYPE DAT_BIND WITHTYPE TYP_BIND WITH DEC END (spacer([ABSTYPE, DAT_BIND, WITHTYPE, TYP_BIND, WITH, DEC, END]))
+       | EXCEPTION EX_BIND (spacer([EXCEPTION, EX_BIND]))
+       | OPEN LONG_STR_ID_LIST (spacer([OPEN, LONG_STR_ID_LIST]))
+       | INFIX VID_LIST (spacer([INFIX, VID_LIST]))
+       | INFIXR VID_LIST (spacer([INFIXR, VID_LIST]))
+       | INFIX INT VID_LIST (spacer([INFIX, INT, VID_LIST]))
+       | INFIXR INT VID_LIST (spacer([INFIXR, INT, VID_LIST]))
+       | NONFIX VID_LIST (spacer([NONFIX, VID_LIST]))
+
+
+  DEC: (* EMPTY *) ("\n") 
+     | DEC' DEC (DEC' ^ DEC)
+     | SEMICOLON DEC (SEMICOLON ^ DEC)
+     | LOCAL DEC IN DEC END DEC (spacer([LOCAL, DEC1, IN, DEC2, END, DEC3]))
+
 
   VAL_BIND : PAT EQUALOP EXP (spacer([PAT, EQUALOP, EXP]))
            | PAT EQUALOP EXP AND VAL_BIND (spacer([PAT, EQUALOP, EXP, AND, VAL_BIND]))
@@ -338,11 +358,17 @@ fun spacer(lis) = concatWith_(" ",lis);
             | FVALBIND_BASE BAR FVAL_BIND (spacer([FVALBIND_BASE, BAR, FVAL_BIND]))
             | FVALBIND_BASE AND FVAL_BIND (spacer([FVALBIND_BASE, AND, FVAL_BIND]))
 
-  TYP_BIND : TYP_VAR_SEQ TYP_CON EQUALOP TYP (spacer([TYP_VAR_SEQ, TYP_CON, EQUALOP, TYP]))
-           | TYP_VAR_SEQ TYP_CON EQUALOP TYP AND TYP_BIND (spacer([TYP_VAR_SEQ, TYP_CON, EQUALOP, TYP, AND, TYP_BIND]))
+  TYP_BIND' : TYP_CON EQUALOP TYP (spacer([TYP_CON, EQUALOP, TYP]))
+            | TYP_VAR_SEQ TYP_CON EQUALOP TYP (spacer([TYP_VAR_SEQ, TYP_CON, EQUALOP, TYP]))
 
-  DAT_BIND : TYP_VAR_SEQ TYP_CON EQUALOP CON_BIND (spacer([TYP_VAR_SEQ, TYP_CON, EQUALOP, CON_BIND]))
-           | TYP_VAR_SEQ TYP_CON EQUALOP CON_BIND AND DAT_BIND (spacer([TYP_VAR_SEQ, TYP_CON, EQUALOP, CON_BIND, AND, DAT_BIND]))
+  TYP_BIND : TYP_BIND' (TYP_BIND')
+           | TYP_BIND' AND TYP_BIND (spacer([TYP_BIND', AND, TYP_BIND]))
+
+  DAT_BIND' : TYP_CON EQUALOP CON_BIND (spacer([TYP_CON, EQUALOP, CON_BIND]))
+            | TYP_VAR_SEQ TYP_CON EQUALOP CON_BIND (spacer([TYP_VAR_SEQ, TYP_CON, EQUALOP, CON_BIND]))
+
+  DAT_BIND : DAT_BIND' (DAT_BIND')
+           | DAT_BIND' AND DAT_BIND (spacer([DAT_BIND', AND, DAT_BIND]))
 
   CONBIND_BASE : VID (VID)
                | VID OF TYP (spacer([VID, OF, TYP]))
@@ -402,8 +428,8 @@ fun spacer(lis) = concatWith_(" ",lis);
 
   AT_PAT : WILD (WILD)
          | CON (CON)
-         | LONG_VID (LONG_VID)
-         | OP LONG_VID (OP ^ " " ^ LONG_VID)
+         | ID_NO_EQ (ID_NO_EQ)
+         | OP ID_NO_EQ (OP ^ " " ^ ID_NO_EQ)
          | LCURLY RCURLY (LCURLY ^ RCURLY)
          | LCURLY PAT_ROW RCURLY (LCURLY ^ " " ^ PAT_ROW ^ " " ^ RCURLY)
          | LPAREN RPAREN (LPAREN ^ RPAREN)
@@ -425,8 +451,8 @@ fun spacer(lis) = concatWith_(" ",lis);
           | VID COLON TYP AS PAT COMMA PAT_ROW (spacer([VID, COLON, TYP, AS, PAT, COMMA, PAT_ROW]))
 
   PAT : AT_PAT (AT_PAT)
-      | LONG_VID AT_PAT (LONG_VID ^ " " ^ AT_PAT)
-      | OP LONG_VID AT_PAT (spacer([OP, LONG_VID, AT_PAT]))
+      | ID_NO_EQ AT_PAT (ID_NO_EQ ^ " " ^ AT_PAT)
+      | OP ID_NO_EQ AT_PAT (spacer([OP, ID_NO_EQ, AT_PAT]))
       | PAT VID PAT (spacer([PAT1, VID, PAT2]))
       | PAT COLON TYP (spacer([PAT, COLON, TYP]))
       | VID AS PAT (spacer([VID, AS, PAT]))
@@ -447,7 +473,7 @@ fun spacer(lis) = concatWith_(" ",lis);
           | FUN_ID LPAREN STR_DEC RPAREN (spacer([FUN_ID, LPAREN, STR_DEC, RPAREN]))
           | LET STR_DEC IN STR_EXP END (spacer([LET, STR_DEC, IN, STR_EXP, END]))
 
-  STR_DEC : DEC (DEC)
+  STR_DEC : DEC' (DEC')
           | STRUCTURE STR_BIND (STRUCTURE ^ " " ^ STR_BIND)
           | LOCAL STR_DEC IN STR_DEC END  (spacer([LOCAL, STR_DEC1, IN, STR_DEC2, END]))
           | (* EMPTY *)  ("")
@@ -459,6 +485,7 @@ fun spacer(lis) = concatWith_(" ",lis);
                                                                           EQUALOP, STR_EXP]))
             | STR_ID COLONGT SIG_EXP EQUALOP STR_EXP (spacer([STR_ID, COLONGT, SIG_EXP, 
                                                                           EQUALOP, STR_EXP]))
+            
 
   STR_BIND : STR_BIND' (STR_BIND')
            | STR_BIND' AND STR_BIND (spacer([STR_BIND', AND, STR_BIND]))
@@ -468,8 +495,8 @@ fun spacer(lis) = concatWith_(" ",lis);
 
   (* Signatures *)
   
-  TYP_REFINE' : TYP_VAR_SEQ LONG_TYP_CON EQUALOP TYP (spacer([TYP_VAR_SEQ, LONG_TYP_CON, 
-                                                              EQUALOP, TYP]))
+  TYP_REFINE : LONG_TYP_CON EQUALOP TYP (spacer([LONG_TYP_CON, EQUALOP, TYP]))
+              | TYP_VAR_SEQ LONG_TYP_CON EQUALOP TYP (spacer([TYP_VAR_SEQ, LONG_TYP_CON, EQUALOP, TYP]))
 
   TYP_REFINE : TYP_REFINE' (TYP_REFINE')
              | TYP_REFINE' AND TYP_REFINE (spacer([TYP_REFINE', AND, TYP_REFINE]))
@@ -512,14 +539,17 @@ fun spacer(lis) = concatWith_(" ",lis);
   VAL_DESC : VID COLON TYP (VID ^ COLON ^ " " ^ TYP)
            | VID COLON TYP AND VAL_DESC (VID ^ COLON ^ " " ^ TYP ^ AND ^ " " ^ VAL_DESC)
 
-  TYP_DESC : TYP_VAR_SEQ TYP_CON (TYP_VAR_SEQ ^ " " ^ TYP_CON)
-           | TYP_VAR_SEQ TYP_CON AND TYP_DESC (spacer([TYP_VAR_SEQ, TYP_CON, AND, TYP_DESC]))
+  TYP_DESC' : TYP_CON (TYP_CON)
+            | TYP_VAR_SEQ TYP_CON (TYP_VAR_SEQ ^ " " ^ TYP_CON)
 
-  DAT_DESC : TYP_VAR_SEQ TYP_CON EQUALOP CON_DESC (spacer([TYP_VAR_SEQ, TYP_CON, 
-                                                                          EQUALOP, CON_DESC]))
-           | TYP_VAR_SEQ TYP_CON EQUALOP CON_DESC AND DAT_DESC (spacer([TYP_VAR_SEQ, TYP_CON, 
-                                                                        EQUALOP, CON_DESC, AND, 
-                                                                        DAT_DESC]))
+  TYP_DESC : TYP_DESC' (TYP_DESC')
+           | TYP_DESC' AND TYP_DESC (spacer([TYP_DESC', AND, TYP_DESC]))
+
+  DAT_DESC' : TYP_CON EQUALOP CON_DESC (spacer([TYP_CON, EQUALOP, CON_DESC]))
+            | TYP_VAR_SEQ TYP_CON EQUALOP CON_DESC (spacer([TYP_VAR_SEQ, TYP_CON, EQUALOP, CON_DESC]))
+
+  DAT_DESC : DAT_DESC' (DAT_DESC')
+           | DAT_DESC' AND DAT_DESC (spacer([DAT_DESC', AND, DAT_DESC]))
 
   CON_DESC : VID (VID)
            | VID OF TYP (spacer([VID, OF, TYP]))
@@ -558,21 +588,20 @@ fun spacer(lis) = concatWith_(" ",lis);
   (* Programs and Top Level Declarations *)
 
   TOP_DEC' : STR_DEC (STR_DEC)
-           | SIG_DEC (SIG_DEC)
-           | FUN_DEC (FUN_DEC)
+           (*| SIG_DEC (SIG_DEC)*)
+           (*| FUN_DEC (FUN_DEC)*)
 
-  TOP_DEC : TOP_DEC' (TOP_DEC')
+(*  TOP_DEC : TOP_DEC' (TOP_DEC')
           | TOP_DEC' TOP_DEC (spacer([TOP_DEC', TOP_DEC]))
-
-  PROGRAM' : EXP (EXP)
-           | TOP_DEC (TOP_DEC)
-
-  PROGRAM : EOF ("")
-          | PAT EQUALOP EXP SEMICOLON (spacer([PAT, EQUALOP, EXP]))  
-
-(*  PROGRAM : EOF ("")
-          | PROGRAM' (PROGRAM')
-          | PROGRAM' SEMICOLON PROGRAM (PROGRAM' ^ SEMICOLON ^ "\n" ^ PROGRAM)
 *)
+(*  PROGRAM' : EXP (EXP)
+           | TOP_DEC (TOP_DEC)
+*)
+(*  PROGRAM : EOF ("")
+          | DEC SEMICOLON (spacer([DEC]))  
+*)
+  PROGRAM : EOF ("")
+          | TOP_DEC' SEMICOLON ( SEMICOLON)
+          (*| PROGRAM' SEMICOLON PROGRAM (PROGRAM' ^ SEMICOLON ^ "\n" ^ PROGRAM)*)
 
-  (*******************************************************************)
+
