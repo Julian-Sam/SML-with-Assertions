@@ -439,7 +439,6 @@ fun spacer(lis) = concatWith_(" ",lis);
       | OP VID COLON TYP AS PAT (spacer([OP, VID, COLON, TYP, AS, PAT]))
 
 
-<<<<<<< HEAD
   (* HELPERS *)
 
   TYP_VAR_SEQ : TYP_VAR (TYP_VAR)
@@ -483,7 +482,7 @@ fun spacer(lis) = concatWith_(" ",lis);
       | INFIX VID_LIST (spacer([INFIX, VID_LIST]))
       | INFIXR VID_LIST (spacer([INFIXR, VID_LIST]))
       | NONFIX VID_LIST (spacer([NONFIX, VID_LIST]))
-      | ("\n") (* EMPTY *)
+      (*| ("\n")  EMPTY *)
 
   VALBIND : PAT EQUALOP EXP (spacer([PAT, EQUALOP, EXP]))
           | PAT EQUALOP EXP AND VALBIND (spacer([PAT, EQUALOP, EXP, AND, VALBIND]))
@@ -516,7 +515,7 @@ fun spacer(lis) = concatWith_(" ",lis);
   (*******************************************************************)
  
   (* Signatures *)
-(*
+
   SIG_EXP : SIG SPEC END (SIG ^ "\n" ^ SPEC ^ "\n" ^ END)
           | SIG_ID (SIG_ID)
           | SIG_EXP WHERE TYPE TYPREFIN (concatWith_(" ", [SIG, "\n", WHERE, TYPE, TYPREFIN]))
@@ -536,19 +535,20 @@ fun spacer(lis) = concatWith_(" ",lis);
             | EXCEPTION EX_DESC (EXCEPTION ^ " " ^ EX_DESC)
             | STRUCTURE STR_DESC (STRUCTURE ^ " " ^ STR_DESC)
             | INCLUDE SIG_EXP (INCLUDE ^ " " ^ SIG_EXP)
-            | ("")  (* EMPTY *)
+            (*| ("")   EMPTY  *)
 
             (* ? - exists in grammar but not in pdf - research this one below !! *)
 (*            | TYPE TYP_BIND (TYPE ^ " " ^ TYP_BIND)
 
 *)
-(*  SPEC : SPEC_BASE (SPEC_BASE)
+
+  SPEC : SPEC_BASE (SPEC_BASE)
        | SPEC_BASE SPEC (SPEC_BASE ^ "\n" ^ SPEC)
        | SPEC_BASE SEMICOLON SPEC (SPEC_BASE ^ "\n" ^ SPEC)
        | SPEC SHARING TYPE LONG_TYP_CON_EQ_LIST (spacer([SPEC, SHARING, TYPE, LONG_TYP_CON_EQ_LIST]))
 
- *)
  
+
   (*******************************************************************)
 
   (* Structures *)
