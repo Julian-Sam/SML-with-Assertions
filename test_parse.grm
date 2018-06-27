@@ -287,7 +287,7 @@ val Stack: stack ref = ref []
          | OP LONG_VID (OP ^ " " ^ LONG_VID)
          | LCURLY EXP_ROW RCURLY (spacer([LCURLY, EXP_ROW, RCURLY]))
          | HASH LAB (HASH ^ LAB)
-         | LPAREN RPAREN (LPAREN ^ RPAREN)
+         | LPAREN RPARENf (LPAREN ^ RPAREN)
          | LPAREN EXP_LIST RPAREN (spacer([LPAREN, EXP_LIST, RPAREN])) 
          | LBRACK RBRACK (LBRACK ^ RBRACK) 
          | LBRACK EXP_LIST RBRACK (spacer([LBRACK, EXP_LIST, RBRACK])) 
