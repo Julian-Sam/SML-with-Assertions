@@ -139,7 +139,10 @@ fun spacer(lis) = concatWith_(" ",lis);
          | PAT_ROW of string
          | PAT of string
          | STR_EXP of string
+         | STR_DEC' of string
          | STR_DEC of string
+         | S_DEC of string
+         | S_DEC' of string
          | STR_BIND' of string
          | STR_BIND of string
          | TYP_REFINE' of string
@@ -150,6 +153,7 @@ fun spacer(lis) = concatWith_(" ",lis);
          | SIG_EXP of string
          | SIG_DEC of string
          | SIG_BIND of string
+         | SPEC' of string
          | SPEC of string
          | VAL_DESC of string
          | TYP_DESC' of string
@@ -159,7 +163,7 @@ fun spacer(lis) = concatWith_(" ",lis);
          | CON_DESC of string
          | EX_DESC of string
          | STR_DESC of string
-         | FUN_DEC of string
+         | FUN_BIND' of string
          | FUN_BIND of string
          | TOP_DEC' of string
          | TOP_DEC of string
@@ -337,7 +341,7 @@ fun spacer(lis) = concatWith_(" ",lis);
 
 
   DEC: (* EMPTY *) ("\n") 
-     | DEC' DEC (DEC' ^ DEC)
+     | DEC' DEC (DEC' ^ " " ^ DEC)
      | SEMICOLON DEC (SEMICOLON ^ DEC)
      | LOCAL DEC IN DEC END DEC (spacer([LOCAL, DEC1, IN, DEC2, END, DEC3]))
 
@@ -473,12 +477,23 @@ fun spacer(lis) = concatWith_(" ",lis);
           | FUN_ID LPAREN STR_DEC RPAREN (spacer([FUN_ID, LPAREN, STR_DEC, RPAREN]))
           | LET STR_DEC IN STR_EXP END (spacer([LET, STR_DEC, IN, STR_EXP, END]))
 
-  STR_DEC : DEC' (DEC')
-          | STRUCTURE STR_BIND (STRUCTURE ^ " " ^ STR_BIND)
-          | LOCAL STR_DEC IN STR_DEC END  (spacer([LOCAL, STR_DEC1, IN, STR_DEC2, END]))
-          | (* EMPTY *)  ("")
-          | STR_DEC STR_DEC (STR_DEC1 ^ " " ^ STR_DEC2)
-          | STR_DEC SEMICOLON STR_DEC (STR_DEC1 ^ SEMICOLON ^ " " ^ STR_DEC2)
+  STR_DEC' : DEC' (DEC')
+           | STRUCTURE STR_BIND (STRUCTURE ^ " " ^ STR_BIND)
+           | LOCAL STR_DEC IN STR_DEC END  (spacer([LOCAL, STR_DEC1, IN, STR_DEC2, END]))
+
+  STR_DEC : (* EMPTY *)  ("")
+          | STR_DEC' STR_DEC (STR_DEC' ^ " " ^ STR_DEC)
+          | SEMICOLON STR_DEC (SEMICOLON ^ " " ^ STR_DEC)
+
+  S_DEC' : S_DEC (S_DEC)
+         | S_DEC S_DEC' (S_DEC ^ " " ^ S_DEC')
+
+  S_DEC : STRUCTURE STR_BIND (STRUCTURE ^ " " ^ STR_BIND)
+        | SIGNATURE SIG_BIND (SIGNATURE ^ " " ^ SIG_BIND)
+        (*| FUNSIG FSIGB*)
+        | FUNCTOR FUN_BIND (FUNCTOR ^ " " ^ FUN_BIND)
+        (*| LOCAL S*)
+        | DEC' (DEC')
 
   STR_BIND' : STR_ID EQUALOP STR_EXP (spacer([STR_ID, EQUALOP, STR_EXP]))
             | STR_ID COLON SIG_EXP EQUALOP STR_EXP (spacer([STR_ID, COLON, SIG_EXP, 
@@ -486,7 +501,6 @@ fun spacer(lis) = concatWith_(" ",lis);
             | STR_ID COLONGT SIG_EXP EQUALOP STR_EXP (spacer([STR_ID, COLONGT, SIG_EXP, 
                                                                           EQUALOP, STR_EXP]))
             
-
   STR_BIND : STR_BIND' (STR_BIND')
            | STR_BIND' AND STR_BIND (spacer([STR_BIND', AND, STR_BIND]))
 
@@ -519,22 +533,23 @@ fun spacer(lis) = concatWith_(" ",lis);
   SIG_BIND : SIG_ID EQUALOP SIG_EXP (spacer([SIG_ID, EQUALOP, SIG_EXP]))
            | SIG_ID EQUALOP SIG_EXP AND SIG_BIND (spacer([SIG_ID, EQUALOP, SIG_EXP, AND, SIG_BIND]))
 
-  SPEC : VAL VAL_DESC (VAL ^ " " ^ VAL_DESC)
-       | TYPE TYP_DESC (TYPE ^ " " ^ TYP_DESC)
-       | EQTYPE TYP_DESC (EQTYPE ^ " " ^ TYP_DESC)
-       | DATATYPE DAT_DESC (DATATYPE ^ " " ^ DAT_DESC)
-       | DATATYPE TYP_CON EQUALOP DATATYPE LONG_TYP_CON (spacer([DATATYPE, TYP_CON, EQUALOP, 
-                                                                 DATATYPE, LONG_TYP_CON]))
-       | EXCEPTION EX_DESC (EXCEPTION ^ " " ^ EX_DESC)
-       | STRUCTURE STR_DESC (STRUCTURE ^ " " ^ STR_DESC)
-       | INCLUDE SIG_EXP (INCLUDE ^ " " ^ SIG_EXP)
-       | (* EMPTY *) ("")
-       | SPEC SPEC (spacer([SPEC, SPEC])) 
-       | SPEC SEMICOLON SPEC (spacer([SPEC, SEMICOLON, SPEC])) 
-       | SPEC SHARING TYPE LONG_TY_CON_EQ_SEQ (spacer([SPEC, SHARING, TYPE, LONG_TY_CON_EQ_SEQ]))
-       | TYPE TYP_BIND (TYPE ^ " " ^ TYP_BIND)
-       | INCLUDE SIG_ID_SPCE_SEQ (INCLUDE ^ " " ^ SIG_ID_SPCE_SEQ)
-       | SPEC SHARING LONG_STR_ID_EQ_SEQ (spacer([SPEC, SHARING, LONG_STR_ID_EQ_SEQ]))
+  SPEC' : VAL VAL_DESC (VAL ^ " " ^ VAL_DESC)
+        | TYPE TYP_DESC (TYPE ^ " " ^ TYP_DESC)
+        | EQTYPE TYP_DESC (EQTYPE ^ " " ^ TYP_DESC)
+        | DATATYPE DAT_DESC (DATATYPE ^ " " ^ DAT_DESC)
+        | DATATYPE TYP_CON EQUALOP DATATYPE LONG_TYP_CON (spacer([DATATYPE, TYP_CON, EQUALOP, DATATYPE, LONG_TYP_CON]))
+        | EXCEPTION EX_DESC (EXCEPTION ^ " " ^ EX_DESC)
+        | STRUCTURE STR_DESC (STRUCTURE ^ " " ^ STR_DESC)
+        | INCLUDE SIG_EXP (INCLUDE ^ " " ^ SIG_EXP)
+        | TYPE TYP_BIND (TYPE ^ " " ^ TYP_BIND)
+ 
+        | INCLUDE SIG_ID_SPCE_SEQ (INCLUDE ^ " " ^ SIG_ID_SPCE_SEQ)
+        | SHARING TYPE LONG_TY_CON_EQ_SEQ (spacer([SHARING, TYPE, LONG_TY_CON_EQ_SEQ]))
+        | SHARING LONG_STR_ID_EQ_SEQ (spacer([SHARING, LONG_STR_ID_EQ_SEQ]))
+
+  SPEC : (* EMPTY *) ("")
+       | SPEC' SPEC (spacer([SPEC', SPEC]))
+       | SEMICOLON SPEC (spacer([SEMICOLON, SPEC])) 
 
   VAL_DESC : VID COLON TYP (VID ^ COLON ^ " " ^ TYP)
            | VID COLON TYP AND VAL_DESC (VID ^ COLON ^ " " ^ TYP ^ AND ^ " " ^ VAL_DESC)
@@ -569,39 +584,24 @@ fun spacer(lis) = concatWith_(" ",lis);
 
   (* Functors *)
 
-  FUN_DEC : FUNCTOR FUN_BIND (FUNCTOR ^ " " ^ FUN_BIND)
+  FUN_BIND' : FUN_ID LPAREN STR_ID COLON SIG_EXP RPAREN EQUALOP STR_EXP (spacer([FUN_ID, LPAREN, STR_ID, COLON, SIG_EXP, RPAREN, EQUALOP, STR_EXP])) 
+            | FUN_ID LPAREN STR_ID COLON SIG_EXP RPAREN COLON SIG_EXP EQUALOP STR_EXP (spacer([FUN_ID, LPAREN, STR_ID, COLON, SIG_EXP1, RPAREN, COLON, SIG_EXP2, EQUALOP, STR_EXP])) 
+            | FUN_ID LPAREN STR_ID COLON SIG_EXP RPAREN COLONGT SIG_EXP EQUALOP STR_EXP (spacer([FUN_ID, LPAREN, STR_ID, COLON, SIG_EXP1, RPAREN, COLONGT, SIG_EXP2, EQUALOP, STR_EXP])) 
+            | FUN_ID LPAREN SPEC RPAREN EQUALOP STR_EXP (spacer([FUN_ID, LPAREN, SPEC, RPAREN, EQUALOP, STR_EXP]))
+            | FUN_ID LPAREN SPEC RPAREN COLON SIG_EXP EQUALOP STR_EXP (spacer([FUN_ID, LPAREN, SPEC, RPAREN, COLON, SIG_EXP, EQUALOP, STR_EXP]))
+            | FUN_ID LPAREN SPEC RPAREN COLONGT SIG_EXP EQUALOP STR_EXP (spacer([FUN_ID, LPAREN, SPEC, RPAREN, COLONGT, SIG_EXP, EQUALOP, STR_EXP]))
 
-  FUN_BIND : FUN_ID LPAREN STR_ID COLON SIG_EXP RPAREN EQUALOP STR_EXP (spacer([FUN_ID, LPAREN, 
-                                                                                STR_ID, COLON, 
-                                                                                SIG_EXP, RPAREN, 
-                                                                                EQUALOP, STR_EXP])) 
+  FUN_BIND : FUN_BIND' (FUN_BIND')
+           | FUN_BIND' AND FUN_BIND (FUN_BIND' ^ " " ^ FUN_BIND)
 
-           | FUN_ID LPAREN STR_ID COLON SIG_EXP RPAREN EQUALOP STR_EXP AND FUN_BIND (
-                                                                          spacer([FUN_ID, LPAREN, 
-                                                                                  STR_ID, COLON, 
-                                                                                  SIG_EXP, RPAREN, 
-                                                                                  EQUALOP, STR_EXP,
-                                                                                  AND, FUN_BIND]))
 
   (*******************************************************************)
 
-  (* Programs and Top Level Declarations *)
+  (* Programs *)
 
-  TOP_DEC' : STR_DEC (STR_DEC)
-           (*| SIG_DEC (SIG_DEC)*)
-           (*| FUN_DEC (FUN_DEC)*)
-
-(*  TOP_DEC : TOP_DEC' (TOP_DEC')
-          | TOP_DEC' TOP_DEC (spacer([TOP_DEC', TOP_DEC]))
-*)
-(*  PROGRAM' : EXP (EXP)
-           | TOP_DEC (TOP_DEC)
-*)
-(*  PROGRAM : EOF ("")
-          | DEC SEMICOLON (spacer([DEC]))  
-*)
   PROGRAM : EOF ("")
-          | TOP_DEC' SEMICOLON ( SEMICOLON)
-          (*| PROGRAM' SEMICOLON PROGRAM (PROGRAM' ^ SEMICOLON ^ "\n" ^ PROGRAM)*)
+          | SEMICOLON PROGRAM (SEMICOLON ^ PROGRAM)
+          | EXP PROGRAM (EXP ^ PROGRAM)
+          | S_DEC' PROGRAM (S_DEC' ^ PROGRAM)
 
 
