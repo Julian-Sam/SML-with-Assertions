@@ -40,6 +40,7 @@ hex = (~?)"0x"{hexnum};
 word_ = "0w"{num}|"0wx"{hexnum};
 char_ = "#\""{ascii}"\"";
 string_ = "\""{ascii}*"\"";
+ 
 
 %%
 <INITIAL>"\n"        => (pos := (!pos) + 1; lex());
@@ -151,8 +152,14 @@ string_ = "\""{ascii}*"\"";
 							yytext = "#" then REJECT()
 						else Tokens.SYMBOLS(yytext, !pos, !pos));
 
-<INITIAL>"'"{idchars}+    => (Tokens.QUOTE_ID(yytext, !pos, !pos));
+<INITIAL>"(*!"       => (Tokens.LASSERT(yytext, !pos, !pos));
+<INITIAL>"!*)"       => (Tokens.RASSERT(yytext, !pos, !pos));
+<INITIAL>"REQUIRES"  => (Tokens.REQUIRES(yytext, !pos, !pos));
+<INITIAL>"ENSURES"   => (Tokens.ENSURES(yytext, !pos, !pos));
 
-<INITIAL>{id}		 => (Tokens.ID(yytext, !pos, !pos));
-<INITIAL>.           => (error ("ignoring bad character "^yytext,!pos,!pos); lex());
+<INITIAL>"'"{idchars}+  => (Tokens.QUOTE_ID(yytext, !pos, !pos));
+
+<INITIAL>{id}		    => (Tokens.ID(yytext, !pos, !pos));
+
+<INITIAL>.              => (error ("ignoring bad character "^yytext,!pos,!pos); lex());
 

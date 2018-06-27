@@ -3,6 +3,30 @@ open Int
 exception LabError
 fun concatWith_(x, lis) = concatWith (x) (lis);
 fun spacer(lis) = concatWith_(" ",lis);
+
+datatype Assert_Type = 
+    EMPTY
+  | REQ of string
+  | ENS of string
+  | BOTH of string * string
+
+type stack = Assert_Type list
+
+fun pop (S) = case S of
+              []         => ([], EMPTY)
+            | elem :: S' => (S', elem)
+
+fun peek (S) = 
+  let
+    val (_, elem) = pop (S)
+  in
+    (S, elem)
+  end
+
+fun push (S, elem) = elem :: S
+
+val Stack: stack ref = ref []
+
 %%
 
 %eop EOF
@@ -181,7 +205,7 @@ fun spacer(lis) = concatWith_(" ",lis);
   START : PROGRAM (SOME (PROGRAM))
         | (NONE)
 
-  (*******************************************************************)
+  (***********************)
 
   (* Identifiers *)
 
@@ -248,7 +272,7 @@ fun spacer(lis) = concatWith_(" ",lis);
                 | ID_NO_EQ DOT LONG_ID_NO_EQ (ID_NO_EQ ^ DOT ^ LONG_ID_NO_EQ)
 
 
-  (*******************************************************************)
+  (***********************)
 
   (* Expressions *)
 
@@ -259,7 +283,7 @@ fun spacer(lis) = concatWith_(" ",lis);
           | EXP SEMICOLON EXP_SEQ (EXP ^ ";\n " ^ EXP_SEQ)
 
   AT_EXP : CON (CON)
-         | LONG_VID ((*print (" <long_id> ");*) LONG_VID)
+         | LONG_VID (LONG_VID)
          | OP LONG_VID (OP ^ " " ^ LONG_VID)
          | LCURLY EXP_ROW RCURLY (spacer([LCURLY, EXP_ROW, RCURLY]))
          | HASH LAB (HASH ^ LAB)
@@ -296,7 +320,7 @@ fun spacer(lis) = concatWith_(" ",lis);
   MATCH : MRULE (MRULE)
         | MRULE BAR MATCH (MRULE ^ "\n" ^ BAR ^ " " ^ MATCH)
 
-  (*******************************************************************)
+  (***********************)
 
   (* Declarations *)
 
@@ -306,10 +330,26 @@ fun spacer(lis) = concatWith_(" ",lis);
   TYP_VAR_SEQ : TYP_VAR (TYP_VAR)
               | LPAREN TYP_VAR_COMMAS RPAREN (LPAREN ^ TYP_VAR_COMMAS ^ RPAREN)
 
-  ASSERT_EXP : REQUIRES COLON EXP (spacer(["\n", REQUIRES, COLON, EXP])) 
-             | REQUIRES COLON EXP ASSERT_EXP (spacer(["\n", REQUIRES, COLON, EXP, ASSERT_EXP])) 
-             | ENSURES COLON EXP (spacer(["\n", ENSURES, COLON, EXP])) 
-             | ENSURES COLON EXP ASSERT_EXP (spacer(["\n", ENSURES, COLON, EXP, ASSERT_EXP]))
+  ASSERT_EXP : REQUIRES COLON EXP ((let
+                                      val ss = !Stack
+                                      val ss' = push (ss, REQ (EXP))
+                                    in
+                                      Stack := ss'
+                                    end); spacer(["\n", REQUIRES, COLON, EXP])) 
+
+             | ENSURES COLON EXP ((let
+                                     val ss = !Stack
+                                     val ss' = push (ss, ENS (EXP))
+                                   in
+                                     Stack := ss'
+                                   end); spacer(["\n", ENSURES, COLON, EXP])) 
+
+             | REQUIRES COLON EXP ENSURES COLON EXP ((let
+                                                        val ss = !Stack
+                                                        val ss' = push (ss, BOTH (EXP1, EXP2))
+                                                      in
+                                                        Stack := ss'
+                                                      end); spacer(["\n", REQUIRES, COLON, EXP1, ENSURES, COLON, EXP2]))
 
   ASSERTIONS : LASSERT ASSERT_EXP RASSERT (spacer([LASSERT, ASSERT_EXP, RASSERT]))
 
@@ -321,8 +361,8 @@ fun spacer(lis) = concatWith_(" ",lis);
 
   DEC' : VAL VAL_BIND (spacer([VAL, VAL_BIND]))
        | VAL TYP_VAR_SEQ VAL_BIND (spacer([VAL, TYP_VAR_SEQ, VAL_BIND]))
-       | ASSERTIONS FUN FVAL_BIND (spacer([FUN, FVAL_BIND]))
-       | ASSERTIONS FUN TYP_VAR_SEQ FVAL_BIND (spacer([FUN, TYP_VAR_SEQ, FVAL_BIND]))
+       | ASSERTIONS FUN FVAL_BIND (spacer(["\n", FUN, FVAL_BIND]))
+       | ASSERTIONS FUN TYP_VAR_SEQ FVAL_BIND (spacer(["\n", FUN, TYP_VAR_SEQ, FVAL_BIND]))
        | FUN FVAL_BIND (spacer([FUN, FVAL_BIND]))
        | FUN TYP_VAR_SEQ FVAL_BIND (spacer([FUN, TYP_VAR_SEQ, FVAL_BIND]))
        | TYPE TYP_BIND (spacer([TYPE, TYP_BIND]))
@@ -353,13 +393,61 @@ fun spacer(lis) = concatWith_(" ",lis);
   AT_PAT_LIST : AT_PAT (AT_PAT)
               | AT_PAT AT_PAT_LIST (AT_PAT ^ " " ^ AT_PAT_LIST)
 
-  FVALBIND_BASE : VID AT_PAT_LIST EQUALOP EXP (spacer([VID, AT_PAT_LIST, EQUALOP, EXP]))
-                | VID AT_PAT_LIST COLON TYP EQUALOP EXP (spacer([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, EXP]))
-                | OP VID AT_PAT_LIST EQUALOP EXP (spacer([OP, VID, AT_PAT_LIST, EQUALOP, EXP]))
-                | OP VID AT_PAT_LIST COLON TYP EQUALOP EXP (spacer([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, EXP]))
+  FVALBIND_BASE : VID AT_PAT_LIST EQUALOP EXP (case (peek (!Stack)) of
+                         (s', EMPTY)                => spacer([VID, AT_PAT_LIST, EQUALOP, EXP])
+
+                       | (s', REQ (exp))            => (Stack := s'; 
+                                                       spacer([VID, AT_PAT_LIST, EQUALOP, "let", "in", "if", exp, "then", EXP, "else", "0", "end"]))
+                       | (s', ENS (exp))            => (Stack := s'; 
+                                                       spacer([VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp, 
+                                                                                                             "then", "result", "else", "0", "end"]))
+                       | (s', BOTH (exp1, exp2)) => (Stack := s'; 
+                                                       spacer([VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp1, 
+                                                                                            "andalso", exp2, "then", "result", "else", "0", "end"])))
+               
+                | VID AT_PAT_LIST COLON TYP EQUALOP EXP (case (peek (!Stack)) of
+                         (s', EMPTY)                => spacer([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, EXP])
+
+                       | (s', REQ (exp))            => (Stack := s'; 
+                                                       spacer([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "in", "if", exp, "then", EXP, "else", "0", "end"]))
+                       | (s', ENS (exp))            => (Stack := s'; 
+                                                       spacer([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp, 
+                                                                                                             "then", "result", "else", "0", "end"]))
+                       | (s', BOTH (exp1, exp2)) => (Stack := s'; 
+                                                      spacer([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp1, 
+                                                                                            "andalso", exp2, "then", "result", "else", "0", "end"])))
+
+                | OP VID AT_PAT_LIST EQUALOP EXP (case (peek (!Stack)) of
+                         (s', EMPTY)                => spacer([OP, VID, AT_PAT_LIST, EQUALOP, EXP])
+
+                       | (s', REQ (exp))            => (Stack := s'; 
+                                                       spacer([OP, VID, AT_PAT_LIST, EQUALOP, "let", "in", "if", exp, "then", EXP, "else", "0", "end"]))
+                       | (s', ENS (exp))            => (Stack := s'; 
+                                                       spacer([OP, VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp, 
+                                                                                                                 "then", "result", "else", "0", "end"]))
+                       | (s', BOTH (exp1, exp2)) => (Stack := s'; 
+                                                       spacer([OP, VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp1, 
+                                                                                               "andalso", exp2, "then", "result", "else", "0", "end"])))
+
+                | OP VID AT_PAT_LIST COLON TYP EQUALOP EXP (case (peek (!Stack)) of
+                         (s', EMPTY)                => spacer([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, EXP])
+
+                       | (s', REQ (exp))            => (Stack := s'; 
+                                                       spacer([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "in", "if", exp, "then", EXP, "else", "0", "end"]))
+                       | (s', ENS (exp))            => (Stack := s'; 
+                                                       spacer([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp, 
+                                                                                                                             "then", "result", "else", "0", "end"]))
+                       | (s', BOTH (exp1, exp2)) => (Stack := s'; 
+                                                       spacer([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp1, 
+                                                                                                           "andalso", exp2, "then", "result", "else", "0", "end"])))
   
-  FVAL_BIND : FVALBIND_BASE (spacer([FVALBIND_BASE]))
-            | FVALBIND_BASE BAR FVAL_BIND (spacer([FVALBIND_BASE, BAR, FVAL_BIND]))
+  FVAL_BIND : FVALBIND_BASE (let
+                               val (s', _) = pop (!Stack)
+                             in 
+                               Stack := s'
+                             end;    spacer([FVALBIND_BASE, "\n"]))
+
+            | FVALBIND_BASE BAR FVAL_BIND (spacer([FVALBIND_BASE, "\n  ", BAR, FVAL_BIND]))
             | FVALBIND_BASE AND FVAL_BIND (spacer([FVALBIND_BASE, AND, FVAL_BIND]))
 
   TYP_BIND' : TYP_CON EQUALOP TYP (spacer([TYP_CON, EQUALOP, TYP]))
@@ -394,7 +482,7 @@ fun spacer(lis) = concatWith_(" ",lis);
   EX_BIND : EX_BIND_BASE (EX_BIND_BASE)
           | EX_BIND_BASE AND EX_BIND (spacer([EX_BIND_BASE, AND, EX_BIND]))
 
-  (*******************************************************************)
+  (***********************)
   
   (* Types *)
 
@@ -420,7 +508,7 @@ fun spacer(lis) = concatWith_(" ",lis);
                                                   COMMA, TYP_ROW]))
 
 
-  (*******************************************************************)
+  (***********************)
 
   (* Patterns *)
 
@@ -465,7 +553,7 @@ fun spacer(lis) = concatWith_(" ",lis);
       | OP VID COLON TYP AS PAT (spacer([OP, VID, COLON, TYP, AS, PAT]))
 
 
-  (*******************************************************************)
+  (***********************)
 
   (* Structures *)
 
@@ -490,9 +578,9 @@ fun spacer(lis) = concatWith_(" ",lis);
 
   S_DEC : STRUCTURE STR_BIND (STRUCTURE ^ " " ^ STR_BIND)
         | SIGNATURE SIG_BIND (SIGNATURE ^ " " ^ SIG_BIND)
-        (*| FUNSIG FSIGB*)
+        (*(| FUNSIG FSIGB)*)
         | FUNCTOR FUN_BIND (FUNCTOR ^ " " ^ FUN_BIND)
-        (*| LOCAL S*)
+        (*(| LOCAL S)*)
         | DEC' (DEC')
 
   STR_BIND' : STR_ID EQUALOP STR_EXP (spacer([STR_ID, EQUALOP, STR_EXP]))
@@ -505,7 +593,7 @@ fun spacer(lis) = concatWith_(" ",lis);
            | STR_BIND' AND STR_BIND (spacer([STR_BIND', AND, STR_BIND]))
 
 
-  (*******************************************************************)
+  (***********************)
 
   (* Signatures *)
   
@@ -580,7 +668,7 @@ fun spacer(lis) = concatWith_(" ",lis);
            | VID COLON SIG_EXP AND STR_DESC (spacer([VID, COLON, SIG_EXP, AND, STR_DESC]))
 
 
-  (*******************************************************************)
+  (***********************)
 
   (* Functors *)
 
@@ -595,7 +683,7 @@ fun spacer(lis) = concatWith_(" ",lis);
            | FUN_BIND' AND FUN_BIND (FUN_BIND' ^ " " ^ FUN_BIND)
 
 
-  (*******************************************************************)
+  (***********************)
 
   (* Programs *)
 

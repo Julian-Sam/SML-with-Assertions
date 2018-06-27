@@ -74,11 +74,11 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
         | SIGNATURE SIGBIND PROG (SIGNATURE ^ " " ^ SIGBIND ^ " " ^ PROG)
         | FUNCTOR FCTBIND PROG (FUNCTOR ^ " " ^ FCTBIND ^ " " ^ PROG)
 
-  CON : INT ((*print (" <int> ");*) INT) 
-      | WORD ((*print (" <word> ");*) WORD)
-      | REAL ((*print (" <real> ");*) REAL)
-      | CHAR ((*print (" <char> ");*) CHAR)
-      | STRING ((*print (" <str> ");*) STRING)
+  CON : INT ((print (" <int> ");) INT) 
+      | WORD ((print (" <word> ");) WORD)
+      | REAL ((print (" <real> ");) REAL)
+      | CHAR ((print (" <char> ");) CHAR)
+      | STRING ((print (" <str> ");) STRING)
 
   ID_NAMES : ID (ID)
            | LPAREN ID_LIST RPAREN (LPAREN ^ " " ^ ID_LIST ^ " " ^ RPAREN)
@@ -122,11 +122,11 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
   EXP : CON (CON)
 
-      | LONG_ID ((*print (" <long_id> ");*) LONG_ID)
+      | LONG_ID ((print (" <long_id> ");) LONG_ID)
 
       | EXP EXP (EXP1 ^ " " ^ EXP2)
 
-      | EXP LONG_ID EXP  ((*print (" <exp id exp> ");*) 
+      | EXP LONG_ID EXP  ((print (" <exp id exp> ");) 
                           concatWith_(" ", [EXP1, LONG_ID, EXP2]))
 
       | EXP GREATERTHAN EXP  (EXP1 ^ " " ^ GREATERTHAN ^ " " ^ EXP2)
@@ -273,14 +273,14 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
             | PAT COMMA PAT_TUPLE (PAT ^ ", " ^ PAT_TUPLE)
 
-  ATPAT_CURRY : ATPAT ((*print (" <atpcurry -> atpat> ");*) ATPAT)
+  ATPAT_CURRY : ATPAT ((print (" <atpcurry -> atpat> ");) ATPAT)
 
-              | ATPAT ATPAT_CURRY ((*print (" <atpcurry -> atpat pcurry> ");*) ATPAT ^ " " ^ ATPAT_CURRY)
+              | ATPAT ATPAT_CURRY ((print (" <atpcurry -> atpat pcurry> ");) ATPAT ^ " " ^ ATPAT_CURRY)
 
 
-  TYP_TUPLE : TYP TIMES TYP ((*print (" <typ * typ> ");*) concatWith_(" ", [TYP1, TIMES, TYP2]))
+  TYP_TUPLE : TYP TIMES TYP ((print (" <typ * typ> ");) concatWith_(" ", [TYP1, TIMES, TYP2]))
 
-            | TYP TIMES TYP_TUPLE ((*print (" <typ * ty_tuple> ");*) concatWith_(" ", [TYP, TIMES, TYP_TUPLE]))
+            | TYP TIMES TYP_TUPLE ((print (" <typ * ty_tuple> ");) concatWith_(" ", [TYP, TIMES, TYP_TUPLE]))
 
 
   (* Space seperated names for types. For example: 'a list list *)
@@ -316,7 +316,7 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
   DEC : VAL VALBIND ("\n\n" ^ VAL ^ " " ^ VALBIND)
 
-      | FUN FUNBIND ((*print (" <fun fbind> ");*)"\n\n" ^ FUN ^ " " ^ FUNBIND)
+      | FUN FUNBIND ((print (" <fun fbind> ");)"\n\n" ^ FUN ^ " " ^ FUNBIND)
 
       | VAL VAR_ID_LIST VALBIND ("\n\n" ^ VAL ^ " " ^ VAR_ID_LIST ^ " " ^ VALBIND)
 
@@ -336,30 +336,30 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
       | EXCEPTION EXNBIND (concatWith_(" ", [EXCEPTION, EXNBIND]))
 
-      | DEC DEC ((*print (" <dec1 dec2> ");*) DEC1 ^ "\n" ^ DEC2)
+      | DEC DEC ((print (" <dec1 dec2> ");) DEC1 ^ "\n" ^ DEC2)
 
-      | STRUCTURE STRBIND ((*print (" <struct stbind> ");*) STRUCTURE ^ " " ^ STRBIND)
+      | STRUCTURE STRBIND ((print (" <struct stbind> ");) STRUCTURE ^ " " ^ STRBIND)
 
-      | DEC SEMICOLON ((*print (" <dec;> ");*) DEC ^ ";\n")
+      | DEC SEMICOLON ((print (" <dec;> ");) DEC ^ ";\n")
 
-      | DEC SEMICOLON DEC ((*print (" <dec1; dec2> ");*) concatWith_(" ", [DEC1, ";\n", DEC2]))
+      | DEC SEMICOLON DEC ((print (" <dec1; dec2> ");) concatWith_(" ", [DEC1, ";\n", DEC2]))
 
-      | LOCAL DEC IN DEC END ((*print (" <lcl dec in dec end> ");*) concatWith_(" ", [LOCAL, DEC1, IN, DEC2, END]))
+      | LOCAL DEC IN DEC END ((print (" <lcl dec in dec end> ");) concatWith_(" ", [LOCAL, DEC1, IN, DEC2, END]))
 
-      | OPEN LONG_ID_LIST ((*print (" <open lgidlist> ");*) OPEN ^ " " ^ LONG_ID_LIST)
+      | OPEN LONG_ID_LIST ((print (" <open lgidlist> ");) OPEN ^ " " ^ LONG_ID_LIST)
 
-      | NONFIX ID_CURRY ((*print (" <nonfix idcurry> ");*) NONFIX ^ " " ^ ID_CURRY)
+      | NONFIX ID_CURRY ((print (" <nonfix idcurry> ");) NONFIX ^ " " ^ ID_CURRY)
 
       | INFIX ID_CURRY ((*print (" <infix idcurry> "); *)INFIX ^ " " ^ ID_CURRY)
 
-      | INFIX INT ID_CURRY ((*print (" <infix int idcurry> ");*) INFIX ^ " " ^ INT ^ " " ^ ID_CURRY)
+      | INFIX INT ID_CURRY ((print (" <infix int idcurry> ");) INFIX ^ " " ^ INT ^ " " ^ ID_CURRY)
 
-      | INFIXR ID_CURRY ((*print (" <infixr idcurry> ");*) INFIXR ^ " " ^ ID_CURRY)
+      | INFIXR ID_CURRY ((print (" <infixr idcurry> ");) INFIXR ^ " " ^ ID_CURRY)
 
-      | INFIXR INT ID_CURRY ((*print (" <infixr int idcurry> ");*) INFIXR ^ " " ^ INT ^ " " ^ ID_CURRY)
+      | INFIXR INT ID_CURRY ((print (" <infixr int idcurry> ");) INFIXR ^ " " ^ INT ^ " " ^ ID_CURRY)
 
 
-  VALBIND : PAT EQUALOP EXP ((*print (" <pat = exp> ");*) concatWith_(" ", [PAT, EQUALOP, EXP]))
+  VALBIND : PAT EQUALOP EXP ((print (" <pat = exp> ");) concatWith_(" ", [PAT, EQUALOP, EXP]))
 
           | PAT EQUALOP EXP AND VALBIND ((*print (" <pat = exp and vbind> "); *)concatWith_(" ", [PAT, EQUALOP, EXP, " and ", VALBIND]))
 
@@ -367,9 +367,9 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
 
 
-  FUNBIND : FUNMATCH ((*print (" <fmatch> ");*) FUNMATCH)
+  FUNBIND : FUNMATCH ((print (" <fmatch> ");) FUNMATCH)
 
-          | FUNMATCH AND FUNBIND ((*print (" <fmatch and fbind> ");*) FUNMATCH ^ " and " ^ FUNBIND)
+          | FUNMATCH AND FUNBIND ((print (" <fmatch and fbind> ");) FUNMATCH ^ " and " ^ FUNBIND)
 
   (* Easier pattern matching for functions *)
 
@@ -377,9 +377,9 @@ fun concatWith_(x, lis) = concatWith (x) (lis);
 
                 | ID ATPAT_CURRY COLON TYP EQUALOP EXP ( print (" <if pat : typ = exp> "); concatWith_(" ", [ID, ATPAT_CURRY, COLON, TYP, EQUALOP, EXP]))
  
-           (*| ID ATPAT_CURRY EQUALOP EXP BAR FUNMATCH (print (" <id pat = exp | fmatch> "); concatWith_(" ", [ID, ATPAT_CURRY, EQUALOP, EXP, "\n  " , BAR, FUNMATCH]))*)
+           (*(| ID ATPAT_CURRY EQUALOP EXP BAR FUNMATCH (print (" <id pat = exp | fmatch> "); concatWith_(" ", [ID, ATPAT_CURRY, EQUALOP, EXP, "\n  " , BAR, FUNMATCH])))*)
  
-           (*| ID ATPAT_CURRY COLON TYP EQUALOP EXP BAR FUNMATCH (print (" <if pat : typ = exp | fmatch> "); concatWith_(" ", [ID, ATPAT_CURRY, COLON, TYP, EQUALOP, EXP, "\n  ", BAR, FUNMATCH]))*)
+           (*(| ID ATPAT_CURRY COLON TYP EQUALOP EXP BAR FUNMATCH (print (" <if pat : typ = exp | fmatch> "); concatWith_(" ", [ID, ATPAT_CURRY, COLON, TYP, EQUALOP, EXP, "\n  ", BAR, FUNMATCH])))*)
  
 
   (* Infix function declarations *)              
