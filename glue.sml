@@ -56,7 +56,7 @@ struct
       val (nextToken,lexer) = SampleParser.Stream.get lexer
       val _ = case result
           of SOME r =>
-        (TextIO.output(TextIO.stdOut, r); TextIO.flushOut TextIO.stdOut)
+        (TextIO.output(TextIO.stdOut, r); TextIO.flushOut TextIO.stdOut; print "\n")
            | NONE => ()
          in if SampleParser.sameToken(nextToken,dummyEOF) then ()
       else loop lexer

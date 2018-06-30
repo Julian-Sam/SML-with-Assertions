@@ -38,7 +38,12 @@ hexnum=[0-9a-fA-F]+;
 integer = (~?){num};
 hex = (~?)"0x"{hexnum};
 word_ = "0w"{num}|"0wx"{hexnum};
-char_ = "#\""{ascii}"\"";
+ordinal_alphabet = "\\"[0-9]{3};
+ordinal_hex = "\\u"[0-9a-fA-F]{4};
+control_chars = "\\^"{ascii};
+escape_chars = "\\"[abtnvfr];
+chars = {ascii} | {escape_chars} | {control_chars} | {ordinal_hex} | {ordinal_alphabet};
+char_ = "#\""{chars}"\"";
 string_ = "\""{ascii}*"\"";
  
 
