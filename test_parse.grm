@@ -188,7 +188,7 @@ val Stack: stack ref = ref []
          | CON_DESC of string
          | EX_DESC of string
          | STR_DESC of string
-         | FUN_DEC of string
+         | FUN_BIND' of string
          | FUN_BIND of string
          | TOP_DEC' of string
          | TOP_DEC of string
@@ -761,19 +761,16 @@ val Stack: stack ref = ref []
 
   (* Functors *)
 
-  FUN_DEC : FUNCTOR FUN_BIND (FUNCTOR ^ " " ^ FUN_BIND)
+  FUN_BIND' : FUN_ID LPAREN STR_ID COLON SIG_EXP RPAREN EQUALOP STR_EXP (spacer([FUN_ID, LPAREN, STR_ID, COLON, SIG_EXP, RPAREN, EQUALOP, STR_EXP])) 
+            | FUN_ID LPAREN STR_ID COLON SIG_EXP RPAREN COLON SIG_EXP EQUALOP STR_EXP (spacer([FUN_ID, LPAREN, STR_ID, COLON, SIG_EXP1, RPAREN, COLON, SIG_EXP2, EQUALOP, STR_EXP])) 
+            | FUN_ID LPAREN STR_ID COLON SIG_EXP RPAREN COLONGT SIG_EXP EQUALOP STR_EXP (spacer([FUN_ID, LPAREN, STR_ID, COLON, SIG_EXP1, RPAREN, COLONGT, SIG_EXP2, EQUALOP, STR_EXP])) 
+            | FUN_ID LPAREN SPEC RPAREN EQUALOP STR_EXP (spacer([FUN_ID, LPAREN, SPEC, RPAREN, EQUALOP, STR_EXP]))
+            | FUN_ID LPAREN SPEC RPAREN COLON SIG_EXP EQUALOP STR_EXP (spacer([FUN_ID, LPAREN, SPEC, RPAREN, COLON, SIG_EXP, EQUALOP, STR_EXP]))
+            | FUN_ID LPAREN SPEC RPAREN COLONGT SIG_EXP EQUALOP STR_EXP (spacer([FUN_ID, LPAREN, SPEC, RPAREN, COLONGT, SIG_EXP, EQUALOP, STR_EXP]))
 
-  FUN_BIND : FUN_ID LPAREN STR_ID COLON SIG_EXP RPAREN EQUALOP STR_EXP (spacer([FUN_ID, LPAREN, 
-                                                                                STR_ID, COLON, 
-                                                                                SIG_EXP, RPAREN, 
-                                                                                EQUALOP, STR_EXP])) 
+  FUN_BIND : FUN_BIND' (FUN_BIND')
+           | FUN_BIND' AND FUN_BIND (FUN_BIND' ^ " " ^ FUN_BIND)
 
-           | FUN_ID LPAREN STR_ID COLON SIG_EXP RPAREN EQUALOP STR_EXP AND FUN_BIND (
-                                                                          spacer([FUN_ID, LPAREN, 
-                                                                                  STR_ID, COLON, 
-                                                                                  SIG_EXP, RPAREN, 
-                                                                                  EQUALOP, STR_EXP,
-                                                                                  AND, FUN_BIND]))
 
   (***********************)
 
@@ -783,3 +780,5 @@ val Stack: stack ref = ref []
           | SEMICOLON PROGRAM (SEMICOLON ^ PROGRAM)
           | EXP PROGRAM (EXP ^ PROGRAM)
           | S_DEC' PROGRAM (S_DEC' ^ PROGRAM)
+
+
