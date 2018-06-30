@@ -2,7 +2,7 @@ fun is_odd (x, y): bool = if x mod 2 = 1 andalso y mod 2 = 1 then true else fals
 
 (*! REQUIRES: is_odd(a, b)
 	ENSURES: result = a + b !*)
-fun math (a: int, ==: char): int -> word = 1
+fun math (a: int, #"b": char): int = 1
   | math (a, b) = (case (Int.compare (a, b)) of
   				    LESS => 1 + math (a, b -1)
   				  | _ 	 => 1 + math (a - 1, b))
@@ -64,18 +64,16 @@ signature QUEUE = sig
 end
 
 
-fun memo (f: D.K.t -> 'a): (D.K.t -> 'a) =
-  let
-	val memoTable = D.new ()
-	fun f_memoed (x: D.K.t): 'a =
-	  case D.lookup (memoTable, x) of 
-	  	SOME y => y
-	  | NONE => (let
-				  val y = f x
-				  val _ = D.insert (memoTable, (x,y))
-			    in 
-			      y 
-			    end)
-  in
-    f_memoed
-  end
+	fun memo (f: D.K.t -> 'a): D.K.t -> 'a =
+	  let
+		val memoTable: 'a D.dict = D.new ()
+		fun f_memoed (x: D.K.t): 'a =
+		  case D.lookup (memoTable, x) of 
+		  	SOME y => y
+		  | NONE => let
+		val y = f x
+		val _ = D.insert (memoTable, (x,y))
+	  in y end
+	in
+	  f_memoed
+	end
