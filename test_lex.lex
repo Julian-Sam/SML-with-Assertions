@@ -1,10 +1,10 @@
-
 structure Tokens = Tokens
 type pos = int
 type svalue = Tokens.svalue
 type ('a,'b) token = ('a,'b) Tokens.token
 type lexresult= (svalue,pos) token
-
+datatype ws_type = WS of int | NL of int | TAB of int;
+val ws_list = [];
 exception UnmatchedComments
 val pos = ref 0
 val unmatched_comments = ref 0
@@ -20,10 +20,16 @@ fun error (e,l : int,_) = print ( String.concat[
 %%
 %header (functor SampleLexFun(structure Tokens: Sample_TOKENS));
 %reject;
+%args ({
+	ws_list
+	});
 %s COMMENT;
 idchars=[A-Za-z'_0-9];
 id=[A-Za-z]{idchars}*;
 ws=("\012"|[\t\ ])*;
+space=" ";
+tab = "\t";
+newline = "\n";
 nrws=("\012"|[\t\ ])+;
 ascii = [^\n] | \n;
 num=[0-9]+;
@@ -45,11 +51,12 @@ escape_chars = "\\"[abtnvfr];
 chars = {ascii} | {escape_chars} | {control_chars} | {ordinal_hex} | {ordinal_alphabet};
 char_ = "#\""{chars}"\"";
 string_ = "\""{ascii}*"\"";
- 
-
 %%
 <INITIAL>"\n"        => (pos := (!pos) + 1; lex());
-<INITIAL>{ws}+       => (lex());
+<INITIAL>{space}     => (lex());
+<INITIAL>{tab}       => (lex());
+<INITIAL>{line}      => (lex());
+
 <INITIAL>{integer}   => (Tokens.INT(yytext, !pos, !pos));
 <INITIAL>{hex}       => (Tokens.INT(yytext, !pos, !pos));
 <INITIAL>{real_}	 => (Tokens.REAL(yytext, !pos, !pos));
@@ -68,7 +75,6 @@ string_ = "\""{ascii}*"\"";
 <INITIAL>"=>"	     => (Tokens.DARROW(yytext, !pos,!pos));
 <INITIAL>"|"		 => (Tokens.BAR(yytext, !pos,!pos));
 <INITIAL>":"		 => (Tokens.COLON(yytext, !pos,!pos));
-<INITIAL>"::"		 => (Tokens.DCOLON(yytext, !pos,!pos));
 <INITIAL>"!"		 => (Tokens.BANG(yytext, !pos,!pos));
 <INITIAL>":>"	     => (Tokens.COLONGT(yytext, !pos,!pos));
 <INITIAL>"#"         => (Tokens.HASH(yytext, !pos,!pos));

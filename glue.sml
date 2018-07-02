@@ -37,6 +37,25 @@ struct
        in SampleParser.parse(0,lexstream,print_error,())
       end
 
+datatype ws_type = WS of int | NL of int | TAB of int;
+
+fun readWS (ch_list: char list , len: int, ws_list: ws_type list) = 
+  case (ws_list) of 
+    nil => ch_list
+  | typ :: ws_list' => case typ of
+                         WS (num) =>  if num = len then #" " :: readWS (ch_list, len + 1, ws_list')
+                                      else (case (ch_list) of
+                                              nil => nil
+                                            | ch :: ch_list' => ch :: readWS (ch_list', len + 1, ws_list))
+                        | TAB (num) =>  if num = len then #"\t" :: readWS (ch_list, len + 1, ws_list')
+                                        else (case (ch_list) of
+                                                nil => nil
+                                              | ch :: ch_list' => ch :: readWS (ch_list', len + 1, ws_list))
+                        | NL (num) => if num = len then #"\n" :: readWS (ch_list, len + 1, ws_list')
+                                      else (case (ch_list) of
+                                              nil => nil
+                                            | ch :: ch_list' => ch :: readWS (ch_list', len + 1, ws_list))
+
 (* 
  * Finally, we need a driver function that reads one or more expressions
  * from the standard input. The function parse, shown below, does
@@ -55,8 +74,13 @@ struct
         let val (result,lexer) = invoke lexer
       val (nextToken,lexer) = SampleParser.Stream.get lexer
       val _ = case result
-          of SOME r =>
-        (TextIO.output(TextIO.stdOut, r); TextIO.flushOut TextIO.stdOut; print "\n")
+          of SOME r => (let
+                          val charList = String.explode (r)
+                          val newChar_List = readWS (charList, 0, sref_list)
+                        in
+                          print (String.implode(newChar_List))
+                        end;
+                        print "\n")
            | NONE => ()
          in if SampleParser.sameToken(nextToken,dummyEOF) then ()
       else loop lexer

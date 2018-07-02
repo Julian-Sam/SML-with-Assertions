@@ -49,7 +49,6 @@ val Stack: stack ref = ref []
     | DARROW of string
     | BAR of string
     | COLON of string
-    | DCOLON of string
     | BANG of string
     | COLONGT of string
     | HASH of string
@@ -533,7 +532,7 @@ val Stack: stack ref = ref []
 
   TYP' : TYP_VAR (TYP_VAR)
        | LCURLY TLABELS RCURLY (spacer([LCURLY, TLABELS, RCURLY]))
-       | LCURLY RCURLY ("{}")
+       | LCURLY RCURLY (LCURLY ^ RCURLY)
        | LPAREN TYP_SEQ RPAREN LONG_TYP_CON (spacer([LPAREN, TYP_SEQ, RPAREN, LONG_TYP_CON]))
        | LPAREN TYP RPAREN (spacer([LPAREN, TYP, RPAREN]))
        | TYP' TY_CON (TYP' ^ " " ^ TY_CON)
