@@ -1,19 +1,42 @@
-
 structure Tokens = Tokens
 type pos = int
 type svalue = Tokens.svalue
 type ('a,'b) token = ('a,'b) Tokens.token
 type lexresult= (svalue,pos) token
-
 exception UnmatchedComments
 val pos = ref 0
+datatype ws_type = WS of int | NL of int | TAB of int
+
+val ws_type_list_ref: (int list * int list * int list) ref = ref ([], [], [])
+
+fun ws num = let
+			   val (ws_list, nl_list, tb_list) = !ws_type_list_ref
+			 in
+			   ws_type_list_ref := (num :: ws_list, nl_list, tb_list)
+			 end
+
+fun nl num = let
+			   val (ws_list, nl_list, tb_list) = !ws_type_list_ref
+			 in
+			   ws_type_list_ref := (ws_list, num :: nl_list, tb_list)
+			 end
+
+fun tb num = let
+			   val (ws_list, nl_list, tb_list) = !ws_type_list_ref
+			 in
+			   ws_type_list_ref := (ws_list, nl_list, num :: tb_list)
+			 end
+
+
 val unmatched_comments = ref 0
 fun inc(x) = x := (!x + 1)
 fun dec(x) = x := (!x - 1)
+
 fun eof () = (if (!unmatched_comments) <> 0 
 			 then (print("Error: Unmatched Comment Bracket"); raise UnmatchedComments)
-			 else Tokens.EOF(!pos,!pos))
-fun error (e,l : int,_) = print ( String.concat[
+			 else Tokens.EOF(ws_type_list_ref, !pos, !pos))
+
+fun error (e,l : int,_) = print (String.concat[
 	"line ", (Int.toString l), ": ", e, "\n"
       ])
 
@@ -24,6 +47,9 @@ fun error (e,l : int,_) = print ( String.concat[
 idchars=[A-Za-z'_0-9];
 id=[A-Za-z]{idchars}*;
 ws=("\012"|[\t\ ])*;
+space = " ";
+tab = [\t];
+newline = [\n];
 nrws=("\012"|[\t\ ])+;
 ascii = [^\n] | \n;
 num=[0-9]+;
@@ -38,13 +64,18 @@ hexnum=[0-9a-fA-F]+;
 integer = (~?){num};
 hex = (~?)"0x"{hexnum};
 word_ = "0w"{num}|"0wx"{hexnum};
-char_ = "#\""{ascii}"\"";
+ordinal_alphabet = "\\"[0-9]{3};
+ordinal_hex = "\\u"[0-9a-fA-F]{4};
+control_chars = "\\^"{ascii};
+escape_chars = "\\"[abtnvfr];
+chars = {ascii} | {escape_chars} | {control_chars} | {ordinal_hex} | {ordinal_alphabet};
+char_ = "#\""{chars}"\"";
 string_ = "\""{ascii}*"\"";
- 
-
 %%
-<INITIAL>"\n"        => (pos := (!pos) + 1; lex());
-<INITIAL>{ws}+       => (lex());
+<INITIAL>{space}     => ((ws (yypos)); lex());
+<INITIAL>{tab}       => ((tb (yypos)); lex());
+<INITIAL>{newline}   => ((nl (yypos)); lex());
+
 <INITIAL>{integer}   => (Tokens.INT(yytext, !pos, !pos));
 <INITIAL>{hex}       => (Tokens.INT(yytext, !pos, !pos));
 <INITIAL>{real_}	 => (Tokens.REAL(yytext, !pos, !pos));
@@ -63,7 +94,6 @@ string_ = "\""{ascii}*"\"";
 <INITIAL>"=>"	     => (Tokens.DARROW(yytext, !pos,!pos));
 <INITIAL>"|"		 => (Tokens.BAR(yytext, !pos,!pos));
 <INITIAL>":"		 => (Tokens.COLON(yytext, !pos,!pos));
-<INITIAL>"::"		 => (Tokens.DCOLON(yytext, !pos,!pos));
 <INITIAL>"!"		 => (Tokens.BANG(yytext, !pos,!pos));
 <INITIAL>":>"	     => (Tokens.COLONGT(yytext, !pos,!pos));
 <INITIAL>"#"         => (Tokens.HASH(yytext, !pos,!pos));
@@ -162,4 +192,3 @@ string_ = "\""{ascii}*"\"";
 <INITIAL>{id}		    => (Tokens.ID(yytext, !pos, !pos));
 
 <INITIAL>.              => (error ("ignoring bad character "^yytext,!pos,!pos); lex());
-
