@@ -87,14 +87,16 @@ fun readFromLists (ws: int list, tb: int list, nl: int list, len: int, final: ws
 
   | (nil, nil, nil) => final)
 
-fun stringList (w: ws_type list) = 
-  case w of
-    nil => "[]"
-  | typ :: w' => case typ of 
-             WS  (num) =>  "WS (" ^ Int.toString(num) ^ ") :: " ^ (stringList w')
-           | NL  (num) =>  "NL (" ^ Int.toString(num) ^ ") :: " ^ (stringList w')
-           | TAB (num) => "TAB (" ^ Int.toString(num) ^ ") :: " ^ (stringList w')
-          
+
+fun write_file filename content =
+    let val fd = TextIO.openOut filename
+        val _ = TextIO.output (fd, content) handle e => (TextIO.closeOut fd; raise e)
+        val _ = TextIO.closeOut fd
+    in () end
+
+fun modify_filename filename = 
+  String.substring (filename, 0, size(filename) - 4) ^ "_parsed" ^ ".sml";
+
 
 (* 
  * Finally, we need a driver function that reads one or more expressions
@@ -124,6 +126,7 @@ fun stringList (w: ws_type list) =
                         val (charList', remaining) = readLines (charList, 2, combined_list, [])
                         val charList'' = List.rev(charList') @ remaining
                       in
+                        write_file (modify_filename(filename)) (String.implode (charList''));
                         print (String.implode (charList'') ^ "\n")
                       end)
            | NONE => ()
