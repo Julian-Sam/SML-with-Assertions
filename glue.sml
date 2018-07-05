@@ -124,8 +124,7 @@ fun stringList (w: ws_type list) =
   				          	  val (charList', remaining) = readLines (charList, 2, combined_list, [])
   				          	  val charList'' = List.rev(charList') @ remaining
   				            in
-  				          	  print (String.implode (charList'') ^ "\n");
-  				          	  y := ([], [], [])
+  				          	  print (String.implode (charList'') ^ "\n")
   				            end)
            | NONE => ()
          in if SampleParser.sameToken(nextToken,dummyEOF) then ()
