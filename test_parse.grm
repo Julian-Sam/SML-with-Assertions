@@ -11,7 +11,7 @@ datatype Assert_Type =
   | ENS of string
   | BOTH of string * string
 
-val ws_type_list_ref: (int list * int list * int list) ref = ref ([], [], []) 
+val final_list_ref: (int list * int list * int list) ref = ref ([], [], []) 
 
 type stack = Assert_Type list
 
@@ -112,7 +112,7 @@ val Stack: stack ref = ref []
     | ID of string
 
 
-%nonterm   START of (string * ((int list * int list * int list) ref)) option
+%nonterm   START of (string * ((int list * int list * int list))) option
          | CON of string
          | VID of string
          | LONG_VID of string
@@ -216,8 +216,17 @@ val Stack: stack ref = ref []
 
   (* Start State *)
 
-  START : PROGRAM (SOME (PROGRAM, ws_type_list_ref))
+  START : PROGRAM (SOME (PROGRAM, !final_list_ref))
         | (NONE)
+
+  (***********************)
+
+  (* Programs *)
+
+  PROGRAM : EOF (final_list_ref := !EOF; "")
+          | SEMICOLON PROGRAM (SEMICOLON ^ PROGRAM)
+          | EXP PROGRAM (EXP ^ PROGRAM)
+          | S_DEC' PROGRAM (S_DEC' ^ PROGRAM)
 
   (***********************)
 
@@ -772,13 +781,4 @@ val Stack: stack ref = ref []
   FUN_BIND : FUN_BIND' (FUN_BIND')
            | FUN_BIND' AND FUN_BIND (FUN_BIND' ^ FUN_BIND)
 
-
-  (***********************)
-
-  (* Programs *)
-
-  PROGRAM : EOF (ws_type_list_ref := !EOF; "")
-          | SEMICOLON PROGRAM (SEMICOLON ^ PROGRAM)
-          | EXP PROGRAM (EXP ^ PROGRAM)
-          | S_DEC' PROGRAM (S_DEC' ^ PROGRAM)
 

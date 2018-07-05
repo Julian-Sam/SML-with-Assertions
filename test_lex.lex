@@ -9,6 +9,7 @@ val pos = ref 0
 datatype ws_type = WS of int | NL of int | TAB of int
 
 val ws_type_list_ref: (int list * int list * int list) ref = ref ([], [], [])
+val final_ref_list: (int list * int list * int list) ref = ref ([], [], [])
 
 fun ws num = let
 			   val (ws_list, nl_list, tb_list) = !ws_type_list_ref
@@ -28,14 +29,19 @@ fun tb num = let
 			   ws_type_list_ref := (ws_list, nl_list, num :: tb_list)
 			 end
 
-
 val unmatched_comments = ref 0
 fun inc(x) = x := (!x + 1)
 fun dec(x) = x := (!x - 1)
 
 fun eof () = (if (!unmatched_comments) <> 0 
 			 then (print("Error: Unmatched Comment Bracket"); raise UnmatchedComments)
-			 else Tokens.EOF(ws_type_list_ref, !pos, !pos))
+			 else (let
+					 val (ws, nl, tb) = !ws_type_list_ref
+					 val final_ref_list = ref (ws, nl, tb)
+				   in
+					 ws_type_list_ref := ([], [], []);
+					 Tokens.EOF(final_ref_list, !pos, !pos)
+				   end))
 
 fun error (e,l : int,_) = print (String.concat[
 	"line ", (Int.toString l), ": ", e, "\n"
