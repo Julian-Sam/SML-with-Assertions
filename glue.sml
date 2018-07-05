@@ -95,6 +95,7 @@ fun stringList (w: ws_type list) =
 				   | NL  (num) =>  "NL (" ^ Int.toString(num) ^ ") :: " ^ (stringList w')
 				   | TAB (num) => "TAB (" ^ Int.toString(num) ^ ") :: " ^ (stringList w')
 				  
+
 (* 
  * Finally, we need a driver function that reads one or more expressions
  * from the standard input. The function parse, shown below, does

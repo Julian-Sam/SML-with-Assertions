@@ -5,6 +5,7 @@ type ('a,'b) token = ('a,'b) Tokens.token
 type lexresult= (svalue,pos) token
 exception UnmatchedComments
 val pos = ref 0
+
 datatype ws_type = WS of int | NL of int | TAB of int
 
 val ws_type_list_ref: (int list * int list * int list) ref = ref ([], [], [])
@@ -42,7 +43,7 @@ fun error (e,l : int,_) = print (String.concat[
 
 %%
 %header (functor SampleLexFun(structure Tokens: Sample_TOKENS));
-%reject;
+%reject
 %s COMMENT;
 idchars=[A-Za-z'_0-9];
 id=[A-Za-z]{idchars}*;
