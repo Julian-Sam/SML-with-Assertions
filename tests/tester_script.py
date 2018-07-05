@@ -17,6 +17,6 @@ for dir_, _, files in walk(mypath):
 	        fileSet.add(relFile)
 
 for i in fileSet:
-	print("sml sml_tester.sml " + i)
+	print("sml sml_tester.sml " + "test_files" + i)
 	subprocess.Popen("sml sml_tester.sml " + i)
 	subprocess.Popen("diff " + i + " " + new_file_name(i))
