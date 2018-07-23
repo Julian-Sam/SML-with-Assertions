@@ -1,22 +1,31 @@
-from os import listdir, walk
-from os.path import join, relpath
 import subprocess
+from os import listdir, remove
+from os.path import isfile, join
+
+
+mypath = "test_files"
+broken_files = []
+
+files = [f for f in listdir(mypath) if isfile(join(mypath, f))]
 
 def new_file_name(old_file_name):
-	return old_file_name[old_file_name.find('.')-1] + "_parsed.sml"
+	return old_file_name[old_file_name.rfind('.')-1] + "_parsed.sml"
 
-mypath = "."
+for i in files:
+	print(i)
 
-fileSet = set()
+for i in files:
+	a = "sml sml_tester.sml " + join("test_files", i)
+	return_status = subprocess.call(a, shell=True)
+	if return_status == 1:
+		broken_files.append(i)
 
-for dir_, _, files in walk(mypath):
-    for fileName in files:
-    	if fileName != "tester_script.py":
-	        relDir = relpath(dir_, mypath)
-	        relFile = join(relDir, fileName)
-	        fileSet.add(relFile)
 
-for i in fileSet:
-	print("sml sml_tester.sml " + "test_files" + i)
-	subprocess.Popen("sml sml_tester.sml " + i)
-	subprocess.Popen("diff " + i + " " + new_file_name(i))
+new_files = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+
+for i in new_files:
+	if "_parsed.sml" in i:
+		remove(join("test_files", i))
+
+for i in broken_files:
+	print(i + " does not parse properly")
