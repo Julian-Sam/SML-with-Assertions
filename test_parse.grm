@@ -165,6 +165,7 @@ val Stack: stack ref = ref []
          | PAT_ROW of string
          | PAT of string
          | STR_EXP of string
+         | ARG_FCT of string
          | STR_DEC' of string
          | STR_DEC of string
          | S_DEC of string
@@ -657,23 +658,26 @@ val Stack: stack ref = ref []
   (* Structures *)
 
   STR_EXP : STRUCT STR_DEC END (STRUCT ^ STR_DEC ^ END)
-          | LONG_STR_ID (LONG_STR_ID)
+          | LONG_STR_ID (print "wharwhat\n"; LONG_STR_ID)
           | STR_EXP COLON SIG_EXP (STR_EXP ^ COLON ^ SIG_EXP)
           | STR_EXP COLONGT SIG_EXP (STR_EXP ^ COLONGT ^ SIG_EXP)
-          | FUN_ID LPAREN STR_EXP RPAREN (spacer([FUN_ID, LPAREN, STR_EXP, RPAREN]))
-          | FUN_ID LPAREN STR_DEC RPAREN (spacer([FUN_ID, LPAREN, STR_DEC, RPAREN]))
+          | FUN_ID ARG_FCT (print "lol"; spacer([FUN_ID, ARG_FCT]))
+          (*| FUN_ID LPAREN STR_DEC RPAREN (spacer([FUN_ID, LPAREN, STR_DEC, RPAREN]))*)
           | LET STR_DEC IN STR_EXP END (spacer([LET, STR_DEC, IN, STR_EXP, END]))
+
+  ARG_FCT : LPAREN STR_DEC RPAREN (spacer([LPAREN, STR_DEC, RPAREN]))
+          | LPAREN STR_EXP RPAREN (spacer([LPAREN, STR_EXP, RPAREN]))
+          | LPAREN STR_DEC RPAREN ARG_FCT (spacer([LPAREN, STR_DEC, RPAREN, ARG_FCT]))
+          | LPAREN STR_EXP RPAREN ARG_FCT (spacer([LPAREN, STR_EXP, RPAREN, ARG_FCT])) 
 
   STR_DEC' : DEC' (DEC')
            | STRUCTURE STR_BIND (STRUCTURE ^ STR_BIND)
+           | FUNCTOR FUN_BIND (FUNCTOR ^ FUN_BIND)
            | LOCAL STR_DEC IN STR_DEC END  (spacer([LOCAL, STR_DEC1, IN, STR_DEC2, END]))
 
-  STR_DEC : (* EMPTY *)  ("")
-          | STR_DEC' STR_DEC (STR_DEC' ^ STR_DEC)
+  STR_DEC : STR_DEC' STR_DEC (STR_DEC' ^ STR_DEC)
           | SEMICOLON STR_DEC (SEMICOLON ^ STR_DEC)
-
-  S_DEC' : S_DEC (S_DEC)
-         | S_DEC S_DEC' (S_DEC ^ S_DEC')
+          | (* EMPTY *)  ("")
 
   S_DEC : STRUCTURE STR_BIND (STRUCTURE ^ STR_BIND)
         | SIGNATURE SIG_BIND (SIGNATURE ^ SIG_BIND)
@@ -681,6 +685,9 @@ val Stack: stack ref = ref []
         | FUNCTOR FUN_BIND (FUNCTOR ^ FUN_BIND)
         (*(| LOCAL S)*)
         | DEC' (DEC')
+
+  S_DEC' : S_DEC (S_DEC)
+         | S_DEC S_DEC' (S_DEC ^ S_DEC')
 
   STR_BIND' : STR_ID EQUALOP STR_EXP (spacer([STR_ID, EQUALOP, STR_EXP]))
             | STR_ID COLON SIG_EXP EQUALOP STR_EXP (spacer([STR_ID, COLON, SIG_EXP, 
