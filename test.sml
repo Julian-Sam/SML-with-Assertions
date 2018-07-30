@@ -1,2 +1,2 @@
 fun toString f t = ""
-fun toString f = ( "as" )
+fun toString f = ( "as") 
