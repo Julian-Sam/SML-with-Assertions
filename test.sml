@@ -1,2 +1,2 @@
-functor MkTreapTable(structure HashKey : HASHKEY) : TABLE =
-  MkBSTTable(structure Tree = MkTreap)
+fun toString f t = ""
+fun toString f = ( "as" )

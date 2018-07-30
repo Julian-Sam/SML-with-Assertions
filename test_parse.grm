@@ -279,6 +279,9 @@ val Stack: stack ref = ref []
               raise LabError)
             else INT)
 
+    (* Functor Identifier *)
+  FUN_ID : ID (ID)
+
     (* Structure Identifier *)
   STR_ID : ID (ID)
 
@@ -289,8 +292,6 @@ val Stack: stack ref = ref []
     (* Signature Identifier *)
   SIG_ID : ID (ID)
 
-    (* Functor Identifier *)
-  FUN_ID : ID (ID)
 
     (* Identifiers without the EQ operator *)
   ID_NO_EQ : ID (ID)
@@ -658,11 +659,10 @@ val Stack: stack ref = ref []
   (* Structures *)
 
   STR_EXP : STRUCT STR_DEC END (STRUCT ^ STR_DEC ^ END)
-          | LONG_STR_ID (print "wharwhat\n"; LONG_STR_ID)
+          | LONG_STR_ID (LONG_STR_ID)
+          | FUN_ID ARG_FCT (spacer([FUN_ID, ARG_FCT]))
           | STR_EXP COLON SIG_EXP (STR_EXP ^ COLON ^ SIG_EXP)
           | STR_EXP COLONGT SIG_EXP (STR_EXP ^ COLONGT ^ SIG_EXP)
-          | FUN_ID ARG_FCT (print "lol"; spacer([FUN_ID, ARG_FCT]))
-          (*| FUN_ID LPAREN STR_DEC RPAREN (spacer([FUN_ID, LPAREN, STR_DEC, RPAREN]))*)
           | LET STR_DEC IN STR_EXP END (spacer([LET, STR_DEC, IN, STR_EXP, END]))
 
   ARG_FCT : LPAREN STR_DEC RPAREN (spacer([LPAREN, STR_DEC, RPAREN]))
@@ -677,7 +677,7 @@ val Stack: stack ref = ref []
 
   STR_DEC : STR_DEC' STR_DEC (STR_DEC' ^ STR_DEC)
           | SEMICOLON STR_DEC (SEMICOLON ^ STR_DEC)
-          | (* EMPTY *)  ("")
+          |  (* EMPTY *)   ("")
 
   S_DEC : STRUCTURE STR_BIND (STRUCTURE ^ STR_BIND)
         | SIGNATURE SIG_BIND (SIGNATURE ^ SIG_BIND)
