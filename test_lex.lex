@@ -9,68 +9,23 @@ val pos = ref 1
 datatype ws_type = WS of int | NL of int | TAB of int | Comment of string * int
 
 
-val ws_type_list_ref: (int list * int list * int list * (string * int) list) ref = ref ([], [], [], [])
-val final_ref_list: (int list * int list * int list * (string * int) list * (string * (int * string) list) list) ref = ref ([], [], [], [], [])
+val ws_type_list_ref: (int list * int list * int list) ref = ref ([], [], [])
+val final_ref_list: (int list * int list * int list) ref = ref ([], [], [])
 val string_ref =  ref ("", 0)
 
-fun ws num = let
-			   val (ws_list, nl_list, tb_list, comm_list) = !ws_type_list_ref
+fun req num = let
+			   val (ws_list, nl_list, _) = !ws_type_list_ref
 			 in
-			   ws_type_list_ref := (num :: ws_list, nl_list, tb_list, comm_list)
+			   ws_type_list_ref := (num :: ws_list, nl_list, [])
 			 end
 
-fun nl num = let
-			   val (ws_list, nl_list, tb_list, comm_list) = !ws_type_list_ref
+fun ens num = let
+			   val (ws_list, nl_list, _) = !ws_type_list_ref
 			 in
-			   ws_type_list_ref := (ws_list, num :: nl_list, tb_list, comm_list)
+			   ws_type_list_ref := (ws_list, num :: nl_list, [])
 			 end
-
-fun tb num = let
-			   val (ws_list, nl_list, tb_list, comm_list) = !ws_type_list_ref
-			 in
-			   ws_type_list_ref := (ws_list, nl_list, num :: tb_list, comm_list)
-			 end
-
-fun print_Ints (x) =
-  case x of 
-    nil => print ("[]\n\n")
-  | i :: x' => (let
-                   val _ = print (Int.toString (i) ^ " :: ")
-                 in
-                   print_Ints (x')
-                 end)
 
 fun rev_str (str: string) = String.implode (List.rev (String.explode (str)))
-
-fun comm () = let
-			   val (ws_list, nl_list, tb_list, comm_list) = !ws_type_list_ref
-			   val (str, pos) = !string_ref
-			   val str' = rev_str (str)
-			 in
-			   ws_type_list_ref := (ws_list, nl_list, tb_list, (str, pos) :: comm_list)
-			 end
-
-fun add_str (str1: string) = let
-							  val (str2, pos) = !string_ref
-							  val new_str = str1 ^ str2 
-							in
-							  string_ref := (new_str, pos)
-							end
-
-fun print_comments (cm) = 
-	case (cm) of 
-	  nil => ()
-	| (str, pos) :: cm' => let
-		val _ = print ("Comment Str = " ^ str ^ "\n\n" ^ "Starting Position = " ^ Int.toString (pos) ^ "\n\n")
-	in
-		print_comments (cm')
-	end
-
-fun add_placeHolder (s: string, len: int) = 
-	case len of
-	  0   => add_str (s)
-	| num => add_placeHolder (s ^ "*", num - 1)
-
 
 val unmatched_comments = ref 0
 fun inc(x) = x := (!x + 1)
@@ -79,13 +34,11 @@ fun dec(x) = x := (!x - 1)
 fun eof () = (if (!unmatched_comments) <> 0 
 			 then (print("Error: Unmatched Comment Bracket"); raise UnmatchedComments)
 			 else (let
-					 val (ws, nl, tb, cm) = !ws_type_list_ref
-					 val final_ref_list = ref (List.rev (ws), List.rev (nl), List.rev (tb), cm, [])
-				   	 (*val _ = print_Ints (ws)
-				   	 val _ = print_Ints (nl)*)
+					 val (ws, nl, _) = !ws_type_list_ref
+					 val final_ref_list = ref (List.rev (ws), List.rev (nl), [])
 				   in
 					 pos := 1;
-					 ws_type_list_ref := ([], [], [], []);
+					 ws_type_list_ref := ([], [], []);
 					 Tokens.EOF(final_ref_list, !pos, !pos)
 				   end))
 
@@ -155,17 +108,17 @@ string_ = "\""{ascii}*"\"";
 <INITIAL>"}"	 	 => (Tokens.RCURLY(yytext, !pos,!pos));
 
 <INITIAL>"(*"		 => (YYBEGIN COMMENT; unmatched_comments := 1;
-						 string_ref := ("*(", yypos); lex());
+						 lex());
 <INITIAL>"*)"		 => (error("Error: unmatched close comment", !pos, !pos); lex());
 
-<COMMENT>"(*"		 => (add_str ("*("); inc unmatched_comments; lex());
-<COMMENT>"*)"		 => (add_str (")*"); dec unmatched_comments; 
+<COMMENT>"(*"		 => (inc unmatched_comments; lex());
+<COMMENT>"*)"		 => (dec unmatched_comments; 
 						 if (!unmatched_comments) = 0
-						 then (comm (); YYBEGIN INITIAL) else (); 
+						 then YYBEGIN INITIAL else (); 
 						 lex());
 
-<COMMENT>\n  		 => (add_str ("\n"); pos := !pos + 1; print ("\n"); lex());
-<COMMENT>.  		 => (add_str (yytext); lex());
+<COMMENT>\n  		 => (pos := !pos + 1; lex());
+<COMMENT>.  		 => (lex());
 
 <INITIAL>"["	 	 => (Tokens.LBRACK(yytext, !pos,!pos));
 <INITIAL>"]"	 	 => (Tokens.RBRACK(yytext, !pos,!pos));
@@ -225,10 +178,10 @@ string_ = "\""{ascii}*"\"";
 
 <INITIAL>"..."		 => (Tokens.DOTTED_WILDCARD(yytext, !pos, !pos));
 
-<INITIAL>"(*!"       => (string_ref := ("**(", yypos); Tokens.LASSERT(yytext, !pos, !pos));
-<INITIAL>"!*)"       => (add_str (")**"); comm(); Tokens.RASSERT(yytext, !pos, !pos));
-<INITIAL>"REQUIRES"  => (ws (!pos); add_str ("********"); Tokens.REQUIRES(yytext, !pos, !pos));
-<INITIAL>"ENSURES"   => (nl (!pos); add_str ("*******");  Tokens.ENSURES(yytext, !pos, !pos));
+<INITIAL>"(*!"       => (Tokens.LASSERT(yytext, !pos, !pos));
+<INITIAL>"!*)"       => (Tokens.RASSERT(yytext, !pos, !pos));
+<INITIAL>"REQUIRES"  => (req (!pos); Tokens.REQUIRES(yytext, !pos, !pos));
+<INITIAL>"ENSURES"   => (ens (!pos); Tokens.ENSURES(yytext, !pos, !pos));
 
 
 
@@ -243,4 +196,4 @@ string_ = "\""{ascii}*"\"";
 
 <INITIAL>{id}		    => (Tokens.ID(yytext, !pos, !pos));
 
-<INITIAL>.              => (error ("ignoring bad character "^yytext,!pos,!pos); lex());
+<INITIAL>.              => (error ("ignoring bad character " ^ yytext,!pos,!pos); lex());

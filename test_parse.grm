@@ -12,66 +12,9 @@ datatype Assert_Type =
   | ENS of string
   | BOTH of string * string
 
-val final_list_ref: (int list * int list * int list * (string * int) list * (string * (int * string) list) list) ref = ref ([], [], [], [], []) 
-val nice: (string * (int * string) list) ref = ref ("", [])
-val case_num: int ref = ref 0
-val function_cases: ((string * (int * string) list) list) ref = ref []
-val assert_lines: (bool * bool) ref = ref (false, false)
-val new_num = ref 1
+val final_list_ref: (int list * int list * int list) ref = ref ([], [], []) 
 val new_ref: int list ref = ref []
-
-
-fun peek_assert (solid: int list) = case (solid) of 
-  nil => (1, [])
-| value :: solid' => (value, solid')
-
-fun line_remove (x: bool, y: bool) = 
-  let 
-    val (ws, nl, _, _, _) = !final_list_ref
-    val (_, list1) = peek_assert (ws)
-    val (_, list2) = peek_assert (nl)
-  in
-  case (x, y) of 
-    (true, true) => final_list_ref := (list1, list2, [], [], [])
-  | (false, true) => final_list_ref := (ws, list2, [], [], [])
-  | (true, false) => final_list_ref := (list1, nl, [], [], [])
-  | (false, false) => final_list_ref := (ws, nl, [], [], [])
- end
-
-fun print_Ints (x) =
-  case x of 
-    nil => print ("[]\n\n")
-  | i :: x' => (let
-                   val _ = print (Int.toString (i) ^ " :: ")
-                 in
-                   print_Ints (x')
-                 end)
-
-fun print_Bools (x, y) =
-  print ("REQUIRES ASSERT = " ^ Bool.toString (x) ^ "\nENSURES ASSERT = " ^ Bool.toString (y) ^ "\n\n")
-
-fun print_Cases (fun_name, cases) = 
-  let
-    val _ = print ("Function Name: " ^ fun_name ^ "\n\n");
-  in
-    case (cases) of
-       nil => ()
-    | (num, case_string) :: cases' => (let
-                                        val _ = print ("Case Number: " ^ Int.toString (num) ^ "\n")
-                                        val _ = print ("Case: " ^ case_string ^ "\n\n")
-                                      in
-                                        print_Cases (fun_name, cases')
-                                      end)
-  end
-
-fun printing (cases) = 
-  case (cases) of 
-    nil => []
-  | nice :: cases' => let 
-                        val _ = print_Cases (nice)
-                      in 
-                        printing (cases')
-                      end
+val new_num = ref 1
 
 type stack = Assert_Type list
 
@@ -96,7 +39,7 @@ val Stack: stack ref = ref []
 
 %pos int
 
-%term EOF of (int list * int list * int list * (string * int) list * ((string * (int * string) list) list)) ref
+%term EOF of (int list * int list * int list) ref
     | INT of string
     | REAL of string
     | WORD of string
@@ -172,7 +115,7 @@ val Stack: stack ref = ref []
     | ID of string
 
 
-%nonterm   START of (string * (int list * int list * int list * (string  * int) list * (string * (int * string) list) list)) option
+%nonterm   START of (string * (int list * int list * int list)) option
          | CON of string
          | VID of string
          | LONG_VID of string
@@ -285,10 +228,7 @@ val Stack: stack ref = ref []
 
   (* Start State *)
 
-  START : PROGRAM (let val (ws, nl, _, _, _) = !final_list_ref
-                       val _ = print_Ints (ws) 
-                       val _ = print_Ints (nl)
-                   in () end; SOME (PROGRAM, !final_list_ref))
+  START : PROGRAM (SOME (PROGRAM, !final_list_ref))
         | (NONE)
 
   (***********************)
@@ -296,20 +236,14 @@ val Stack: stack ref = ref []
   (* Programs *)
 
   PROGRAM : EOF (let
-                   val (str, case_list) = !nice
-                   val (a, b, c, d, _) = !EOF;
+                   val (req, ens, _) = !EOF;
                    val num_list = !new_ref
-                   val (ws, nl, _, _, _) = !final_list_ref
-                   val _ = print_Ints (ws) 
-                   val _ = print_Ints (nl)
                  in
                    new_num := 1;
                    new_ref := [];
-                   final_list_ref := (a, b, num_list, d, !function_cases)
-                   (*printing (!function_cases)*)
-                 end; 
-                 nice := ("", []);
-                 function_cases := []; "")
+                   final_list_ref := (req, ens, num_list);
+                   ""
+                 end)
           | SEMICOLON PROGRAM (SEMICOLON ^ PROGRAM)
           | EXP PROGRAM (EXP ^ PROGRAM)
           | S_DEC' PROGRAM (S_DEC' ^ PROGRAM)
@@ -520,8 +454,8 @@ val Stack: stack ref = ref []
 
   DEC' : VAL VAL_BIND (spacer'(["\n\n", VAL, VAL_BIND]))
        | VAL TYP_VAR_SEQ VAL_BIND (spacer'(["\n\n", VAL, TYP_VAR_SEQ, VAL_BIND]))
-       | ASSERTIONS FUN FVAL_BIND (case_num := 0; spacer'(["\n\n", FUN, FVAL_BIND]))
-       | ASSERTIONS FUN TYP_VAR_SEQ FVAL_BIND (case_num := 0; spacer'(["\n\n", FUN, TYP_VAR_SEQ, FVAL_BIND]))
+       | ASSERTIONS FUN FVAL_BIND (spacer'(["\n\n", FUN, FVAL_BIND]))
+       | ASSERTIONS FUN TYP_VAR_SEQ FVAL_BIND (spacer'(["\n\n", FUN, TYP_VAR_SEQ, FVAL_BIND]))
        | FUN FVAL_BIND (spacer'(["\n\n", FUN, FVAL_BIND]))
        | FUN TYP_VAR_SEQ FVAL_BIND (spacer'(["\n\n", FUN, TYP_VAR_SEQ, FVAL_BIND]))
        | TYPE TYP_BIND (spacer'(["\n\n", TYPE, TYP_BIND]))
@@ -555,141 +489,77 @@ val Stack: stack ref = ref []
   FVALBIND_BASE : VID AT_PAT_LIST EQUALOP EXP (case (peek (!Stack)) of
                          (s', EMPTY)                => spacer'([VID, AT_PAT_LIST, EQUALOP, EXP])
 
-                       | (s', REQ (exp))            => (
-                                                        (*case (!nice) of (str, case_list) => 
-                                                        case (case_list) of y => nice := (VID, (!case_num + 1, spacer'(["let", "in", "if", exp, "then", EXP, "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", "end"])) :: y);
-                                                        case_num := !case_num + 1;*)
-                                                        let
-                                                          val (ws, nl, tb, cm, _) = !final_list_ref
-                                                          val (num, list) = peek_assert (ws)
-                                                          val (req_bool, ens_bool) = !assert_lines
+                       | (s', REQ (exp))            => (let
                                                           val number = !new_num
                                                           val numlist = !new_ref
                                                         in
-                                                          assert_lines := (true, ens_bool);
                                                           Stack := s'; 
-                                                          final_list_ref := (ws, nl, tb, cm, []);
                                                           new_ref := number :: numlist;
                                                           spacer'([VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "<>", "(", exp, ")", "then", 
-                                                                 "raise Fail \" Function", VID, "Error:", "Requires Failure in line", "$", "\"", 
+                                                                 "raise Fail \" Function", VID, "Error:", "Requires Failure in line", "$#$$#$", "\"", 
                                                                  "else", EXP, "end"])
                                                         end)
                                                         
-                       | (s', ENS (exp))            => (
-                                                        (*case (!nice) of (str, case_list) => 
-                                                        case (case_list) of y => nice := (VID, (!case_num + 1, spacer'(["let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp, 
-                                                                                                             "then", "result", "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", "end"])) :: y);
-                                                        case_num := !case_num + 1;*)
-                                                        let
-                                                          val (ws, nl, tb, cm, _) = !final_list_ref
-                                                          val (num, list) = peek_assert (nl)
-                                                          val (req_bool, ens_bool) = !assert_lines
+                       | (s', ENS (exp))            => (let
                                                           val number = !new_num
                                                           val numlist = !new_ref
                                                         in
-                                                          assert_lines := (req_bool, true);
                                                           Stack := s';
-                                                          final_list_ref := (ws, nl, tb, cm, []);
                                                           new_ref := number :: numlist;
                                                           spacer'([VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "<>", "(", exp, ")", "then", 
-                                                                 "raise Fail \" Function", VID, "Error:", "Ensures Failure in line", "%", "\"", 
+                                                                 "raise Fail \" Function", VID, "Error:", "Ensures Failure in line", "%#%%#%", "\"", 
                                                                  "else", EXP, "end"])
                                                         end)
                                                         
                                                         
-                       | (s', BOTH (exp1, exp2))    => (
-                                                        (*case (!nice) of (str, case_list) => 
-                                                        case (case_list) of y => nice := (VID, (!case_num + 1, spacer'(["let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp1, 
-                                                                                            "andalso", exp2, "then", "result", "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", "end"])) :: y);
-                                                        case_num := !case_num + 1;*)
-                                                        let
-                                                          val (ws, nl, tb, cm, _) = !final_list_ref
-                                                          val (num1, list) = peek_assert (ws)
-                                                          val (num2, list2) = peek_assert (nl)
-                                                          (*val _ = print_Ints (ws)
-                                                          val _ = print_Ints (nl)*)
-                                                          (*val _ = print ("BOTH: (" ^ Int.toString (num1) ^ ", " ^ Int.toString (num2) ^ ")\n\n")*)
+                       | (s', BOTH (exp1, exp2))    => (let
                                                           val number = !new_num
                                                           val numlist = !new_ref
                                                         in
-                                                          assert_lines := (true, true);
                                                           Stack := s';
                                                           new_ref := number :: number :: numlist;
-                                                          final_list_ref := (ws, nl, tb, cm, []);
                                                           spacer'([VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "<>", "(", exp1, ")", "then", 
-                                                                 "raise Fail \" Function", VID, "Error:", "Requires Failure in line", "$", "\"", "else if", "<>", "(", exp2, ")", "then", 
-                                                                 "raise Fail \" Function", VID, "Error:", "Ensures Failure in line", "%", "\"", 
+                                                                 "raise Fail \" Function", VID, "Error:", "Requires Failure in line", "$#$$#$", "\"", "else if", "<>", "(", exp2, ")", "then", 
+                                                                 "raise Fail \" Function", VID, "Error:", "Ensures Failure in line", "%#%%#%", "\"", 
                                                                  "else", EXP, "end"])
                                                         end))
 
                 | VID AT_PAT_LIST COLON TYP EQUALOP EXP (case (peek (!Stack)) of
-                         (s', EMPTY)                => (assert_lines := (false, false); spacer'([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, EXP]))
+                         (s', EMPTY)                => (spacer'([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, EXP]))
 
 
-                       | (s', REQ (exp))            => (
-                                                        (*case (!nice) of (str, case_list) => 
-                                                        case (case_list) of y => nice := (VID, (!case_num + 1, spacer'(["let", "in", "if", exp, "then", EXP, "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", "end"])) :: y);
-                                                        case_num := !case_num + 1;*)
-                                                        let
-                                                          val (ws, nl, tb, cm, _) = !final_list_ref
-                                                          val (num, list) = peek_assert (ws)
-                                                          val (req_bool, ens_bool) = !assert_lines
+                       | (s', REQ (exp))            => (let
                                                           val number = !new_num
                                                           val numlist = !new_ref
                                                         in
-                                                          assert_lines := (true, false);
                                                           Stack := s'; 
-                                                          final_list_ref := (ws, nl, tb, cm, []);
                                                           new_ref := number :: numlist;
                                                           spacer'([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "<>", "(", exp, ")", "then", 
-                                                                 "raise Fail \" Function", VID, "Error:", "Requires Failure in line", "$", "\"", 
+                                                                 "raise Fail \" Function", VID, "Error:", "Requires Failure in line", "$#$$#$", "\"", 
                                                                  "else", EXP, "end"])
                                                         end)
                                                         
-                       | (s', ENS (exp))            => (
-                                                        (*case (!nice) of (str, case_list) => 
-                                                        case (case_list) of y => nice := (VID, (!case_num + 1, spacer'(["let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp, 
-                                                                                                             "then", "result", "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", "end"])) :: y);
-                                                        case_num := !case_num + 1;*)
-                                                        let
-                                                          val (ws, nl, tb, cm, _) = !final_list_ref
-                                                          val (num, list) = peek_assert (nl)
-                                                          val (req_bool, ens_bool) = !assert_lines
+                       | (s', ENS (exp))            => (let
                                                           val number = !new_num
                                                           val numlist = !new_ref
                                                         in
-                                                          assert_lines := (false, true);
                                                           Stack := s';
-                                                          final_list_ref := (ws, nl, tb, cm, []);
                                                           new_ref := number :: numlist;
                                                           spacer'([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "<>", "(", exp, ")", "then", 
-                                                                 "raise Fail \" Function", VID, "Error:", "Ensures Failure in line", "%", "\"", 
+                                                                 "raise Fail \" Function", VID, "Error:", "Ensures Failure in line", "%#%%#%", "\"", 
                                                                  "else", EXP, "end"])
                                                         end)
                                                         
                                                         
-                       | (s', BOTH (exp1, exp2))    => (
-                                                        (*case (!nice) of (str, case_list) => 
-                                                        case (case_list) of y => nice := (VID, (!case_num + 1, spacer'(["let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp1, 
-                                                                                            "andalso", exp2, "then", "result", "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", "end"])) :: y);
-                                                        case_num := !case_num + 1;*)
-                                                        let
-                                                          val (ws, nl, tb, cm, _) = !final_list_ref
-                                                          val (num1, list1) = peek_assert (ws)
-                                                          val (num2, list2) = peek_assert (nl)
-                                                          val (req_bool, ens_bool) = !assert_lines
+                       | (s', BOTH (exp1, exp2))    => (let
                                                           val number = !new_num
                                                           val numlist = !new_ref
-                                                          (*val _ = print_Ints (ws)
-                                                          val _ = print_Ints (nl)*)
                                                         in
-                                                          assert_lines := (true, true);
                                                           Stack := s';
-                                                          final_list_ref := (ws, nl, tb, cm, []);
                                                           new_ref := number :: number :: numlist;
                                                           spacer'([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "<>", "(", exp1, ")", "then", 
-                                                                 "raise Fail \" Function", VID, "Error:", "Requires Failure in line", "$", "\"", "else if", "<>", "(", exp2, ")", "then", 
-                                                                 "raise Fail \" Function", VID, "Error:", "Ensures Failure in line", "%", "\"", 
+                                                                 "raise Fail \" Function", VID, "Error:", "Requires Failure in line", "$#$$#$", "\"", "else if", "<>", "(", exp2, ")", "then", 
+                                                                 "raise Fail \" Function", VID, "Error:", "Ensures Failure in line", "%#%%#%", "\"", 
                                                                  "else", EXP, "end"])
                                                         end))
 
@@ -697,52 +567,99 @@ val Stack: stack ref = ref []
                 | OP VID AT_PAT_LIST EQUALOP EXP (case (peek (!Stack)) of
                          (s', EMPTY)                => spacer'([OP, VID, AT_PAT_LIST, EQUALOP, EXP])
 
-                       | (s', REQ (exp))            => (Stack := s'; 
-                                                       spacer'([OP, VID, AT_PAT_LIST, EQUALOP, "let", "in", "if", exp, "then", EXP, "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", " end"]))
-                       | (s', ENS (exp))            => (Stack := s'; 
-                                                       spacer'([OP, VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp, 
-                                                                                                                 "then", "result", "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", " end"]))
-                       | (s', BOTH (exp1, exp2)) => (Stack := s'; 
-                                                       spacer'([OP, VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp1, 
-                                                                                               "andalso", exp2, "then", "result", "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", " end"])))
+                       | (s', REQ (exp))            => (let
+                                                          val number = !new_num
+                                                          val numlist = !new_ref
+                                                        in
+                                                          Stack := s';
+                                                          new_ref := number :: numlist;
+                                                          spacer'([OP, VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "<>", "(", exp, ")", "then", 
+                                                                 "raise Fail \" Function", VID, "Error:", "Requires Failure in line", "$#$$#$", "\"", 
+                                                                 "else", EXP, "end"])
+                                                        end)
+
+                       | (s', ENS (exp))            => (let
+                                                          val number = !new_num
+                                                          val numlist = !new_ref
+                                                        in
+                                                          Stack := s'; 
+                                                          new_ref := number :: numlist;
+                                                          spacer'([OP, VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "<>", "(", exp, ")", "then", 
+                                                                 "raise Fail \" Function", VID, "Error:", "Ensures Failure in line", "%#%%#%", "\"", 
+                                                                 "else", EXP, "end"])
+                                                        end)
+
+                       | (s', BOTH (exp1, exp2))    => (let
+                                                          val number = !new_num
+                                                          val numlist = !new_ref
+                                                        in
+                                                          Stack := s'; 
+                                                          spacer'([OP, VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "<>", "(", exp1, ")", "then", 
+                                                                 "raise Fail \" Function", VID, "Error:", "Requires Failure in line", "$#$$#$", "\"", "else if", "<>", "(", exp2, ")", "then", 
+                                                                 "raise Fail \" Function", VID, "Error:", "Ensures Failure in line", "%#%%#%", "\"", 
+                                                                 "else", EXP, "end"])
+                                                        end))
 
                 | OP VID AT_PAT_LIST COLON TYP EQUALOP EXP (case (peek (!Stack)) of
                          (s', EMPTY)                => spacer'([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, EXP])
 
-                       | (s', REQ (exp))            => (Stack := s'; 
-                                                       spacer'([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "in", "if", exp, "then", EXP, "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", " end"]))
-                       | (s', ENS (exp))            => (Stack := s'; 
-                                                       spacer'([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp, 
-                                                                                                                             "then", "result", "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", " end"]))
-                       | (s', BOTH (exp1, exp2)) => (Stack := s'; 
-                                                       spacer'([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp1, 
-                                                                                                           "andalso", exp2, "then", "result", "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", " end"])))
-  
+                       | (s', REQ (exp))            => (let
+                                                          val number = !new_num
+                                                          val numlist = !new_ref
+                                                        in
+                                                          Stack := s'; 
+                                                          spacer'([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "<>", "(", exp, ")", "then", 
+                                                                 "raise Fail \" Function", VID, "Error:", "Requires Failure in line", "$#$$#$", "\"", 
+                                                                 "else", EXP, "end"])
+                                                        end)
+
+                       | (s', ENS (exp))            => (let
+                                                          val number = !new_num
+                                                          val numlist = !new_ref
+                                                        in
+                                                          Stack := s'; 
+                                                          spacer'([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "<>", "(", exp, ")", "then", 
+                                                                 "raise Fail \" Function", VID, "Error:", "Ensures Failure in line", "%#%%#%", "\"", 
+                                                                 "else", EXP, "end"])
+                                                        end)
+
+                       | (s', BOTH (exp1, exp2))    => (let
+                                                          val number = !new_num
+                                                          val numlist = !new_ref
+                                                        in
+                                                          Stack := s'; 
+                                                          spacer'([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "<>", "(", exp1, ")", "then", 
+                                                                 "raise Fail \" Function", VID, "Error:", "Requires Failure in line", "$#$$#$", "\"", "else if", "<>", "(", exp2, ")", "then", 
+                                                                 "raise Fail \" Function", VID, "Error:", "Ensures Failure in line", "%#%%#%", "\"", 
+                                                                 "else", EXP, "end"])
+                                                        end))
+
   FVAL_BIND : FVALBIND_BASE (let
                                val (s', _) = pop (!Stack)
-                               val _ = function_cases := !(nice) :: !function_cases
-                               val _ = nice := ("", [])
-                               val _ = line_remove (!assert_lines)
-                               val (ws, nl, [], [], []) = !final_list_ref
-                               val _ = print_Bools (!assert_lines) 
-(*                               val _ = print_Ints (nl)
-*)                             in 
+                             in 
                                Stack := s';
                                new_num := !new_num + 1;
-                               assert_lines := (false, false)
-                             end;    spacer'([FVALBIND_BASE, ""]))
+                               spacer'([FVALBIND_BASE, ""])
+                             end)
 
-            | FVALBIND_BASE BAR FVAL_BIND (spacer'([FVALBIND_BASE, "", BAR, FVAL_BIND]))
+            | FVALBIND_BASE BAR FVAL_BIND (spacer'([FVALBIND_BASE, " ", BAR, FVAL_BIND]))
+
             | FVALBIND_BASE AND FVAL_BIND (let
                                              val (s', _) = pop (!Stack)
                                            in 
-                                             Stack := s'
-                                           end;    spacer'([FVALBIND_BASE, AND, FVAL_BIND]))
+                                             Stack := s';
+                                             new_num := !new_num + 1;
+                                             spacer'([FVALBIND_BASE, AND, FVAL_BIND])
+                                           end)    
+
             | FVALBIND_BASE AND ASSERTIONS FVAL_BIND (let
                                                        val (s', _) = pop (!Stack)
                                                      in 
-                                                       Stack := s'
-                                                     end;    spacer'([FVALBIND_BASE, "", AND, "", FVAL_BIND]))
+                                                       Stack := s';
+                                                       new_num := !new_num + 1;
+                                                       spacer'([FVALBIND_BASE, "", AND, "", FVAL_BIND])
+                                                     end)    
+
 
   TYP_BIND' : TYP_CON EQUALOP TYP (spacer'([TYP_CON, EQUALOP, TYP]))
             | TYP_VAR_SEQ TYP_CON EQUALOP TYP (spacer'([TYP_VAR_SEQ, TYP_CON, EQUALOP, TYP]))
