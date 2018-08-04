@@ -11,3 +11,5 @@ fun add (x: int) = x + 1
 !*)
 fun sub (x: int): int = x - 1
   | sub (0) = ("")
+
+val ## = ("")
