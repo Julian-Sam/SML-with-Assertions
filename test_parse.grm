@@ -3,7 +3,8 @@ open Int
 exception LabError
 exception AssertionError
 fun concatWith_(x, lis) = concatWith (x) (lis);
-fun spacer(lis) = concatWith_("",lis);
+fun spacer'(lis) = concatWith_("",lis);
+fun spacer'(lis) = concatWith_(" ",lis);
 
 datatype Assert_Type = 
     EMPTY
@@ -11,7 +12,66 @@ datatype Assert_Type =
   | ENS of string
   | BOTH of string * string
 
-val final_list_ref: (int list * int list * int list) ref = ref ([], [], []) 
+val final_list_ref: (int list * int list * int list * (string * int) list * (string * (int * string) list) list) ref = ref ([], [], [], [], []) 
+val nice: (string * (int * string) list) ref = ref ("", [])
+val case_num: int ref = ref 0
+val function_cases: ((string * (int * string) list) list) ref = ref []
+val assert_lines: (bool * bool) ref = ref (false, false)
+val new_num = ref 1
+val new_ref: int list ref = ref []
+
+
+fun peek_assert (solid: int list) = case (solid) of 
+  nil => (1, [])
+| value :: solid' => (value, solid')
+
+fun line_remove (x: bool, y: bool) = 
+  let 
+    val (ws, nl, _, _, _) = !final_list_ref
+    val (_, list1) = peek_assert (ws)
+    val (_, list2) = peek_assert (nl)
+  in
+  case (x, y) of 
+    (true, true) => final_list_ref := (list1, list2, [], [], [])
+  | (false, true) => final_list_ref := (ws, list2, [], [], [])
+  | (true, false) => final_list_ref := (list1, nl, [], [], [])
+  | (false, false) => final_list_ref := (ws, nl, [], [], [])
+ end
+
+fun print_Ints (x) =
+  case x of 
+    nil => print ("[]\n\n")
+  | i :: x' => (let
+                   val _ = print (Int.toString (i) ^ " :: ")
+                 in
+                   print_Ints (x')
+                 end)
+
+fun print_Bools (x, y) =
+  print ("REQUIRES ASSERT = " ^ Bool.toString (x) ^ "\nENSURES ASSERT = " ^ Bool.toString (y) ^ "\n\n")
+
+fun print_Cases (fun_name, cases) = 
+  let
+    val _ = print ("Function Name: " ^ fun_name ^ "\n\n");
+  in
+    case (cases) of
+       nil => ()
+    | (num, case_string) :: cases' => (let
+                                        val _ = print ("Case Number: " ^ Int.toString (num) ^ "\n")
+                                        val _ = print ("Case: " ^ case_string ^ "\n\n")
+                                      in
+                                        print_Cases (fun_name, cases')
+                                      end)
+  end
+
+fun printing (cases) = 
+  case (cases) of 
+    nil => []
+  | nice :: cases' => let 
+                        val _ = print_Cases (nice)
+                      in 
+                        printing (cases')
+                      end
 
 type stack = Assert_Type list
 
@@ -36,7 +96,7 @@ val Stack: stack ref = ref []
 
 %pos int
 
-%term EOF of (int list * int list * int list) ref
+%term EOF of (int list * int list * int list * (string * int) list * ((string * (int * string) list) list)) ref
     | INT of string
     | REAL of string
     | WORD of string
@@ -112,7 +172,7 @@ val Stack: stack ref = ref []
     | ID of string
 
 
-%nonterm   START of (string * ((int list * int list * int list))) option
+%nonterm   START of (string * (int list * int list * int list * (string  * int) list * (string * (int * string) list) list)) option
          | CON of string
          | VID of string
          | LONG_VID of string
@@ -209,6 +269,14 @@ val Stack: stack ref = ref []
          | ALL_IDs of string 
          | TY_CON of string 
 
+         | EXP_A_LIST of string
+         | EXP_A_SEQ of string
+         | AT_EXP_A of string
+         | EXP_A_ROW of string
+         | APP_EXP_A of string
+         | INF_EXP_A of string
+         | EXP_A of string
+
 %name Sample
 
 %noshift EOF
@@ -217,14 +285,31 @@ val Stack: stack ref = ref []
 
   (* Start State *)
 
-  START : PROGRAM (SOME (PROGRAM, !final_list_ref))
+  START : PROGRAM (let val (ws, nl, _, _, _) = !final_list_ref
+                       val _ = print_Ints (ws) 
+                       val _ = print_Ints (nl)
+                   in () end; SOME (PROGRAM, !final_list_ref))
         | (NONE)
 
   (***********************)
 
   (* Programs *)
 
-  PROGRAM : EOF (final_list_ref := !EOF; "")
+  PROGRAM : EOF (let
+                   val (str, case_list) = !nice
+                   val (a, b, c, d, _) = !EOF;
+                   val num_list = !new_ref
+                   val (ws, nl, _, _, _) = !final_list_ref
+                   val _ = print_Ints (ws) 
+                   val _ = print_Ints (nl)
+                 in
+                   new_num := 1;
+                   new_ref := [];
+                   final_list_ref := (a, b, num_list, d, !function_cases)
+                   (*printing (!function_cases)*)
+                 end; 
+                 nice := ("", []);
+                 function_cases := []; "")
           | SEMICOLON PROGRAM (SEMICOLON ^ PROGRAM)
           | EXP PROGRAM (EXP ^ PROGRAM)
           | S_DEC' PROGRAM (S_DEC' ^ PROGRAM)
@@ -257,7 +342,7 @@ val Stack: stack ref = ref []
   ALL_IDs : ID (ID)
           | SYMBOLS (SYMBOLS)
 
-  QID : ALL_IDs DOT QID (spacer([ALL_IDs, DOT, QID]))
+  QID : ALL_IDs DOT QID (spacer'([ALL_IDs, DOT, QID]))
       | VID (VID)
 
     (* Type Constructor *)
@@ -316,15 +401,15 @@ val Stack: stack ref = ref []
   AT_EXP : CON (CON)
          | LONG_VID (LONG_VID)
          | OP LONG_VID (OP ^ LONG_VID)
-         | LCURLY EXP_ROW RCURLY (spacer([LCURLY, EXP_ROW, RCURLY]))
+         | LCURLY EXP_ROW RCURLY (spacer'([LCURLY, EXP_ROW, RCURLY]))
          | HASH LAB (HASH ^ LAB)
          | LPAREN RPAREN (LPAREN ^ RPAREN)
-         | LPAREN EXP_LIST RPAREN (spacer([LPAREN, EXP_LIST, RPAREN])) 
+         | LPAREN EXP_LIST RPAREN (spacer'([LPAREN, EXP_LIST, RPAREN])) 
          | LBRACK RBRACK (LBRACK ^ RBRACK) 
-         | LBRACK EXP_LIST RBRACK (spacer([LBRACK, EXP_LIST, RBRACK])) 
-         | LPAREN EXP_SEQ RPAREN (spacer([LPAREN, EXP_SEQ, RPAREN]))
-         | LET DEC IN EXP END (spacer([LET, DEC, IN, EXP, END]))
-         | LET DEC IN EXP_SEQ END (spacer([LET, DEC, IN, EXP_SEQ, END]))
+         | LBRACK EXP_LIST RBRACK (spacer'([LBRACK, EXP_LIST, RBRACK])) 
+         | LPAREN EXP_SEQ RPAREN (spacer'([LPAREN, EXP_SEQ, RPAREN]))
+         | LET DEC IN EXP END (spacer'([LET, DEC, IN, EXP, END]))
+         | LET DEC IN EXP_SEQ END (spacer'([LET, DEC, IN, EXP_SEQ, END]))
 
   EXP_ROW : LAB EQUALOP EXP (LAB ^ "=" ^ EXP)
           | LAB EQUALOP EXP COMMA EXP_ROW (LAB ^ "=" ^ EXP ^ COMMA ^ EXP_ROW)
@@ -336,20 +421,63 @@ val Stack: stack ref = ref []
           | INF_EXP VID INF_EXP (INF_EXP1 ^ VID ^ INF_EXP2)
 
   EXP : INF_EXP (INF_EXP)
-      | EXP COLON TYP (spacer([EXP, COLON, TYP]))
-      | EXP ANDALSO EXP (spacer([EXP1, ANDALSO, EXP2])) 
-      | EXP ORELSE EXP (spacer([EXP1, ORELSE, EXP2])) 
-      | EXP HANDLE MATCH (spacer([EXP, HANDLE, MATCH]))
-      | RAISE EXP (spacer([RAISE, EXP]))
-      | IF EXP THEN EXP ELSE EXP (spacer([IF, EXP1, THEN, EXP2, ELSE, EXP3])) 
-      | WHILE EXP DO EXP (spacer([WHILE, EXP1, DO, EXP2])) 
-      | CASE EXP OF MATCH (spacer([CASE, EXP, OF, MATCH])) 
-      | FN MATCH (spacer([FN, MATCH]))
+      | EXP COLON TYP (spacer'([EXP, COLON, TYP]))
+      | EXP ANDALSO EXP (spacer'([EXP1, ANDALSO, EXP2])) 
+      | EXP ORELSE EXP (spacer'([EXP1, ORELSE, EXP2])) 
+      | EXP HANDLE MATCH (spacer'([EXP, HANDLE, MATCH]))
+      | RAISE EXP (spacer'([RAISE, EXP]))
+      | IF EXP THEN EXP ELSE EXP (spacer'([IF, EXP1, THEN, EXP2, ELSE, EXP3])) 
+      | WHILE EXP DO EXP (spacer'([WHILE, EXP1, DO, EXP2])) 
+      | CASE EXP OF MATCH (spacer'([CASE, EXP, OF, MATCH]))  
+      | FN MATCH (spacer'([FN, MATCH]))
 
-  MRULE : PAT DARROW EXP (spacer([PAT, DARROW, EXP]))
+  MRULE : PAT DARROW EXP (spacer'([PAT, DARROW, EXP]))
 
   MATCH : MRULE (MRULE)
         | MRULE BAR MATCH (MRULE ^ "" ^ BAR ^ MATCH)
+
+  (***********************)
+
+  (* Assertion_Expressions *)
+
+  EXP_A_LIST : EXP_A (EXP_A)
+             | EXP_A COMMA EXP_A_LIST (EXP_A ^ COMMA ^ EXP_A_LIST)
+
+  EXP_A_SEQ : EXP_A SEMICOLON EXP_A (EXP_A1 ^ SEMICOLON ^ EXP_A2)
+            | EXP_A SEMICOLON EXP_A_SEQ (EXP_A ^ SEMICOLON ^ EXP_A_SEQ)
+
+  AT_EXP_A : CON (CON)
+           | LONG_VID (LONG_VID)
+           | OP LONG_VID (OP ^ LONG_VID)
+           | LCURLY EXP_A_ROW RCURLY (spacer'([LCURLY, EXP_A_ROW, RCURLY]))
+           | HASH LAB (HASH ^ LAB)
+           | LPAREN RPAREN (LPAREN ^ RPAREN)
+           | LPAREN EXP_A_LIST RPAREN (spacer'([LPAREN, EXP_A_LIST, RPAREN])) 
+           | LBRACK RBRACK (LBRACK ^ RBRACK) 
+           | LBRACK EXP_A_LIST RBRACK (spacer'([LBRACK, EXP_A_LIST, RBRACK])) 
+           | LPAREN EXP_A_SEQ RPAREN (spacer'([LPAREN, EXP_A_SEQ, RPAREN]))
+           | LET DEC IN EXP_A END (spacer'([LET, DEC, IN, EXP_A, END]))
+           | LET DEC IN EXP_A_SEQ END (spacer'([LET, DEC, IN, EXP_A_SEQ, END]))
+
+  EXP_A_ROW : LAB EQUALOP EXP_A (LAB ^ "=" ^ EXP_A)
+            | LAB EQUALOP EXP_A COMMA EXP_A_ROW (LAB ^ "=" ^ EXP_A ^ COMMA ^ EXP_A_ROW)
+
+  APP_EXP_A : AT_EXP_A (AT_EXP_A)
+            | APP_EXP_A AT_EXP_A (APP_EXP_A ^ AT_EXP_A)
+
+  INF_EXP_A : APP_EXP_A (APP_EXP_A)
+            | INF_EXP_A VID INF_EXP_A (INF_EXP_A1 ^ VID ^ INF_EXP_A2)
+
+  EXP_A : INF_EXP_A (INF_EXP_A)
+        | EXP_A COLON TYP (spacer'([EXP_A, COLON, TYP]))
+        | EXP_A ANDALSO EXP_A (spacer'([EXP_A1, ANDALSO, EXP_A2])) 
+        | EXP_A ORELSE EXP_A (spacer'([EXP_A1, ORELSE, EXP_A2])) 
+        | EXP_A HANDLE MATCH (spacer'([EXP_A, HANDLE, MATCH]))
+        | RAISE EXP_A (spacer'([RAISE, EXP_A]))
+        | IF EXP_A THEN EXP_A ELSE EXP_A (spacer'([IF, EXP_A1, THEN, EXP_A2, ELSE, EXP_A3])) 
+        | WHILE EXP_A DO EXP_A (spacer'([WHILE, EXP_A1, DO, EXP_A2])) 
+        | CASE EXP_A OF MATCH (spacer'([CASE, EXP_A, OF, MATCH]))  
+        | FN MATCH (spacer'([FN, MATCH]))
 
   (***********************)
 
@@ -385,142 +513,268 @@ val Stack: stack ref = ref []
   ASSERTIONS : LASSERT ASSERT_EXP RASSERT ("")
 
   LONG_STR_ID_LIST : LONG_STR_ID (LONG_STR_ID)
-                   | LONG_STR_ID LONG_STR_ID_LIST (spacer([LONG_STR_ID, LONG_STR_ID_LIST]))
+                   | LONG_STR_ID LONG_STR_ID_LIST (spacer'([LONG_STR_ID, LONG_STR_ID_LIST]))
 
   VID_LIST : VID (VID)
            | VID VID_LIST (VID ^ VID_LIST)
 
-  DEC' : VAL VAL_BIND (spacer(["", VAL, VAL_BIND]))
-       | VAL TYP_VAR_SEQ VAL_BIND (spacer(["", VAL, TYP_VAR_SEQ, VAL_BIND]))
-       | ASSERTIONS FUN FVAL_BIND (spacer(["", FUN, FVAL_BIND]))
-       | ASSERTIONS FUN TYP_VAR_SEQ FVAL_BIND (spacer(["", FUN, TYP_VAR_SEQ, FVAL_BIND]))
-       | FUN FVAL_BIND (spacer(["", FUN, FVAL_BIND]))
-       | FUN TYP_VAR_SEQ FVAL_BIND (spacer(["", FUN, TYP_VAR_SEQ, FVAL_BIND]))
-       | TYPE TYP_BIND (spacer(["", TYPE, TYP_BIND]))
-       | DATATYPE DAT_BIND (spacer(["", DATATYPE, DAT_BIND])) 
-       | DATATYPE DAT_BIND WITHTYPE TYP_BIND (spacer(["", DATATYPE, DAT_BIND, WITHTYPE, TYP_BIND]))
-       | DATATYPE TYP_CON EQUALOP DATATYPE LONG_TYP_CON (spacer(["", DATATYPE, TYP_CON, EQUALOP, DATATYPE, LONG_TYP_CON]))
-       | ABSTYPE DAT_BIND WITH DEC END (spacer(["", ABSTYPE, DAT_BIND, WITH, DEC, END]))
-       | ABSTYPE DAT_BIND WITHTYPE TYP_BIND WITH DEC END (spacer(["", ABSTYPE, DAT_BIND, WITHTYPE, TYP_BIND, WITH, DEC, END]))
-       | EXCEPTION EX_BIND (spacer(["", EXCEPTION, EX_BIND]))
-       | OPEN LONG_STR_ID_LIST (spacer(["", OPEN, LONG_STR_ID_LIST]))
-       | INFIX VID_LIST (spacer(["", INFIX, VID_LIST]))
-       | INFIXR VID_LIST (spacer(["", INFIXR, VID_LIST]))
-       | INFIX INT VID_LIST (spacer(["", INFIX, INT, VID_LIST]))
-       | INFIXR INT VID_LIST (spacer(["", INFIXR, INT, VID_LIST]))
-       | NONFIX VID_LIST (spacer(["", NONFIX, VID_LIST]))
+  DEC' : VAL VAL_BIND (spacer'(["\n\n", VAL, VAL_BIND]))
+       | VAL TYP_VAR_SEQ VAL_BIND (spacer'(["\n\n", VAL, TYP_VAR_SEQ, VAL_BIND]))
+       | ASSERTIONS FUN FVAL_BIND (case_num := 0; spacer'(["\n\n", FUN, FVAL_BIND]))
+       | ASSERTIONS FUN TYP_VAR_SEQ FVAL_BIND (case_num := 0; spacer'(["\n\n", FUN, TYP_VAR_SEQ, FVAL_BIND]))
+       | FUN FVAL_BIND (spacer'(["\n\n", FUN, FVAL_BIND]))
+       | FUN TYP_VAR_SEQ FVAL_BIND (spacer'(["\n\n", FUN, TYP_VAR_SEQ, FVAL_BIND]))
+       | TYPE TYP_BIND (spacer'(["\n\n", TYPE, TYP_BIND]))
+       | DATATYPE DAT_BIND (spacer'(["\n\n", DATATYPE, DAT_BIND])) 
+       | DATATYPE DAT_BIND WITHTYPE TYP_BIND (spacer'(["\n\n", DATATYPE, DAT_BIND, WITHTYPE, TYP_BIND]))
+       | DATATYPE TYP_CON EQUALOP DATATYPE LONG_TYP_CON (spacer'(["", DATATYPE, TYP_CON, EQUALOP, DATATYPE, LONG_TYP_CON]))
+       | ABSTYPE DAT_BIND WITH DEC END (spacer'(["", ABSTYPE, DAT_BIND, WITH, DEC, END]))
+       | ABSTYPE DAT_BIND WITHTYPE TYP_BIND WITH DEC END (spacer'(["", ABSTYPE, DAT_BIND, WITHTYPE, TYP_BIND, WITH, DEC, END]))
+       | EXCEPTION EX_BIND (spacer'(["", EXCEPTION, EX_BIND]))
+       | OPEN LONG_STR_ID_LIST (spacer'(["", OPEN, LONG_STR_ID_LIST]))
+       | INFIX VID_LIST (spacer'(["", INFIX, VID_LIST]))
+       | INFIXR VID_LIST (spacer'(["", INFIXR, VID_LIST]))
+       | INFIX INT VID_LIST (spacer'(["", INFIX, INT, VID_LIST]))
+       | INFIXR INT VID_LIST (spacer'(["", INFIXR, INT, VID_LIST]))
+       | NONFIX VID_LIST (spacer'(["", NONFIX, VID_LIST]))
 
 
   DEC: (* EMPTY *) ("") 
      | DEC' DEC ("" ^ DEC' ^ DEC)
      | SEMICOLON DEC (SEMICOLON ^ DEC)
-     | LOCAL DEC IN DEC END DEC (spacer([LOCAL, DEC1, IN, DEC2, END, DEC3]))
+     | LOCAL DEC IN DEC END DEC (spacer'([LOCAL, DEC1, IN, DEC2, END, DEC3]))
 
 
-  VAL_BIND : PAT EQUALOP EXP (spacer([PAT, EQUALOP, EXP]))
-           | PAT EQUALOP EXP AND VAL_BIND (spacer([PAT, EQUALOP, EXP, AND, VAL_BIND]))
-           | REC VAL_BIND (spacer([REC, VAL_BIND]))
+  VAL_BIND : PAT EQUALOP EXP (spacer'([PAT, EQUALOP, EXP]))
+           | PAT EQUALOP EXP AND VAL_BIND (spacer'([PAT, EQUALOP, EXP, AND, VAL_BIND]))
+           | REC VAL_BIND (spacer'([REC, VAL_BIND]))
 
   AT_PAT_LIST : AT_PAT (AT_PAT)
               | AT_PAT AT_PAT_LIST (AT_PAT ^ AT_PAT_LIST)
 
   FVALBIND_BASE : VID AT_PAT_LIST EQUALOP EXP (case (peek (!Stack)) of
-                         (s', EMPTY)                => spacer([VID, AT_PAT_LIST, EQUALOP, EXP])
+                         (s', EMPTY)                => spacer'([VID, AT_PAT_LIST, EQUALOP, EXP])
 
-                       | (s', REQ (exp))            => (Stack := s'; 
-                                                       spacer([VID, AT_PAT_LIST, EQUALOP, "let", "in", "if", exp, "then", EXP, "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", " end"]))
-                       | (s', ENS (exp))            => (Stack := s'; 
-                                                       spacer([VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp, 
-                                                                                                             "then", "result", "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", " end"]))
-                       | (s', BOTH (exp1, exp2)) => (Stack := s'; 
-                                                       spacer([VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp1, 
-                                                                                            "andalso", exp2, "then", "result", "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", " end"])))
-               
+                       | (s', REQ (exp))            => (
+                                                        (*case (!nice) of (str, case_list) => 
+                                                        case (case_list) of y => nice := (VID, (!case_num + 1, spacer'(["let", "in", "if", exp, "then", EXP, "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", "end"])) :: y);
+                                                        case_num := !case_num + 1;*)
+                                                        let
+                                                          val (ws, nl, tb, cm, _) = !final_list_ref
+                                                          val (num, list) = peek_assert (ws)
+                                                          val (req_bool, ens_bool) = !assert_lines
+                                                          val number = !new_num
+                                                          val numlist = !new_ref
+                                                        in
+                                                          assert_lines := (true, ens_bool);
+                                                          Stack := s'; 
+                                                          final_list_ref := (ws, nl, tb, cm, []);
+                                                          new_ref := number :: numlist;
+                                                          spacer'([VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "<>", "(", exp, ")", "then", 
+                                                                 "raise Fail \" Function", VID, "Error:", "Requires Failure in line", "$", "\"", 
+                                                                 "else", EXP, "end"])
+                                                        end)
+                                                        
+                       | (s', ENS (exp))            => (
+                                                        (*case (!nice) of (str, case_list) => 
+                                                        case (case_list) of y => nice := (VID, (!case_num + 1, spacer'(["let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp, 
+                                                                                                             "then", "result", "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", "end"])) :: y);
+                                                        case_num := !case_num + 1;*)
+                                                        let
+                                                          val (ws, nl, tb, cm, _) = !final_list_ref
+                                                          val (num, list) = peek_assert (nl)
+                                                          val (req_bool, ens_bool) = !assert_lines
+                                                          val number = !new_num
+                                                          val numlist = !new_ref
+                                                        in
+                                                          assert_lines := (req_bool, true);
+                                                          Stack := s';
+                                                          final_list_ref := (ws, nl, tb, cm, []);
+                                                          new_ref := number :: numlist;
+                                                          spacer'([VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "<>", "(", exp, ")", "then", 
+                                                                 "raise Fail \" Function", VID, "Error:", "Ensures Failure in line", "%", "\"", 
+                                                                 "else", EXP, "end"])
+                                                        end)
+                                                        
+                                                        
+                       | (s', BOTH (exp1, exp2))    => (
+                                                        (*case (!nice) of (str, case_list) => 
+                                                        case (case_list) of y => nice := (VID, (!case_num + 1, spacer'(["let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp1, 
+                                                                                            "andalso", exp2, "then", "result", "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", "end"])) :: y);
+                                                        case_num := !case_num + 1;*)
+                                                        let
+                                                          val (ws, nl, tb, cm, _) = !final_list_ref
+                                                          val (num1, list) = peek_assert (ws)
+                                                          val (num2, list2) = peek_assert (nl)
+                                                          (*val _ = print_Ints (ws)
+                                                          val _ = print_Ints (nl)*)
+                                                          (*val _ = print ("BOTH: (" ^ Int.toString (num1) ^ ", " ^ Int.toString (num2) ^ ")\n\n")*)
+                                                          val number = !new_num
+                                                          val numlist = !new_ref
+                                                        in
+                                                          assert_lines := (true, true);
+                                                          Stack := s';
+                                                          new_ref := number :: number :: numlist;
+                                                          final_list_ref := (ws, nl, tb, cm, []);
+                                                          spacer'([VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "<>", "(", exp1, ")", "then", 
+                                                                 "raise Fail \" Function", VID, "Error:", "Requires Failure in line", "$", "\"", "else if", "<>", "(", exp2, ")", "then", 
+                                                                 "raise Fail \" Function", VID, "Error:", "Ensures Failure in line", "%", "\"", 
+                                                                 "else", EXP, "end"])
+                                                        end))
+
                 | VID AT_PAT_LIST COLON TYP EQUALOP EXP (case (peek (!Stack)) of
-                         (s', EMPTY)                => spacer([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, EXP])
+                         (s', EMPTY)                => (assert_lines := (false, false); spacer'([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, EXP]))
 
-                       | (s', REQ (exp))            => (Stack := s'; 
-                                                       spacer([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "in", "if", exp, "then", EXP, "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", " end"]))
-                       | (s', ENS (exp))            => (Stack := s'; 
-                                                       spacer([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp, 
-                                                                                                             "then", "result", "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", " end"]))
-                       | (s', BOTH (exp1, exp2)) => (Stack := s'; 
-                                                      spacer([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp1, 
-                                                                                            "andalso", exp2, "then", "result", "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", " end"])))
+
+                       | (s', REQ (exp))            => (
+                                                        (*case (!nice) of (str, case_list) => 
+                                                        case (case_list) of y => nice := (VID, (!case_num + 1, spacer'(["let", "in", "if", exp, "then", EXP, "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", "end"])) :: y);
+                                                        case_num := !case_num + 1;*)
+                                                        let
+                                                          val (ws, nl, tb, cm, _) = !final_list_ref
+                                                          val (num, list) = peek_assert (ws)
+                                                          val (req_bool, ens_bool) = !assert_lines
+                                                          val number = !new_num
+                                                          val numlist = !new_ref
+                                                        in
+                                                          assert_lines := (true, false);
+                                                          Stack := s'; 
+                                                          final_list_ref := (ws, nl, tb, cm, []);
+                                                          new_ref := number :: numlist;
+                                                          spacer'([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "<>", "(", exp, ")", "then", 
+                                                                 "raise Fail \" Function", VID, "Error:", "Requires Failure in line", "$", "\"", 
+                                                                 "else", EXP, "end"])
+                                                        end)
+                                                        
+                       | (s', ENS (exp))            => (
+                                                        (*case (!nice) of (str, case_list) => 
+                                                        case (case_list) of y => nice := (VID, (!case_num + 1, spacer'(["let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp, 
+                                                                                                             "then", "result", "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", "end"])) :: y);
+                                                        case_num := !case_num + 1;*)
+                                                        let
+                                                          val (ws, nl, tb, cm, _) = !final_list_ref
+                                                          val (num, list) = peek_assert (nl)
+                                                          val (req_bool, ens_bool) = !assert_lines
+                                                          val number = !new_num
+                                                          val numlist = !new_ref
+                                                        in
+                                                          assert_lines := (false, true);
+                                                          Stack := s';
+                                                          final_list_ref := (ws, nl, tb, cm, []);
+                                                          new_ref := number :: numlist;
+                                                          spacer'([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "<>", "(", exp, ")", "then", 
+                                                                 "raise Fail \" Function", VID, "Error:", "Ensures Failure in line", "%", "\"", 
+                                                                 "else", EXP, "end"])
+                                                        end)
+                                                        
+                                                        
+                       | (s', BOTH (exp1, exp2))    => (
+                                                        (*case (!nice) of (str, case_list) => 
+                                                        case (case_list) of y => nice := (VID, (!case_num + 1, spacer'(["let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp1, 
+                                                                                            "andalso", exp2, "then", "result", "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", "end"])) :: y);
+                                                        case_num := !case_num + 1;*)
+                                                        let
+                                                          val (ws, nl, tb, cm, _) = !final_list_ref
+                                                          val (num1, list1) = peek_assert (ws)
+                                                          val (num2, list2) = peek_assert (nl)
+                                                          val (req_bool, ens_bool) = !assert_lines
+                                                          val number = !new_num
+                                                          val numlist = !new_ref
+                                                          (*val _ = print_Ints (ws)
+                                                          val _ = print_Ints (nl)*)
+                                                        in
+                                                          assert_lines := (true, true);
+                                                          Stack := s';
+                                                          final_list_ref := (ws, nl, tb, cm, []);
+                                                          new_ref := number :: number :: numlist;
+                                                          spacer'([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "<>", "(", exp1, ")", "then", 
+                                                                 "raise Fail \" Function", VID, "Error:", "Requires Failure in line", "$", "\"", "else if", "<>", "(", exp2, ")", "then", 
+                                                                 "raise Fail \" Function", VID, "Error:", "Ensures Failure in line", "%", "\"", 
+                                                                 "else", EXP, "end"])
+                                                        end))
+
 
                 | OP VID AT_PAT_LIST EQUALOP EXP (case (peek (!Stack)) of
-                         (s', EMPTY)                => spacer([OP, VID, AT_PAT_LIST, EQUALOP, EXP])
+                         (s', EMPTY)                => spacer'([OP, VID, AT_PAT_LIST, EQUALOP, EXP])
 
                        | (s', REQ (exp))            => (Stack := s'; 
-                                                       spacer([OP, VID, AT_PAT_LIST, EQUALOP, "let", "in", "if", exp, "then", EXP, "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", " end"]))
+                                                       spacer'([OP, VID, AT_PAT_LIST, EQUALOP, "let", "in", "if", exp, "then", EXP, "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", " end"]))
                        | (s', ENS (exp))            => (Stack := s'; 
-                                                       spacer([OP, VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp, 
+                                                       spacer'([OP, VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp, 
                                                                                                                  "then", "result", "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", " end"]))
                        | (s', BOTH (exp1, exp2)) => (Stack := s'; 
-                                                       spacer([OP, VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp1, 
+                                                       spacer'([OP, VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp1, 
                                                                                                "andalso", exp2, "then", "result", "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", " end"])))
 
                 | OP VID AT_PAT_LIST COLON TYP EQUALOP EXP (case (peek (!Stack)) of
-                         (s', EMPTY)                => spacer([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, EXP])
+                         (s', EMPTY)                => spacer'([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, EXP])
 
                        | (s', REQ (exp))            => (Stack := s'; 
-                                                       spacer([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "in", "if", exp, "then", EXP, "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", " end"]))
+                                                       spacer'([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "in", "if", exp, "then", EXP, "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", " end"]))
                        | (s', ENS (exp))            => (Stack := s'; 
-                                                       spacer([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp, 
+                                                       spacer'([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp, 
                                                                                                                              "then", "result", "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", " end"]))
                        | (s', BOTH (exp1, exp2)) => (Stack := s'; 
-                                                       spacer([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp1, 
+                                                       spacer'([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, "(" ^ EXP ^ ")", "in", "if", exp1, 
                                                                                                            "andalso", exp2, "then", "result", "else", "raise Fail \"Assertion error in function " ^ VID ^ "\"", " end"])))
   
   FVAL_BIND : FVALBIND_BASE (let
                                val (s', _) = pop (!Stack)
-                             in 
-                               Stack := s'
-                             end;    spacer([FVALBIND_BASE, ""]))
+                               val _ = function_cases := !(nice) :: !function_cases
+                               val _ = nice := ("", [])
+                               val _ = line_remove (!assert_lines)
+                               val (ws, nl, [], [], []) = !final_list_ref
+                               val _ = print_Bools (!assert_lines) 
+(*                               val _ = print_Ints (nl)
+*)                             in 
+                               Stack := s';
+                               new_num := !new_num + 1;
+                               assert_lines := (false, false)
+                             end;    spacer'([FVALBIND_BASE, ""]))
 
-            | FVALBIND_BASE BAR FVAL_BIND (spacer([FVALBIND_BASE, "", BAR, FVAL_BIND]))
+            | FVALBIND_BASE BAR FVAL_BIND (spacer'([FVALBIND_BASE, "", BAR, FVAL_BIND]))
             | FVALBIND_BASE AND FVAL_BIND (let
                                              val (s', _) = pop (!Stack)
                                            in 
                                              Stack := s'
-                                           end;    spacer([FVALBIND_BASE, AND, FVAL_BIND]))
+                                           end;    spacer'([FVALBIND_BASE, AND, FVAL_BIND]))
             | FVALBIND_BASE AND ASSERTIONS FVAL_BIND (let
                                                        val (s', _) = pop (!Stack)
                                                      in 
                                                        Stack := s'
-                                                     end;    spacer([FVALBIND_BASE, "", AND, "", FVAL_BIND]))
+                                                     end;    spacer'([FVALBIND_BASE, "", AND, "", FVAL_BIND]))
 
-  TYP_BIND' : TYP_CON EQUALOP TYP (spacer([TYP_CON, EQUALOP, TYP]))
-            | TYP_VAR_SEQ TYP_CON EQUALOP TYP (spacer([TYP_VAR_SEQ, TYP_CON, EQUALOP, TYP]))
+  TYP_BIND' : TYP_CON EQUALOP TYP (spacer'([TYP_CON, EQUALOP, TYP]))
+            | TYP_VAR_SEQ TYP_CON EQUALOP TYP (spacer'([TYP_VAR_SEQ, TYP_CON, EQUALOP, TYP]))
 
   TYP_BIND : TYP_BIND' (TYP_BIND')
-           | TYP_BIND' AND TYP_BIND (spacer([TYP_BIND', AND, TYP_BIND]))
+           | TYP_BIND' AND TYP_BIND (spacer'([TYP_BIND', AND, TYP_BIND]))
 
-  DAT_BIND' : TYP_CON EQUALOP CON_BIND (spacer([TYP_CON, EQUALOP, CON_BIND]))
-            | TYP_VAR_SEQ TYP_CON EQUALOP CON_BIND (spacer([TYP_VAR_SEQ, TYP_CON, EQUALOP, CON_BIND]))
+  DAT_BIND' : TYP_CON EQUALOP CON_BIND (spacer'([TYP_CON, EQUALOP, CON_BIND]))
+            | TYP_VAR_SEQ TYP_CON EQUALOP CON_BIND (spacer'([TYP_VAR_SEQ, TYP_CON, EQUALOP, CON_BIND]))
 
   DAT_BIND : DAT_BIND' (DAT_BIND')
-           | DAT_BIND' AND DAT_BIND (spacer([DAT_BIND', AND, DAT_BIND]))
+           | DAT_BIND' AND DAT_BIND (spacer'([DAT_BIND', AND, DAT_BIND]))
 
   CONBIND_BASE : VID (VID)
-               | VID OF TYP (spacer([VID, OF, TYP]))
+               | VID OF TYP (spacer'([VID, OF, TYP]))
                | OP VID (OP ^ VID)
-               | OP VID OF TYP (spacer([OP, VID, OF, TYP]))  
+               | OP VID OF TYP (spacer'([OP, VID, OF, TYP]))  
 
   CON_BIND : CONBIND_BASE (CONBIND_BASE)
-           | CONBIND_BASE BAR CON_BIND (spacer([CONBIND_BASE, BAR, CON_BIND]))
+           | CONBIND_BASE BAR CON_BIND (spacer'([CONBIND_BASE, BAR, CON_BIND]))
 
   EX_BIND_BASE : VID (VID)
-               | VID OF TYP (spacer([VID, OF, TYP]))
+               | VID OF TYP (spacer'([VID, OF, TYP]))
                | OP VID (OP ^ VID)
-               | OP VID OF TYP (spacer([VID, OF, TYP]))
-               | VID EQUALOP LONG_VID (spacer([VID, EQUALOP, LONG_VID]))
-               | VID EQUALOP OP LONG_VID (spacer([VID, EQUALOP, OP, LONG_VID]))
-               | OP VID EQUALOP LONG_VID (spacer([OP, VID, EQUALOP, LONG_VID]))
-               | OP VID EQUALOP OP LONG_VID (spacer([OP, VID, EQUALOP, OP, LONG_VID]))
+               | OP VID OF TYP (spacer'([VID, OF, TYP]))
+               | VID EQUALOP LONG_VID (spacer'([VID, EQUALOP, LONG_VID]))
+               | VID EQUALOP OP LONG_VID (spacer'([VID, EQUALOP, OP, LONG_VID]))
+               | OP VID EQUALOP LONG_VID (spacer'([OP, VID, EQUALOP, LONG_VID]))
+               | OP VID EQUALOP OP LONG_VID (spacer'([OP, VID, EQUALOP, OP, LONG_VID]))
 
   EX_BIND : EX_BIND_BASE (EX_BIND_BASE)
-          | EX_BIND_BASE AND EX_BIND (spacer([EX_BIND_BASE, AND, EX_BIND]))
+          | EX_BIND_BASE AND EX_BIND (spacer'([EX_BIND_BASE, AND, EX_BIND]))
 
   (***********************)
   
@@ -529,30 +783,30 @@ val Stack: stack ref = ref []
   SELECTOR : ID (ID)
            | INT (INT)
 
-  TYP_TUPLE : TYP' TIMES TYP' (spacer([TYP'1, TIMES, TYP'2]))
-            | TYP' TIMES TYP_TUPLE (spacer([TYP', TIMES, TYP_TUPLE]))
+  TYP_TUPLE : TYP' TIMES TYP' (spacer'([TYP'1, TIMES, TYP'2]))
+            | TYP' TIMES TYP_TUPLE (spacer'([TYP', TIMES, TYP_TUPLE]))
 
-  TY_CON : ALL_IDs DOT TY_CON (spacer([ALL_IDs, DOT, TY_CON]))
+  TY_CON : ALL_IDs DOT TY_CON (spacer'([ALL_IDs, DOT, TY_CON]))
          | ALL_IDs (ALL_IDs)
 
   TYP_SEQ : TYP COMMA TYP (TYP1 ^ COMMA ^ TYP2)
           | TYP COMMA TYP_SEQ (TYP ^ COMMA ^ TYP_SEQ)
 
-  TLABEL : SELECTOR COLON TYP (spacer([SELECTOR, COLON, TYP]))
+  TLABEL : SELECTOR COLON TYP (spacer'([SELECTOR, COLON, TYP]))
 
-  TLABELS : TLABEL COMMA TLABELS (spacer([TLABEL, COMMA, TLABELS]))
+  TLABELS : TLABEL COMMA TLABELS (spacer'([TLABEL, COMMA, TLABELS]))
           | TLABEL (TLABEL)
 
   TYP' : TYP_VAR (TYP_VAR)
-       | LCURLY TLABELS RCURLY (spacer([LCURLY, TLABELS, RCURLY]))
+       | LCURLY TLABELS RCURLY (spacer'([LCURLY, TLABELS, RCURLY]))
        | LCURLY RCURLY (LCURLY ^ RCURLY)
-       | LPAREN TYP_SEQ RPAREN LONG_TYP_CON (spacer([LPAREN, TYP_SEQ, RPAREN, LONG_TYP_CON]))
-       | LPAREN TYP RPAREN (spacer([LPAREN, TYP, RPAREN]))
+       | LPAREN TYP_SEQ RPAREN LONG_TYP_CON (spacer'([LPAREN, TYP_SEQ, RPAREN, LONG_TYP_CON]))
+       | LPAREN TYP RPAREN (spacer'([LPAREN, TYP, RPAREN]))
        | TYP' TY_CON (TYP' ^ TY_CON)
        | TY_CON (TY_CON)
 
   TYP : TYP_TUPLE (TYP_TUPLE)
-      | TYP ARROW TYP (spacer([TYP1, ARROW, TYP2])) 
+      | TYP ARROW TYP (spacer'([TYP1, ARROW, TYP2])) 
       | TYP' (TYP')
 
   
@@ -560,17 +814,17 @@ val Stack: stack ref = ref []
 
 (*  TYP : TYP_VAR (TYP_VAR)
       | LCURLY RCURLY (LCURLY ^ RCURLY)
-      | LCURLY TYP_ROW RCURLY (spacer([LCURLY, TYP_ROW, RCURLY]))
+      | LCURLY TYP_ROW RCURLY (spacer'([LCURLY, TYP_ROW, RCURLY]))
       | LONG_TYP_CON (LONG_TYP_CON)
       | TYP LONG_TYP_CON (TYP ^ LONG_TYP_CON)
-      | LPAREN TYP_SEQ RPAREN LONG_TYP_CON (spacer([LPAREN, TYP_SEQ, RPAREN,
+      | LPAREN TYP_SEQ RPAREN LONG_TYP_CON (spacer'([LPAREN, TYP_SEQ, RPAREN,
                                                               LONG_TYP_CON]))
-      | TYP ARROW TYP (spacer([TYP1, ARROW, TYP2]))
+      | TYP ARROW TYP (spacer'([TYP1, ARROW, TYP2]))
       | TYP_TUPLE (TYP_TUPLE)
       | LPAREN TYP RPAREN (LPAREN ^ TYP ^ RPAREN)
 
   TYP_ROW : LAB COLON TYP (LAB ^ COLON ^ TYP)
-          | LAB COLON TYP COMMA TYP_ROW (spacer([LAB, COLON, TYP, 
+          | LAB COLON TYP COMMA TYP_ROW (spacer'([LAB, COLON, TYP, 
                                                   COMMA, TYP_ROW]))*)
 
 
@@ -582,41 +836,41 @@ val Stack: stack ref = ref []
            | PAT COMMA PAT_LIST (PAT ^ COMMA ^ PAT_LIST)
 
   OR_PAT_LIST : PAT (PAT)
-              | PAT BAR OR_PAT_LIST (spacer([PAT, BAR, OR_PAT_LIST]))
+              | PAT BAR OR_PAT_LIST (spacer'([PAT, BAR, OR_PAT_LIST]))
 
   PAT_TUPLE : PAT COMMA PAT (PAT1 ^ COMMA ^ PAT2)
             | PAT COMMA PAT_TUPLE (PAT ^ COMMA ^ PAT_TUPLE)
 
-  PAT : PAT AS PAT (spacer([PAT1, AS, PAT2]))
-      | PAT COLON TYP (spacer([PAT, COLON, TYP]))
+  PAT : PAT AS PAT (spacer'([PAT1, AS, PAT2]))
+      | PAT COLON TYP (spacer'([PAT, COLON, TYP]))
       | AT_PAT_LIST (AT_PAT_LIST)
 
   AT_PAT : AT_PAT' (AT_PAT')
-         | LPAREN PAT RPAREN (spacer([LPAREN, PAT, RPAREN]))
+         | LPAREN PAT RPAREN (spacer'([LPAREN, PAT, RPAREN]))
          | ID_NO_EQ (ID_NO_EQ)
          | LPAREN RPAREN ("()")
-         | LPAREN PAT COMMA PAT_LIST RPAREN (spacer([LPAREN, PAT, COMMA, PAT_LIST, RPAREN]))
-         | LPAREN PAT BAR OR_PAT_LIST RPAREN (spacer([LPAREN, PAT, BAR, OR_PAT_LIST, RPAREN]))
+         | LPAREN PAT COMMA PAT_LIST RPAREN (spacer'([LPAREN, PAT, COMMA, PAT_LIST, RPAREN]))
+         | LPAREN PAT BAR OR_PAT_LIST RPAREN (spacer'([LPAREN, PAT, BAR, OR_PAT_LIST, RPAREN]))
 
-  AT_PAT' : OP STR_ID (spacer([OP, STR_ID]))
+  AT_PAT' : OP STR_ID (spacer'([OP, STR_ID]))
           | LONG_STR_ID (LONG_STR_ID)
           | CON (CON)
           | WILD (WILD)
           | LBRACK RBRACK (LBRACK ^ RBRACK)
-          | LBRACK PAT_LIST RBRACK (spacer([LBRACK, PAT_LIST, RBRACK]))
-          | HASH LBRACK RBRACK (spacer([HASH, LBRACK, RBRACK]))
-          | HASH LBRACK PAT_LIST RBRACK (spacer([HASH, LBRACK, PAT_LIST, RBRACK]))
+          | LBRACK PAT_LIST RBRACK (spacer'([LBRACK, PAT_LIST, RBRACK]))
+          | HASH LBRACK RBRACK (spacer'([HASH, LBRACK, RBRACK]))
+          | HASH LBRACK PAT_LIST RBRACK (spacer'([HASH, LBRACK, PAT_LIST, RBRACK]))
           | LCURLY RCURLY (LCURLY ^ RCURLY)
-          | LCURLY PLABELS RCURLY (spacer([LCURLY, PLABELS, RCURLY]))
+          | LCURLY PLABELS RCURLY (spacer'([LCURLY, PLABELS, RCURLY]))
 
-  PLABEL : SELECTOR EQUALOP PAT (spacer([SELECTOR, "=", PAT]))
+  PLABEL : SELECTOR EQUALOP PAT (spacer'([SELECTOR, "=", PAT]))
          | ID_NO_EQ (ID_NO_EQ)
-         | ID_NO_EQ AS PAT (spacer([ID_NO_EQ, AS, PAT]))
-         | ID_NO_EQ COLON TYP (spacer([ID_NO_EQ, COLON, TYP]))
-         | ID_NO_EQ COLON TYP AS PAT (spacer([ID_NO_EQ, COLON, TYP, AS, PAT]))
+         | ID_NO_EQ AS PAT (spacer'([ID_NO_EQ, AS, PAT]))
+         | ID_NO_EQ COLON TYP (spacer'([ID_NO_EQ, COLON, TYP]))
+         | ID_NO_EQ COLON TYP AS PAT (spacer'([ID_NO_EQ, COLON, TYP, AS, PAT]))
 
   PLABELS : PLABEL (PLABEL)
-          | PLABEL COMMA PLABELS (spacer([PLABEL, COMMA, PLABELS]))
+          | PLABEL COMMA PLABELS (spacer'([PLABEL, COMMA, PLABELS]))
           | DOTTED_WILDCARD (DOTTED_WILDCARD)
 
 (*  AT_PAT : WILD (WILD)
@@ -626,32 +880,32 @@ val Stack: stack ref = ref []
          | LCURLY RCURLY (LCURLY ^ RCURLY)
          | LCURLY PAT_ROW RCURLY (LCURLY ^ PAT_ROW ^ RCURLY)
          | LPAREN RPAREN (LPAREN ^ RPAREN)
-         | LPAREN PAT_TUPLE RPAREN (spacer([LPAREN, PAT_TUPLE, RPAREN]))
+         | LPAREN PAT_TUPLE RPAREN (spacer'([LPAREN, PAT_TUPLE, RPAREN]))
          | LBRACK RBRACK (LBRACK ^ RBRACK)
-         | LBRACK PAT_LIST RBRACK (spacer([LBRACK, PAT_LIST, RBRACK]))
-         | LPAREN PAT RPAREN (spacer([LPAREN, PAT, RPAREN]))
+         | LBRACK PAT_LIST RBRACK (spacer'([LBRACK, PAT_LIST, RBRACK]))
+         | LPAREN PAT RPAREN (spacer'([LPAREN, PAT, RPAREN]))
 
   PAT_ROW : DOTTED_WILDCARD (DOTTED_WILDCARD)
           | LAB EQUALOP PAT (LAB ^ EQUALOP ^ PAT)
-          | LAB EQUALOP PAT COMMA PAT_ROW (spacer([LAB, EQUALOP, PAT, COMMA, PAT_ROW]))
+          | LAB EQUALOP PAT COMMA PAT_ROW (spacer'([LAB, EQUALOP, PAT, COMMA, PAT_ROW]))
           | VID (VID)
-          | VID COLON TYP (spacer([VID, COLON, TYP]))
-          | VID AS PAT (spacer([VID, AS, PAT]))
-          | VID COMMA PAT_ROW (spacer([VID, COMMA, PAT_ROW]))
-          | VID COLON TYP AS PAT (spacer([VID, COLON, TYP, AS, PAT]))
-          | VID AS PAT COMMA PAT_ROW (spacer([VID, AS, PAT, COMMA, PAT_ROW]))
-          | VID COLON TYP COMMA PAT_ROW (spacer([VID, COLON, TYP, COMMA, PAT_ROW]))
-          | VID COLON TYP AS PAT COMMA PAT_ROW (spacer([VID, COLON, TYP, AS, PAT, COMMA, PAT_ROW]))
+          | VID COLON TYP (spacer'([VID, COLON, TYP]))
+          | VID AS PAT (spacer'([VID, AS, PAT]))
+          | VID COMMA PAT_ROW (spacer'([VID, COMMA, PAT_ROW]))
+          | VID COLON TYP AS PAT (spacer'([VID, COLON, TYP, AS, PAT]))
+          | VID AS PAT COMMA PAT_ROW (spacer'([VID, AS, PAT, COMMA, PAT_ROW]))
+          | VID COLON TYP COMMA PAT_ROW (spacer'([VID, COLON, TYP, COMMA, PAT_ROW]))
+          | VID COLON TYP AS PAT COMMA PAT_ROW (spacer'([VID, COLON, TYP, AS, PAT, COMMA, PAT_ROW]))
 
   PAT : AT_PAT (AT_PAT)
       | ID_NO_EQ AT_PAT (ID_NO_EQ ^ AT_PAT)
-      | OP ID_NO_EQ AT_PAT (spacer([OP, ID_NO_EQ, AT_PAT]))
-      | PAT VID PAT (spacer([PAT1, VID, PAT2]))
-      | PAT COLON TYP (spacer([PAT, COLON, TYP]))
-      | VID AS PAT (spacer([VID, AS, PAT]))
-      | VID COLON TYP AS PAT (spacer([VID, COLON, TYP, AS, PAT]))
-      | OP VID AS PAT (spacer([OP, VID, AS, PAT]))
-      | OP VID COLON TYP AS PAT (spacer([OP, VID, COLON, TYP, AS, PAT]))*)
+      | OP ID_NO_EQ AT_PAT (spacer'([OP, ID_NO_EQ, AT_PAT]))
+      | PAT VID PAT (spacer'([PAT1, VID, PAT2]))
+      | PAT COLON TYP (spacer'([PAT, COLON, TYP]))
+      | VID AS PAT (spacer'([VID, AS, PAT]))
+      | VID COLON TYP AS PAT (spacer'([VID, COLON, TYP, AS, PAT]))
+      | OP VID AS PAT (spacer'([OP, VID, AS, PAT]))
+      | OP VID COLON TYP AS PAT (spacer'([OP, VID, COLON, TYP, AS, PAT]))*)
 
 
   (***********************)
@@ -660,20 +914,20 @@ val Stack: stack ref = ref []
 
   STR_EXP : STRUCT STR_DEC END (STRUCT ^ STR_DEC ^ END)
           | LONG_STR_ID (LONG_STR_ID)
-          | FUN_ID ARG_FCT (spacer([FUN_ID, ARG_FCT]))
+          | FUN_ID ARG_FCT (spacer'([FUN_ID, ARG_FCT]))
           | STR_EXP COLON SIG_EXP (STR_EXP ^ COLON ^ SIG_EXP)
           | STR_EXP COLONGT SIG_EXP (STR_EXP ^ COLONGT ^ SIG_EXP)
-          | LET STR_DEC IN STR_EXP END (spacer([LET, STR_DEC, IN, STR_EXP, END]))
+          | LET STR_DEC IN STR_EXP END (spacer'([LET, STR_DEC, IN, STR_EXP, END]))
 
-  ARG_FCT : LPAREN STR_DEC RPAREN (spacer([LPAREN, STR_DEC, RPAREN]))
-          | LPAREN STR_EXP RPAREN (spacer([LPAREN, STR_EXP, RPAREN]))
-          | LPAREN STR_DEC RPAREN ARG_FCT (spacer([LPAREN, STR_DEC, RPAREN, ARG_FCT]))
-          | LPAREN STR_EXP RPAREN ARG_FCT (spacer([LPAREN, STR_EXP, RPAREN, ARG_FCT])) 
+  ARG_FCT : LPAREN STR_DEC RPAREN (spacer'([LPAREN, STR_DEC, RPAREN]))
+          | LPAREN STR_EXP RPAREN (spacer'([LPAREN, STR_EXP, RPAREN]))
+          | LPAREN STR_DEC RPAREN ARG_FCT (spacer'([LPAREN, STR_DEC, RPAREN, ARG_FCT]))
+          | LPAREN STR_EXP RPAREN ARG_FCT (spacer'([LPAREN, STR_EXP, RPAREN, ARG_FCT])) 
 
   STR_DEC' : DEC' (DEC')
            | STRUCTURE STR_BIND (STRUCTURE ^ STR_BIND)
            | FUNCTOR FUN_BIND (FUNCTOR ^ FUN_BIND)
-           | LOCAL STR_DEC IN STR_DEC END  (spacer([LOCAL, STR_DEC1, IN, STR_DEC2, END]))
+           | LOCAL STR_DEC IN STR_DEC END  (spacer'([LOCAL, STR_DEC1, IN, STR_DEC2, END]))
 
   STR_DEC : STR_DEC' STR_DEC (STR_DEC' ^ STR_DEC)
           | SEMICOLON STR_DEC (SEMICOLON ^ STR_DEC)
@@ -685,65 +939,67 @@ val Stack: stack ref = ref []
         | FUNCTOR FUN_BIND (FUNCTOR ^ FUN_BIND)
         (*(| LOCAL S)*)
         | DEC' (DEC')
-
+ 
   S_DEC' : S_DEC (S_DEC)
          | S_DEC S_DEC' (S_DEC ^ S_DEC')
 
-  STR_BIND' : STR_ID EQUALOP STR_EXP (spacer([STR_ID, EQUALOP, STR_EXP]))
-            | STR_ID COLON SIG_EXP EQUALOP STR_EXP (spacer([STR_ID, COLON, SIG_EXP, 
+  STR_BIND' : STR_ID EQUALOP STR_EXP (spacer'([STR_ID, EQUALOP, STR_EXP]))
+            | STR_ID COLON SIG_EXP EQUALOP STR_EXP (spacer'([STR_ID, COLON, SIG_EXP, 
                                                                           EQUALOP, STR_EXP]))
-            | STR_ID COLONGT SIG_EXP EQUALOP STR_EXP (spacer([STR_ID, COLONGT, SIG_EXP, 
+            
+            | STR_ID COLONGT SIG_EXP EQUALOP STR_EXP (spacer'([STR_ID, COLONGT, SIG_EXP, 
                                                                           EQUALOP, STR_EXP]))
             
   STR_BIND : STR_BIND' (STR_BIND')
-           | STR_BIND' AND STR_BIND (spacer([STR_BIND', AND, STR_BIND]))
+           | STR_BIND' AND STR_BIND (spacer'([STR_BIND', AND, STR_BIND]))
 
 
   (***********************)
 
   (* Signatures *)
   
-  TYP_REFINE : LONG_TYP_CON EQUALOP TYP (spacer([LONG_TYP_CON, EQUALOP, TYP]))
-              | TYP_VAR_SEQ LONG_TYP_CON EQUALOP TYP (spacer([TYP_VAR_SEQ, LONG_TYP_CON, EQUALOP, TYP]))
+  TYP_REFINE' : TYPE LONG_TYP_CON EQUALOP TYP (spacer'([TYPE, LONG_TYP_CON, EQUALOP, TYP]))
+              | TYPE TYP_VAR_SEQ LONG_TYP_CON EQUALOP TYP (spacer'([TYPE, TYP_VAR_SEQ, LONG_TYP_CON, EQUALOP, TYP]))
+              | LONG_TYP_CON EQUALOP LONG_TYP_CON (spacer'[LONG_TYP_CON, EQUALOP, LONG_TYP_CON])
 
   TYP_REFINE : TYP_REFINE' (TYP_REFINE')
-             | TYP_REFINE' AND TYP_REFINE (spacer([TYP_REFINE', AND, TYP_REFINE]))
+             | TYP_REFINE' AND TYP_REFINE (spacer'([TYP_REFINE', AND, TYP_REFINE]))
   
-  LONG_TY_CON_EQ_SEQ : LONG_TYP_CON EQUALOP LONG_TYP_CON (spacer([LONG_TYP_CON, EQUALOP, LONG_TYP_CON]))
-                     | LONG_TYP_CON EQUALOP LONG_TY_CON_EQ_SEQ (spacer([LONG_TYP_CON, EQUALOP, LONG_TY_CON_EQ_SEQ]))
+  LONG_TY_CON_EQ_SEQ : LONG_TYP_CON EQUALOP LONG_TYP_CON (spacer'([LONG_TYP_CON, EQUALOP, LONG_TYP_CON]))
+                     | LONG_TYP_CON EQUALOP LONG_TY_CON_EQ_SEQ (spacer'([LONG_TYP_CON, EQUALOP, LONG_TY_CON_EQ_SEQ]))
 
-  LONG_STR_ID_EQ_SEQ : LONG_STR_ID EQUALOP LONG_STR_ID (spacer([LONG_STR_ID, EQUALOP, LONG_STR_ID]))
-                     | LONG_STR_ID EQUALOP LONG_STR_ID_EQ_SEQ (spacer([LONG_STR_ID, EQUALOP, LONG_STR_ID_EQ_SEQ]))
+  LONG_STR_ID_EQ_SEQ : LONG_STR_ID EQUALOP LONG_STR_ID (spacer'([LONG_STR_ID, EQUALOP, LONG_STR_ID]))
+                     | LONG_STR_ID EQUALOP LONG_STR_ID_EQ_SEQ (spacer'([LONG_STR_ID, EQUALOP, LONG_STR_ID_EQ_SEQ]))
 
   SIG_ID_SPCE_SEQ : SIG_ID (SIG_ID)
                   | SIG_ID SIG_ID_SPCE_SEQ (SIG_ID ^ SIG_ID_SPCE_SEQ) 
 
-  SIG_EXP : SIG SPEC END (spacer([SIG, SPEC, END]))
+  SIG_EXP : SIG SPEC END (spacer'([SIG, SPEC, END]))
           | SIG_ID (SIG_ID)
-          | SIG_EXP WHERE TYPE TYP_REFINE (spacer([SIG_EXP, WHERE, TYPE, TYP_REFINE]))
+          | SIG_EXP WHERE TYP_REFINE (spacer'([SIG_EXP, WHERE, TYP_REFINE]))
 
   SIG_DEC : SIGNATURE SIG_BIND (SIGNATURE ^ SIG_BIND)
 
-  SIG_BIND : SIG_ID EQUALOP SIG_EXP (spacer([SIG_ID, EQUALOP, SIG_EXP]))
-           | SIG_ID EQUALOP SIG_EXP AND SIG_BIND (spacer([SIG_ID, EQUALOP, SIG_EXP, AND, SIG_BIND]))
+  SIG_BIND : SIG_ID EQUALOP SIG_EXP (spacer'([SIG_ID, EQUALOP, SIG_EXP]))
+           | SIG_ID EQUALOP SIG_EXP AND SIG_BIND (spacer'([SIG_ID, EQUALOP, SIG_EXP, AND, SIG_BIND]))
 
   SPEC' : VAL VAL_DESC (VAL ^ VAL_DESC)
         | TYPE TYP_DESC (TYPE ^ TYP_DESC)
         | EQTYPE TYP_DESC (EQTYPE ^ TYP_DESC)
         | DATATYPE DAT_DESC (DATATYPE ^ DAT_DESC)
-        | DATATYPE TYP_CON EQUALOP DATATYPE LONG_TYP_CON (spacer([DATATYPE, TYP_CON, EQUALOP, DATATYPE, LONG_TYP_CON]))
+        | DATATYPE TYP_CON EQUALOP DATATYPE LONG_TYP_CON (spacer'([DATATYPE, TYP_CON, EQUALOP, DATATYPE, LONG_TYP_CON]))
         | EXCEPTION EX_DESC (EXCEPTION ^ EX_DESC)
         | STRUCTURE STR_DESC (STRUCTURE ^ STR_DESC)
         | INCLUDE SIG_EXP (INCLUDE ^ SIG_EXP)
         | TYPE TYP_BIND (TYPE ^ TYP_BIND)
  
         | INCLUDE SIG_ID_SPCE_SEQ (INCLUDE ^ SIG_ID_SPCE_SEQ)
-        | SHARING TYPE LONG_TY_CON_EQ_SEQ (spacer([SHARING, TYPE, LONG_TY_CON_EQ_SEQ]))
-        | SHARING LONG_STR_ID_EQ_SEQ (spacer([SHARING, LONG_STR_ID_EQ_SEQ]))
+        | SHARING TYPE LONG_TY_CON_EQ_SEQ (spacer'([SHARING, TYPE, LONG_TY_CON_EQ_SEQ]))
+        | SHARING LONG_STR_ID_EQ_SEQ (spacer'([SHARING, LONG_STR_ID_EQ_SEQ]))
 
   SPEC : (* EMPTY *) ("")
-       | SPEC' SPEC (spacer([SPEC', SPEC]))
-       | SEMICOLON SPEC (spacer([SEMICOLON, SPEC])) 
+       | SPEC' SPEC (spacer'([SPEC', SPEC]))
+       | SEMICOLON SPEC (spacer'([SEMICOLON, SPEC])) 
 
   VAL_DESC : VID COLON TYP (VID ^ COLON ^ TYP)
            | VID COLON TYP AND VAL_DESC (VID ^ COLON ^ TYP ^ AND ^ VAL_DESC)
@@ -752,40 +1008,40 @@ val Stack: stack ref = ref []
             | TYP_VAR_SEQ TYP_CON (TYP_VAR_SEQ ^ TYP_CON)
 
   TYP_DESC : TYP_DESC' (TYP_DESC')
-           | TYP_DESC' AND TYP_DESC (spacer([TYP_DESC', AND, TYP_DESC]))
+           | TYP_DESC' AND TYP_DESC (spacer'([TYP_DESC', AND, TYP_DESC]))
 
-  DAT_DESC' : TYP_CON EQUALOP CON_DESC (spacer([TYP_CON, EQUALOP, CON_DESC]))
-            | TYP_VAR_SEQ TYP_CON EQUALOP CON_DESC (spacer([TYP_VAR_SEQ, TYP_CON, EQUALOP, CON_DESC]))
+  DAT_DESC' : TYP_CON EQUALOP CON_DESC (spacer'([TYP_CON, EQUALOP, CON_DESC]))
+            | TYP_VAR_SEQ TYP_CON EQUALOP CON_DESC (spacer'([TYP_VAR_SEQ, TYP_CON, EQUALOP, CON_DESC]))
 
   DAT_DESC : DAT_DESC' (DAT_DESC')
-           | DAT_DESC' AND DAT_DESC (spacer([DAT_DESC', AND, DAT_DESC]))
+           | DAT_DESC' AND DAT_DESC (spacer'([DAT_DESC', AND, DAT_DESC]))
 
   CON_DESC : VID (VID)
-           | VID OF TYP (spacer([VID, OF, TYP]))
-           | VID BAR CON_DESC (spacer([VID, BAR, CON_DESC]))
-           | VID OF TYP BAR CON_DESC(spacer([VID, OF, TYP, BAR, CON_DESC]))
+           | VID OF TYP (spacer'([VID, OF, TYP]))
+           | VID BAR CON_DESC (spacer'([VID, BAR, CON_DESC]))
+           | VID OF TYP BAR CON_DESC(spacer'([VID, OF, TYP, BAR, CON_DESC]))
 
   EX_DESC : VID (VID)
-          | VID OF TYP (spacer([VID, OF, TYP]))
-          | VID AND EX_DESC (spacer([VID, AND, EX_DESC]))
-          | VID OF TYP AND EX_DESC(spacer([VID, OF, TYP, AND, EX_DESC]))
+          | VID OF TYP (spacer'([VID, OF, TYP]))
+          | VID AND EX_DESC (spacer'([VID, AND, EX_DESC]))
+          | VID OF TYP AND EX_DESC(spacer'([VID, OF, TYP, AND, EX_DESC]))
 
-  STR_DESC : VID COLON SIG_EXP (spacer([VID, COLON, SIG_EXP]))
-           | VID COLON SIG_EXP AND STR_DESC (spacer([VID, COLON, SIG_EXP, AND, STR_DESC]))
+  STR_DESC : VID COLON SIG_EXP (spacer'([VID, COLON, SIG_EXP]))
+           | VID COLON SIG_EXP AND STR_DESC (spacer'([VID, COLON, SIG_EXP, AND, STR_DESC]))
 
 
   (***********************)
 
   (* Functors *)
 
-  FUN_BIND' : FUN_ID LPAREN STR_ID COLON SIG_EXP RPAREN EQUALOP STR_EXP (spacer([FUN_ID, LPAREN, STR_ID, COLON, SIG_EXP, RPAREN, EQUALOP, STR_EXP])) 
-            | FUN_ID LPAREN STR_ID COLON SIG_EXP RPAREN COLON SIG_EXP EQUALOP STR_EXP (spacer([FUN_ID, LPAREN, STR_ID, COLON, SIG_EXP1, RPAREN, COLON, SIG_EXP2, EQUALOP, STR_EXP])) 
-            | FUN_ID LPAREN STR_ID COLON SIG_EXP RPAREN COLONGT SIG_EXP EQUALOP STR_EXP (spacer([FUN_ID, LPAREN, STR_ID, COLON, SIG_EXP1, RPAREN, COLONGT, SIG_EXP2, EQUALOP, STR_EXP])) 
-            | FUN_ID LPAREN SPEC RPAREN EQUALOP STR_EXP (spacer([FUN_ID, LPAREN, SPEC, RPAREN, EQUALOP, STR_EXP]))
-            | FUN_ID LPAREN SPEC RPAREN COLON SIG_EXP EQUALOP STR_EXP (spacer([FUN_ID, LPAREN, SPEC, RPAREN, COLON, SIG_EXP, EQUALOP, STR_EXP]))
-            | FUN_ID LPAREN SPEC RPAREN COLONGT SIG_EXP EQUALOP STR_EXP (spacer([FUN_ID, LPAREN, SPEC, RPAREN, COLONGT, SIG_EXP, EQUALOP, STR_EXP]))
+  FUN_BIND' : FUN_ID LPAREN STR_ID COLON SIG_EXP RPAREN EQUALOP STR_EXP (spacer'([FUN_ID, LPAREN, STR_ID, COLON, SIG_EXP, RPAREN, EQUALOP, STR_EXP])) 
+            | FUN_ID LPAREN STR_ID COLON SIG_EXP RPAREN COLON SIG_EXP EQUALOP STR_EXP (spacer'([FUN_ID, LPAREN, STR_ID, COLON, SIG_EXP1, RPAREN, COLON, SIG_EXP2, EQUALOP, STR_EXP])) 
+            | FUN_ID LPAREN STR_ID COLON SIG_EXP RPAREN COLONGT SIG_EXP EQUALOP STR_EXP (spacer'([FUN_ID, LPAREN, STR_ID, COLON, SIG_EXP1, RPAREN, COLONGT, SIG_EXP2, EQUALOP, STR_EXP])) 
+            | FUN_ID LPAREN SPEC RPAREN EQUALOP STR_EXP (spacer'([FUN_ID, LPAREN, SPEC, RPAREN, EQUALOP, STR_EXP]))
+            | FUN_ID LPAREN SPEC RPAREN COLON SIG_EXP EQUALOP STR_EXP (spacer'([FUN_ID, LPAREN, SPEC, RPAREN, COLON, SIG_EXP, EQUALOP, STR_EXP]))
+            | FUN_ID LPAREN SPEC RPAREN COLONGT SIG_EXP EQUALOP STR_EXP (spacer'([FUN_ID, LPAREN, SPEC, RPAREN, COLONGT, SIG_EXP, EQUALOP, STR_EXP]))
 
   FUN_BIND : FUN_BIND' (FUN_BIND')
-           | FUN_BIND' AND FUN_BIND (FUN_BIND' ^ FUN_BIND)
+           | FUN_BIND' AND FUN_BIND (FUN_BIND' ^ AND ^ FUN_BIND)
 
 

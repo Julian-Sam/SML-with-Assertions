@@ -1,2 +1,4 @@
-fun toString f t = ""
-fun toString f = ( "as") 
+signature TABLE =
+sig
+  structure Set : SET where Key = Key and Seq = Seq
+end
