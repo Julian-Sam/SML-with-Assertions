@@ -15,6 +15,8 @@ for i in files:
 	print(i)
 
 for i in files:
+	if "_parsed.sml" in i:
+		continue
 	a = "sml sml_tester.sml " + join("test_files", i)
 	return_status = subprocess.call(a, shell=True)
 	if return_status == 1:
@@ -27,5 +29,11 @@ for i in new_files:
 	if "_parsed.sml" in i:
 		remove(join("test_files", i))
 
+one_fail = False
+
 for i in broken_files:
+	one_fail = True
 	print(i + " does not parse properly")
+
+if not one_fail:
+	print("\n\nAll tests passed!")

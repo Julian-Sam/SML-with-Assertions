@@ -7,3 +7,7 @@ Group is
   ml-yacc-lib.cm
 #endif
 
+  test_parse.grm
+  test_lex.lex
+  glue.sml
+

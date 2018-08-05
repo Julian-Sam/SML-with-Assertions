@@ -58,7 +58,7 @@ fun error (e,l : int,_) = printf (String.concat[
 %%
 %header (functor SampleLexFun(structure Tokens: Sample_TOKENS));
 %reject
-%s COMMENT | ASSERTION; 
+%s COMMENT; 
 idchars=[A-Za-z'_0-9];
 id=[A-Za-z]{idchars}*;
 ws=("\012"|[\t\ ])*;
