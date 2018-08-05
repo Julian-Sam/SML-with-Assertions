@@ -9,27 +9,23 @@ fun printf x = ()
 datatype ws_type = WS of int | NL of int | TAB of int | Comment of string * int
 
 
-val ws_type_list_ref: (int list * int list * int list * (string * int) list) ref = ref ([], [], [], [])
-val final_ref_list: (int list * int list * int list * (string * int) list * (string * (int * string) list) list) ref = ref ([], [], [], [], [])
+val ws_type_list_ref: (int list * int list * int list) ref = ref ([], [], [])
+val final_ref_list: (int list * int list * int list) ref = ref ([], [], [])
 val string_ref =  ref ("", 0)
 
-fun ws num = let
-			   val (ws_list, nl_list, tb_list, comm_list) = !ws_type_list_ref
+fun req num = let
+			   val (ws_list, nl_list, _) = !ws_type_list_ref
 			 in
-			   ws_type_list_ref := (num :: ws_list, nl_list, tb_list, comm_list)
+			   ws_type_list_ref := (num :: ws_list, nl_list, [])
 			 end
 
-fun nl num = let
-			   val (ws_list, nl_list, tb_list, comm_list) = !ws_type_list_ref
+fun ens num = let
+			   val (ws_list, nl_list, _) = !ws_type_list_ref
 			 in
-			   ws_type_list_ref := (ws_list, num :: nl_list, tb_list, comm_list)
+			   ws_type_list_ref := (ws_list, num :: nl_list, [])
 			 end
 
-fun tb num = let
-			   val (ws_list, nl_list, tb_list, comm_list) = !ws_type_list_ref
-			 in
-			   ws_type_list_ref := (ws_list, nl_list, num :: tb_list, comm_list)
-			 end
+fun rev_str (str: string) = String.implode (List.rev (String.explode (str)))
 
 fun printf_Ints (x) =
   case x of 
@@ -40,38 +36,6 @@ fun printf_Ints (x) =
                    printf_Ints (x')
                  end)
 
-fun rev_str (str: string) = String.implode (List.rev (String.explode (str)))
-
-fun comm () = let
-			   val (ws_list, nl_list, tb_list, comm_list) = !ws_type_list_ref
-			   val (str, pos) = !string_ref
-			   val str' = rev_str (str)
-			 in
-			   ws_type_list_ref := (ws_list, nl_list, tb_list, (str, pos) :: comm_list)
-			 end
-
-fun add_str (str1: string) = let
-							  val (str2, pos) = !string_ref
-							  val new_str = str1 ^ str2 
-							in
-							  string_ref := (new_str, pos)
-							end
-
-fun printf_comments (cm) = 
-	case (cm) of 
-	  nil => ()
-	| (str, pos) :: cm' => let
-		val _ = printf ("Comment Str = " ^ str ^ "\n\n" ^ "Starting Position = " ^ Int.toString (pos) ^ "\n\n")
-	in
-		printf_comments (cm')
-	end
-
-fun add_placeHolder (s: string, len: int) = 
-	case len of
-	  0   => add_str (s)
-	| num => add_placeHolder (s ^ "*", num - 1)
-
-
 val unmatched_comments = ref 0
 fun inc(x) = x := (!x + 1)
 fun dec(x) = x := (!x - 1)
@@ -79,13 +43,11 @@ fun dec(x) = x := (!x - 1)
 fun eof () = (if (!unmatched_comments) <> 0 
 			 then (printf("Error: Unmatched Comment Bracket"); raise UnmatchedComments)
 			 else (let
-					 val (ws, nl, tb, cm) = !ws_type_list_ref
-					 val final_ref_list = ref (List.rev (ws), List.rev (nl), List.rev (tb), cm, [])
-				   	 (*val _ = printf_Ints (ws)
-				   	 val _ = printf_Ints (nl)*)
+					 val (ws, nl, _) = !ws_type_list_ref
+					 val final_ref_list = ref (List.rev (ws), List.rev (nl), [])
 				   in
 					 pos := 1;
-					 ws_type_list_ref := ([], [], [], []);
+					 ws_type_list_ref := ([], [], []);
 					 Tokens.EOF(final_ref_list, !pos, !pos)
 				   end))
 
@@ -160,17 +122,18 @@ string_ = {empty_string} | {non_empty_string};
 <INITIAL>"}"	 	 => (printf "2\n"; Tokens.RCURLY(yytext, !pos,!pos));
 
 <INITIAL>"(*"		 => (printf "open comment ini\n"; YYBEGIN COMMENT; unmatched_comments := 1;
-						 string_ref := ("*(", yypos); lex());
+						 lex());
 <INITIAL>"*)"		 => (printf "close comment ini\n"; error("Error: unmatched close comment", !pos, !pos); lex());
 
-<COMMENT>"(*"		 => (printf "open comment com\n"; add_str ("*("); inc unmatched_comments; lex());
-<COMMENT>"*)"		 => (printf "close comment com\n"; add_str (")*"); dec unmatched_comments; 
+<COMMENT>"(*"		 => (printf "open comment com\n"; inc unmatched_comments; lex());
+<COMMENT>"*)"		 => (printf "close comment com\n"; dec unmatched_comments; 
 						 if (!unmatched_comments) = 0
-						 then (comm (); YYBEGIN INITIAL) else (); 
+						 then YYBEGIN INITIAL else (); 
 						 lex());
 
-<COMMENT>\n  		 => (printf "4\n"; add_str ("\n"); pos := !pos + 1; printf ("\n"); lex());
-<COMMENT>.  		 => (printf "4\n"; add_str (yytext); lex());
+
+<COMMENT>\n  		 => (printf "4\n"; pos := !pos + 1; lex());
+<COMMENT>.  		 => (printf "4\n"; lex());
 
 <INITIAL>"["	 	 => (printf "a\n"; Tokens.LBRACK(yytext, !pos,!pos));
 <INITIAL>"]"	 	 => (printf "b\n"; Tokens.RBRACK(yytext, !pos,!pos));
@@ -230,12 +193,11 @@ string_ = {empty_string} | {non_empty_string};
 
 <INITIAL>"..."		 => (printf "5\n"; Tokens.DOTTED_WILDCARD(yytext, !pos, !pos));
 
-<INITIAL>"(*!"       => (printf "5\n"; string_ref := ("**(", yypos); Tokens.LASSERT(yytext, !pos, !pos));
-<INITIAL>"!*)"       => (printf "5\n"; add_str (")**"); comm(); Tokens.RASSERT(yytext, !pos, !pos));
-<INITIAL>"REQUIRES"  => (printf "5\n"; ws (!pos); add_str ("********"); Tokens.REQUIRES(yytext, !pos, !pos));
-<INITIAL>"ENSURES"   => (printf "5\n"; nl (!pos); add_str ("*******");  Tokens.ENSURES(yytext, !pos, !pos));
 
-
+<INITIAL>"(*!"       => (printf "5\n"; Tokens.LASSERT(yytext, !pos, !pos));
+<INITIAL>"!*)"       => (printf "5\n"; Tokens.RASSERT(yytext, !pos, !pos));
+<INITIAL>"REQUIRES"  => (printf "5\n"; req (!pos); Tokens.REQUIRES(yytext, !pos, !pos));
+<INITIAL>"ENSURES"   => (printf "5\n"; ens (!pos); Tokens.ENSURES(yytext, !pos, !pos));
 
 
 <INITIAL>{symbol}+   => (printf "rip\n"; if yytext = ":" orelse
@@ -249,4 +211,3 @@ string_ = {empty_string} | {non_empty_string};
 <INITIAL>{id}		    => (printf "token\n"; Tokens.ID(yytext, !pos, !pos));
 
 <INITIAL>.              => (printf "rip\n"; error ("ignoring bad character "^yytext,!pos,!pos); lex());
-
