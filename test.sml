@@ -1,4 +1,15 @@
-signature TABLE =
-sig
-  structure Set : SET where Key = Key and Seq = Seq
-end
+(*! 
+	REQUIRES: true
+	ENSURES: true
+!*)
+fun add (x: int) = x + 1
+  | add (0) = 1
+
+(*! 
+	REQUIRES: true
+	ENSURES: true
+!*)
+fun sub (x: int): int = x - 1
+  | sub (0) = ("")
+
+val ## = ("")
