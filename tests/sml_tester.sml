@@ -1,6 +1,6 @@
 val args = CommandLine.arguments();
 val arg = List.hd args;
-CM.make "../sources1.cm";
+CM.make "../sources.cm";
 
 Sample.parse(arg);
 
