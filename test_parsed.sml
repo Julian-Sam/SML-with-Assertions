@@ -1,1 +1,0 @@
-signatureTABLE = sig structureSet : SET where Key = Key and Seq = Seq  end
