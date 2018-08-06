@@ -114,7 +114,6 @@ string_ = {empty_string} | {non_empty_string};
 <INITIAL>"=>"	     => (printf "2\n"; Tokens.DARROW(yytext, !pos,!pos));
 <INITIAL>"|"		 => (printf "2\n"; Tokens.BAR(yytext, !pos,!pos));
 <INITIAL>":"		 => (printf "2\n"; Tokens.COLON(yytext, !pos,!pos));
-<INITIAL>"!"		 => (printf "2\n"; Tokens.BANG(yytext, !pos,!pos));
 <INITIAL>":>"	     => (printf "2\n"; Tokens.COLONGT(yytext, !pos,!pos));
 <INITIAL>"#"         => (printf "2\n"; Tokens.HASH(yytext, !pos,!pos));
 
