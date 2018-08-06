@@ -8,28 +8,27 @@ datatype treeC' = leafC of string
 datatype treeC  = emptyC
                 | T of treeC'
 
-(* inorder: tree -> string list
-   ENSURES: inorder(t) is the inorder traversal of t
- *)
+(*!
+   ENSURES: true
+ !*)
 fun inorder (empty: tree): string list = []
   | inorder (node(tL, c, tR)) = (inorder tL) @ (c :: inorder tR)
 
-(* size: tree -> int
-   ENSURES: size(t) is the number of elements in t
- *)
+(*!
+   ENSURES: true
+!*)
 fun size (empty: tree): int = 0
   | size (node(tL, _, tR)) = 1 + size tL + size tR
 
-(* height: tree -> int
-   ENSURES: height(t) is the height of tree t
- *)
+(*!
+   ENSURES: true
+ !*)
 fun height (empty: tree): int = 0
   | height (node(tL, _, tR)) = 1 + Int.max(height tL, height tR)
 
-(* balanced: tree -> bool
-   ENSURES: balanced(t) iff the heights of the left and right subtree of every inner
-            node differ by at most 1
- *)
+(*!
+   ENSURES: true
+!*)
 fun balanced (empty: tree) : bool = true
   | balanced (node(tL, _, tR)) =
     let

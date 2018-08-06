@@ -83,23 +83,21 @@ struct
          Game.Maxie => (maxalpha (a, v1), b)
       | Game.Minnie => (a, minbeta (b, v1))
 
-(*-----------------------
-  fun value_for: state -> alplhabeta -> value 
+(*! 
   REQUIRES: true
-  ENSURES: if Maxie State then alpha is returned else beta.
--------------------------*)
+  ENSURES: case (Game.player (s)) of Game.Maxie  => if result = a then true else false
+                                   | Game.Minnie => if result = b then true else false
+!*)
 
   fun value_for (s: Game.state) ((a, b): alphabeta): value = 
     case (Game.player (s)) of
          Game.Maxie => a
       | Game.Minnie => b
 
-(*-----------------------
-  fun check_bounds: alplhabeta -> state -> move -> est -> result 
+(*!
   REQUIRES: true
-  ENSURES: if est is in bounds then returns it as BestEdge (m , e)
-          else prunes or parent prunes based on the player.
--------------------------*)
+  ENSURES: true
+!*)
 
   fun check_bounds ((a, b): alphabeta) (s: Game.state) (x: Game.move)
       (y: Game.est): result = (let
@@ -116,13 +114,15 @@ struct
                       | Game.Minnie => ParentPrune)
                   | true => Value (BestEdge (x, y))))
        end)
-      
-(*-----------------------
-  fun evaluate: int -> alphabeta -> state -> move -> result
-  and search:   int -> alphabeta -> state -> move Seq.seq -> value
-  REQUIRES: state not final state
-  ENSURES: value returned is optimal for player at called state.
--------------------------*)
+
+fun final_state (S: Game.State) = case (Game.status (S)) of
+    Game.In_play => true
+  | _ => false 
+
+(*!
+  REQUIRES: final_state (S) 
+  ENSURES: true
+!*)
 
   fun evaluate (0: int) ((a, b): alphabeta) (S: Game.state) 
       (Move: Game.move): result = (let
@@ -142,8 +142,14 @@ struct
         end)   
       | _ => check_bounds ((a, b)) (S) (Move) (Game.estimate (S))
 
+  and
 
-  and search (0: int) ((a, b): alphabeta) (S: Game.state) 
+(*!
+  REQUIRES: final_state (S) 
+  ENSURES: true
+!*)
+
+  search (0: int) ((a, b): alphabeta) (S: Game.state) 
       (Moves: Game.move Seq.seq): value = raise Fail "Write-up lied to me!"
 
     | search (n) ((a,b)) (S) (Moves) = 
@@ -161,11 +167,10 @@ struct
           end)
     end)
 
-(*-----------------------
-  fun next_move: state -> move
-  REQUIRES: state not final state.
-  ENSURES: Next move most optimal for player in state according to alphabeta pruning
--------------------------*)
+(*!
+  REQUIRES: final_state (S)
+  ENSURES: true
+!*)
 
   fun next_move (S: Game.state): Game.move = let
     val v = search (search_depth) (Pruned, Pruned) 
