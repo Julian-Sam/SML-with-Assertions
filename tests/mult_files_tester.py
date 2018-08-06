@@ -2,10 +2,8 @@ import subprocess
 from os import listdir, remove
 from os.path import isfile, join
 
-
 mypath = "test_files"
 broken_files = []
-
 files = [f for f in listdir(mypath) if isfile(join(mypath, f))]
 
 def new_file_name(old_file_name):

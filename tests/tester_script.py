@@ -10,7 +10,6 @@ def new_file_name(old_file_name):
 	return old_file_name[old_file_name.rfind('.')-1] + "_parsed.sml"
 
 
-
 a = "sml sml_tester1.sml " + mypath
 return_status = subprocess.call(a, shell=True)
 if return_status == 1:

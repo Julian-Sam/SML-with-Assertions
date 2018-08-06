@@ -54,7 +54,6 @@ val Stack: stack ref = ref []
     | DARROW of string
     | BAR of string
     | COLON of string
-    | BANG of string
     | COLONGT of string
     | HASH of string
     | LCURLY of string
@@ -171,6 +170,7 @@ val Stack: stack ref = ref []
          | ARG_FCT of string
          | STR_DEC' of string
          | STR_DEC of string
+         | S_DECS of string
          | S_DEC of string
          | S_DEC' of string
          | STR_BIND' of string
@@ -246,7 +246,7 @@ val Stack: stack ref = ref []
                  end)
           | SEMICOLON PROGRAM (SEMICOLON ^ PROGRAM)
           | EXP PROGRAM (EXP ^ PROGRAM)
-          | S_DEC' PROGRAM (S_DEC' ^ PROGRAM)
+          | S_DEC PROGRAM (S_DEC ^ PROGRAM)
 
   (***********************)
 
@@ -259,7 +259,7 @@ val Stack: stack ref = ref []
       | STRING (STRING)
 
     (* Value Identifier *)
-      (*Note: Times and EQUALOP done here since its not lexed, 
+      (*Note: Times and EQUALOP done here since its lexed, 
         since we need it lexed to be used elsewhere*)
   VID : ID (ID)
       | SYMBOLS (SYMBOLS)
@@ -769,8 +769,8 @@ val Stack: stack ref = ref []
          | LPAREN PAT COMMA PAT_LIST RPAREN (spacer'([LPAREN, PAT, COMMA, PAT_LIST, RPAREN]))
          | LPAREN PAT BAR OR_PAT_LIST RPAREN (spacer'([LPAREN, PAT, BAR, OR_PAT_LIST, RPAREN]))
 
-  AT_PAT' : OP STR_ID (spacer'([OP, STR_ID]))
-          | LONG_STR_ID (LONG_STR_ID)
+  AT_PAT' : OP LONG_ID_NO_EQ (spacer'([OP, LONG_ID_NO_EQ]))
+          | LONG_ID_NO_EQ (LONG_ID_NO_EQ)
           | CON (CON)
           | WILD (WILD)
           | LBRACK RBRACK (LBRACK ^ RBRACK)
@@ -850,15 +850,19 @@ val Stack: stack ref = ref []
           | SEMICOLON STR_DEC (SEMICOLON ^ STR_DEC)
           |  (* EMPTY *)   ("")
 
-  S_DEC : STRUCTURE STR_BIND (STRUCTURE ^ STR_BIND)
-        | SIGNATURE SIG_BIND (SIGNATURE ^ SIG_BIND)
-        (*(| FUNSIG FSIGB)*)
-        | FUNCTOR FUN_BIND (FUNCTOR ^ FUN_BIND)
-        (*(| LOCAL S)*)
-        | DEC' (DEC')
+  S_DECS : S_DEC' S_DECS (S_DEC' ^ S_DECS)
+         | SEMICOLON S_DECS (SEMICOLON ^ S_DECS)
+         |  (* EMPTY *)   ("")
+
+  S_DEC' : STRUCTURE STR_BIND (STRUCTURE ^ STR_BIND)
+         | SIGNATURE SIG_BIND (SIGNATURE ^ SIG_BIND)
+         (*(| FUNSIG FSIGB)*)
+         | FUNCTOR FUN_BIND (FUNCTOR ^ FUN_BIND)
+         | LOCAL S_DECS IN S_DECS END (spacer'([LOCAL, S_DECS, IN, S_DECS, END]))
+         | DEC' (DEC')
  
-  S_DEC' : S_DEC (S_DEC)
-         | S_DEC S_DEC' (S_DEC ^ S_DEC')
+  S_DEC : S_DEC' (S_DEC')
+        | S_DEC' S_DEC (S_DEC' ^ S_DEC)
 
   STR_BIND' : STR_ID EQUALOP STR_EXP (spacer'([STR_ID, EQUALOP, STR_EXP]))
             | STR_ID COLON SIG_EXP EQUALOP STR_EXP (spacer'([STR_ID, COLON, SIG_EXP, 
