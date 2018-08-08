@@ -170,6 +170,7 @@ val Stack: stack ref = ref []
          | ARG_FCT of string
          | STR_DEC' of string
          | STR_DEC of string
+         | S_DECS of string
          | S_DEC of string
          | S_DEC' of string
          | STR_BIND' of string
@@ -243,9 +244,10 @@ val Stack: stack ref = ref []
                    final_list_ref := (req, ens, num_list);
                    ""
                  end)
-          | SEMICOLON PROGRAM (SEMICOLON ^ " " ^ PROGRAM)
-          | EXP PROGRAM (EXP ^ " " ^ PROGRAM)
-          | S_DEC' PROGRAM (S_DEC' ^ " " ^ PROGRAM)
+
+          | SEMICOLON PROGRAM (spacer'([SEMICOLON, PROGRAM]))
+          | EXP PROGRAM (spacer'([EXP, PROGRAM]))
+          | S_DEC PROGRAM (spacer'([S_DEC, PROGRAM]))
 
   (***********************)
 
@@ -258,7 +260,7 @@ val Stack: stack ref = ref []
       | STRING (STRING)
 
     (* Value Identifier *)
-      (*Note: Times and EQUALOP done here since its not lexed, 
+      (*Note: Times and EQUALOP done here since its lexed, 
         since we need it lexed to be used elsewhere*)
   VID : ID (ID)
       | SYMBOLS (SYMBOLS)
@@ -334,6 +336,7 @@ val Stack: stack ref = ref []
   AT_EXP : CON (CON)
          | LONG_VID (LONG_VID)
          | OP LONG_VID (OP ^ " " ^ LONG_VID)
+         | LCURLY RCURLY (spacer'([LCURLY, RCURLY]))
          | LCURLY EXP_ROW RCURLY (spacer'([LCURLY, EXP_ROW, RCURLY]))
          | HASH LAB (HASH ^ " " ^ LAB)
          | LPAREN RPAREN (LPAREN ^ " " ^ RPAREN)
@@ -769,8 +772,8 @@ val Stack: stack ref = ref []
          | LPAREN PAT COMMA PAT_LIST RPAREN (spacer'([LPAREN, PAT, COMMA, PAT_LIST, RPAREN]))
          | LPAREN PAT BAR OR_PAT_LIST RPAREN (spacer'([LPAREN, PAT, BAR, OR_PAT_LIST, RPAREN]))
 
-  AT_PAT' : OP STR_ID (spacer'([OP, STR_ID]))
-          | LONG_STR_ID (LONG_STR_ID)
+  AT_PAT' : OP LONG_ID_NO_EQ (spacer'([OP, LONG_ID_NO_EQ]))
+          | LONG_ID_NO_EQ (LONG_ID_NO_EQ)
           | CON (CON)
           | WILD (WILD)
           | LBRACK RBRACK (LBRACK ^ " " ^ RBRACK)
@@ -842,23 +845,27 @@ val Stack: stack ref = ref []
           | LPAREN STR_EXP RPAREN ARG_FCT (spacer'([LPAREN, STR_EXP, RPAREN, ARG_FCT])) 
 
   STR_DEC' : DEC' (DEC')
-           | STRUCTURE STR_BIND (STRUCTURE ^ " " ^ STR_BIND)
-           | FUNCTOR FUN_BIND (FUNCTOR ^ " " ^ FUN_BIND)
+           | STRUCTURE STR_BIND (spacer'([STRUCTURE, STR_BIND]))
+           | FUNCTOR FUN_BIND (spacer'([FUNCTOR, FUN_BIND]))
            | LOCAL STR_DEC IN STR_DEC END  (spacer'([LOCAL, STR_DEC1, IN, STR_DEC2, END]))
 
-  STR_DEC : STR_DEC' STR_DEC (STR_DEC' ^ " " ^ STR_DEC)
-          | SEMICOLON STR_DEC (SEMICOLON ^ " " ^ STR_DEC)
+  STR_DEC : STR_DEC' STR_DEC (spacer'([STR_DEC', STR_DEC]))
+          | SEMICOLON STR_DEC (spacer'([SEMICOLON, STR_DEC]))
           |  (* EMPTY *)   ("")
 
-  S_DEC : STRUCTURE STR_BIND (STRUCTURE ^ " " ^ STR_BIND)
-        | SIGNATURE SIG_BIND (SIGNATURE ^ " " ^ SIG_BIND)
-        (*(| FUNSIG FSIGB)*)
-        | FUNCTOR FUN_BIND (FUNCTOR ^ " " ^ FUN_BIND)
-        (*(| LOCAL S)*)
-        | DEC' (DEC')
+  S_DECS : S_DEC' S_DECS (spacer'([S_DEC', S_DECS]))
+         | SEMICOLON S_DECS (spacer'([SEMICOLON, S_DECS]))
+         |  (* EMPTY *)   ("")
+
+  S_DEC' : STRUCTURE STR_BIND (spacer'([STRUCTURE, STR_BIND]))
+         | SIGNATURE SIG_BIND (spacer'([SIGNATURE, SIG_BIND]))
+         (*(| FUNSIG FSIGB)*)
+         | FUNCTOR FUN_BIND (spacer'([FUNCTOR, FUN_BIND]))
+         | LOCAL S_DECS IN S_DECS END (spacer'([LOCAL, S_DECS, IN, S_DECS, END]))
+         | DEC' (DEC')
  
-  S_DEC' : S_DEC (S_DEC)
-         | S_DEC S_DEC' (S_DEC ^ " " ^ S_DEC')
+  S_DEC : S_DEC' (S_DEC')
+        | S_DEC' S_DEC (spacer'([S_DEC', S_DEC]))
 
   STR_BIND' : STR_ID EQUALOP STR_EXP (spacer'([STR_ID, EQUALOP, STR_EXP]))
             | STR_ID COLON SIG_EXP EQUALOP STR_EXP (spacer'([STR_ID, COLON, SIG_EXP, 
