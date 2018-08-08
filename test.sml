@@ -15,7 +15,7 @@ struct
   (*!
    REQUIRES:  true 
    ENSURES:   case (last_elem (m, lis)) of true  => (List.length (result) <> List.length (lis))
-                                         | false => (List.length (result) = List.length (lis)) 
+                                         | false   => (List.length (result) = List.length (lis)) 
   !*)
 
   fun removeTrailing (m: int, lis as []: int list): int list = []

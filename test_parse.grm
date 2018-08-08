@@ -550,6 +550,7 @@ val Stack: stack ref = ref []
                                                         end)
                                                         
                                                         
+                                                        
                        | (s', BOTH (exp1, exp2))    => (let
                                                           val number = !new_num
                                                           val numlist = !new_ref
@@ -641,7 +642,7 @@ val Stack: stack ref = ref []
                                spacer'([FVALBIND_BASE, ""])
                              end)
 
-            | FVALBIND_BASE BAR FVAL_BIND (spacer'([FVALBIND_BASE, " ", BAR, FVAL_BIND]))
+            | FVALBIND_BASE BAR FVAL_BIND (spacer'([FVALBIND_BASE, " \n", BAR, FVAL_BIND]))
 
             | FVALBIND_BASE AND FVAL_BIND (let
                                              val (s', _) = pop (!Stack)
