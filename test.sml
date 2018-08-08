@@ -1,12 +1,14 @@
-(* andrew Id: ____sjahmad_____ *)
+load"simpLib";
+open Simplifier Simpsets arith_ss ;
+infix ++;
+trace_level := 5;
+quotation := true; open Parse;
 
-structure Util :> UTIL =
-struct
+(* reduction in operand *)
+SIMP_PROVE bool_ss [] (--`((P:'a) = P') ==> (P' = P)`--);
 
-  (*!
-   REQUIRES:  true 
-   ENSURES:   true
-  !*)
+(* reduction in operand *)
+SIMP_PROVE bool_ss [] (--`((P:'a) = P') ==> ((Q P:'b) = Q P')`--);
 
   fun last_elem (m: int, []: int list): bool = true
   	| last_elem (m, x :: l) = if m = x then last_elem(m, l)
@@ -66,18 +68,3 @@ struct
 
 
 end (* structure Util *)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

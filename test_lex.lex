@@ -5,7 +5,7 @@ type ('a,'b) token = ('a,'b) Tokens.token
 type lexresult= (svalue,pos) token
 exception UnmatchedComments
 val pos = ref 1
-fun printf x = ()
+fun printf x = ();
 datatype ws_type = WS of int | NL of int | TAB of int | Comment of string * int
 
 
@@ -83,30 +83,31 @@ ordinal_alphabet = "\\"[0-9]{3};
 ordinal_hex = "\\u"[0-9a-fA-F]{4};
 control_chars = "\\^"{ascii};
 escape_chars = "\\"[abtnvfr];
-chars = {ascii} | {escape_chars} | {control_chars} | {ordinal_hex} | {ordinal_alphabet};
+escape_quote = "\\\"";
+escape_backslash = "\\\\";
+escaped =  {escape_chars} | {control_chars} | {ordinal_hex} | {ordinal_alphabet} | {escape_quote} | {escape_backslash};
+chars = {ascii} | {escaped};
 char_ = "#\""{chars}"\"";
-everything_but_quotes = [^\"];
-everything_but_backslash = [^\\];
-empty_string = "\"\"";
-non_empty_string = "\""{everything_but_quotes}*{everything_but_backslash}"\"";
-string_ = {empty_string} | {non_empty_string};
-%%
+non_quotes = [^\"\\];
+str_content = {non_quotes} | {escaped};
+string_ = "\""{str_content}*"\"";
+%%	
 <INITIAL>{space}     => (printf "space\n"; lex());
 <INITIAL>{tab}       => (printf "tab\n"; lex());
 <INITIAL>{newline}   => (printf "newline\n"; pos := !pos + 1; lex());
 
-<INITIAL>{integer}   => (printf "1\n"; Tokens.INT(yytext, !pos, !pos));
+<INITIAL>{integer}   => (printf "int\n"; Tokens.INT(yytext, !pos, !pos));
 <INITIAL>{hex}       => (printf "1\n"; Tokens.INT(yytext, !pos, !pos));
 <INITIAL>{real_}	 => (printf "1\n"; Tokens.REAL(yytext, !pos, !pos));
 <INITIAL>{word_}     => (printf "1\n"; Tokens.WORD(yytext, !pos,!pos));
-<INITIAL>{char_}	 => (printf "1\n"; Tokens.CHAR(yytext, !pos, !pos));
+<INITIAL>{char_}	 => (printf "char\n"; Tokens.CHAR(yytext, !pos, !pos));
 
 <INITIAL>{string_}	 => (printf "string\n"; Tokens.STRING(yytext, !pos, !pos));
 
 <INITIAL>"="	     => (printf "equalop\n"; Tokens.EQUALOP(yytext, !pos,!pos));
 <INITIAL>"*"         => (printf "1\n"; Tokens.TIMES(yytext, !pos,!pos));
 
-<INITIAL>";"		 => (printf "1\n"; Tokens.SEMICOLON (yytext, !pos, !pos));
+<INITIAL>";"		 => (printf "semicolon\n"; Tokens.SEMICOLON (yytext, !pos, !pos));
 <INITIAL>","         => (printf "1\n"; Tokens.COMMA(yytext, !pos,!pos));
 <INITIAL>"."		 => (printf "1\n"; Tokens.DOT (yytext, !pos, !pos));
 
@@ -114,7 +115,7 @@ string_ = {empty_string} | {non_empty_string};
 <INITIAL>"=>"	     => (printf "2\n"; Tokens.DARROW(yytext, !pos,!pos));
 <INITIAL>"|"		 => (printf "2\n"; Tokens.BAR(yytext, !pos,!pos));
 <INITIAL>":"		 => (printf "2\n"; Tokens.COLON(yytext, !pos,!pos));
-<INITIAL>":>"	     => (printf "2\n"; Tokens.COLONGT(yytext, !pos,!pos));
+<INITIAL>":>"	     => (printf ":>\n"; Tokens.COLONGT(yytext, !pos,!pos));
 <INITIAL>"#"         => (printf "2\n"; Tokens.HASH(yytext, !pos,!pos));
 
 <INITIAL>"{"	 	 => (printf "2\n"; Tokens.LCURLY(yytext, !pos,!pos));
@@ -122,7 +123,6 @@ string_ = {empty_string} | {non_empty_string};
 
 <INITIAL>"(*"		 => (printf "open comment ini\n"; YYBEGIN COMMENT; unmatched_comments := 1;
 						 lex());
-<INITIAL>"*)"		 => (printf "close comment ini\n"; error("Error: unmatched close comment", !pos, !pos); lex());
 
 <COMMENT>"(*"		 => (printf "open comment com\n"; inc unmatched_comments; lex());
 <COMMENT>"*)"		 => (printf "close comment com\n"; dec unmatched_comments; 
@@ -148,7 +148,7 @@ string_ = {empty_string} | {non_empty_string};
 
 <INITIAL>"let"	     => (printf "e\n"; Tokens.LET(yytext, !pos,!pos));
 <INITIAL>"in"	     => (printf "e\n"; Tokens.IN(yytext, !pos,!pos));
-<INITIAL>"end"	     => (printf "e\n"; Tokens.END(yytext, !pos,!pos));
+<INITIAL>"end"	     => (printf "end\n"; Tokens.END(yytext, !pos,!pos));
 
 <INITIAL>"orelse"    => (printf "5\n"; Tokens.ORELSE(yytext, !pos,!pos));
 <INITIAL>"andalso"   => (printf "5\n"; Tokens.ANDALSO(yytext, !pos,!pos));
@@ -157,14 +157,14 @@ string_ = {empty_string} | {non_empty_string};
 <INITIAL>"raise"	 => (printf "5\n"; Tokens.RAISE(yytext, !pos,!pos));
 <INITIAL>"exception" => (printf "5\n"; Tokens.EXCEPTION(yytext, !pos,!pos));
 
-<INITIAL>"val"		 => (printf "5\n"; Tokens.VAL(yytext, !pos, !pos));
+<INITIAL>"val"		 => (printf "val\n"; Tokens.VAL(yytext, !pos, !pos));
 <INITIAL>"and"		 => (printf "5\n"; Tokens.AND(yytext, !pos, !pos));
 <INITIAL>"fn" 		 => (printf "5\n"; Tokens.FN(yytext, !pos, !pos));
 <INITIAL>"fun"		 => (printf "fun\n"; Tokens.FUN(yytext, !pos, !pos));
 <INITIAL>"case" 	 => (printf "5\n"; Tokens.CASE(yytext, !pos, !pos));
 <INITIAL>"of"	     => (printf "5\n"; Tokens.OF(yytext, !pos, !pos));
 <INITIAL>"_"		 => (printf "5\n"; Tokens.WILD(yytext, !pos, !pos));
-<INITIAL>"op"		 => (printf "5\n"; Tokens.OP(yytext, !pos, !pos));
+<INITIAL>"op"		 => (printf "op\n"; Tokens.OP(yytext, !pos, !pos));
 <INITIAL>"rec"		 => (printf "5\n"; Tokens.REC(yytext, !pos, !pos));
 
 <INITIAL>"type" 	 => (printf "5\n"; Tokens.TYPE(yytext, !pos, !pos));
@@ -179,8 +179,8 @@ string_ = {empty_string} | {non_empty_string};
 <INITIAL>"infixr"	 => (printf "5\n"; Tokens.INFIXR(yytext, !pos, !pos));
 <INITIAL>"nonfix"	 => (printf "5\n"; Tokens.NONFIX(yytext, !pos, !pos));
 
-<INITIAL>"struct"	 => (printf "5\n"; Tokens.STRUCT(yytext, !pos, !pos));
-<INITIAL>"structure" => (printf "5\n"; Tokens.STRUCTURE(yytext, !pos, !pos));
+<INITIAL>"struct"	 => (printf "struct\n"; Tokens.STRUCT(yytext, !pos, !pos));
+<INITIAL>"structure" => (printf "structure\n"; Tokens.STRUCTURE(yytext, !pos, !pos));
 <INITIAL>"sig" 		 => (printf "5\n"; Tokens.SIG(yytext, !pos, !pos));
 <INITIAL>"signature" => (printf "5\n"; Tokens.SIGNATURE(yytext, !pos, !pos));
 <INITIAL>"functor"   => (printf "5\n"; Tokens.FUNCTOR(yytext, !pos, !pos));
@@ -199,14 +199,14 @@ string_ = {empty_string} | {non_empty_string};
 <INITIAL>"ENSURES"   => (printf "5\n"; ens (!pos); Tokens.ENSURES(yytext, !pos, !pos));
 
 
-<INITIAL>{symbol}+   => (printf "rip\n"; if yytext = ":" orelse
+<INITIAL>{symbol}+   => (printf "symbol_token\n"; if yytext = ":" orelse
 							yytext = "|" orelse
 							yytext = "=" orelse
 							yytext = "#" then REJECT()
 						else Tokens.SYMBOLS(yytext, !pos, !pos));
 
-<INITIAL>"'"{idchars}+  => (printf "rip\n"; Tokens.QUOTE_ID(yytext, !pos, !pos));
+<INITIAL>"'"{idchars}+  => (printf "quote_id\n"; Tokens.QUOTE_ID(yytext, !pos, !pos));
 
 <INITIAL>{id}		    => (printf "token\n"; Tokens.ID(yytext, !pos, !pos));
 
-<INITIAL>.              => (printf "rip\n"; error ("ignoring bad character "^yytext,!pos,!pos); lex());
+<INITIAL>.              => (printf "smthing else\n"; error ("ignoring bad character "^yytext,!pos,!pos); lex());
