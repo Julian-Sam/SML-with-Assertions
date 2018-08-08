@@ -336,6 +336,7 @@ val Stack: stack ref = ref []
   AT_EXP : CON (CON)
          | LONG_VID (LONG_VID)
          | OP LONG_VID (OP ^ " " ^ LONG_VID)
+         | LCURLY RCURLY (spacer'([LCURLY, RCURLY]))
          | LCURLY EXP_ROW RCURLY (spacer'([LCURLY, EXP_ROW, RCURLY]))
          | HASH LAB (HASH ^ " " ^ LAB)
          | LPAREN RPAREN (LPAREN ^ " " ^ RPAREN)

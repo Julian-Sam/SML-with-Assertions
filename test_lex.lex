@@ -5,7 +5,7 @@ type ('a,'b) token = ('a,'b) Tokens.token
 type lexresult= (svalue,pos) token
 exception UnmatchedComments
 val pos = ref 1
-fun printf x = print x;
+fun printf x = ();
 datatype ws_type = WS of int | NL of int | TAB of int | Comment of string * int
 
 
@@ -83,16 +83,15 @@ ordinal_alphabet = "\\"[0-9]{3};
 ordinal_hex = "\\u"[0-9a-fA-F]{4};
 control_chars = "\\^"{ascii};
 escape_chars = "\\"[abtnvfr];
-chars = {ascii} | {escape_chars} | {control_chars} | {ordinal_hex} | {ordinal_alphabet};
+escape_quote = "\\\"";
+escape_backslash = "\\\\";
+escaped =  {escape_chars} | {control_chars} | {ordinal_hex} | {ordinal_alphabet} | {escape_quote} | {escape_backslash};
+chars = {ascii} | {escaped};
 char_ = "#\""{chars}"\"";
-two_backslash = "\\\\";
-even_backslashes = {two_backslash}*;
-everything_but_quotes = [^\"];
-everything_but_backslash = [^\\];
-empty_string = "\"\"";
-non_empty_string = "\""{everything_but_quotes}*{even_backslashes}"\"";
-string_ = {non_empty_string};
-%%
+non_quotes = [^\"\\];
+str_content = {non_quotes} | {escaped};
+string_ = "\""{str_content}*"\"";
+%%	
 <INITIAL>{space}     => (printf "space\n"; lex());
 <INITIAL>{tab}       => (printf "tab\n"; lex());
 <INITIAL>{newline}   => (printf "newline\n"; pos := !pos + 1; lex());
@@ -101,7 +100,7 @@ string_ = {non_empty_string};
 <INITIAL>{hex}       => (printf "1\n"; Tokens.INT(yytext, !pos, !pos));
 <INITIAL>{real_}	 => (printf "1\n"; Tokens.REAL(yytext, !pos, !pos));
 <INITIAL>{word_}     => (printf "1\n"; Tokens.WORD(yytext, !pos,!pos));
-<INITIAL>{char_}	 => (printf "1\n"; Tokens.CHAR(yytext, !pos, !pos));
+<INITIAL>{char_}	 => (printf "char\n"; Tokens.CHAR(yytext, !pos, !pos));
 
 <INITIAL>{string_}	 => (printf "string\n"; Tokens.STRING(yytext, !pos, !pos));
 
@@ -124,7 +123,6 @@ string_ = {non_empty_string};
 
 <INITIAL>"(*"		 => (printf "open comment ini\n"; YYBEGIN COMMENT; unmatched_comments := 1;
 						 lex());
-<INITIAL>"*)"		 => (printf "close comment ini\n"; error("Error: unmatched close comment", !pos, !pos); lex());
 
 <COMMENT>"(*"		 => (printf "open comment com\n"; inc unmatched_comments; lex());
 <COMMENT>"*)"		 => (printf "close comment com\n"; dec unmatched_comments; 
