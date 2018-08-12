@@ -1,69 +1,148 @@
-load"simpLib";
-open Simplifier Simpsets arith_ss ;
-infix ++;
-trace_level := 5;
-quotation := true; open Parse;
+(* This file provides glue code for building the sampleulator using the
+ * parser and lexer specified in sample.lex and sample.grm.
+*)
 
-(* reduction in operand *)
-SIMP_PROVE bool_ss [] (--`((P:'a) = P') ==> (P' = P)`--);
+structure Sample : sig
+             val parse : string -> unit
+             val parse_print : string -> unit
+                 end = 
+struct
 
-(* reduction in operand *)
-SIMP_PROVE bool_ss [] (--`((P:'a) = P') ==> ((Q P:'b) = Q P')`--);
+(* 
+ * We apply the functors generated from sample.lex and sample.grm to produce
+ * the SampleParser structure.
+ *)
 
-(* reduction in operator *)
-SIMP_PROVE bool_ss [] (--`(P = P') ==> (P (Q:'a) = (P' Q:'b))`--);
+  structure SampleLrVals =
+    SampleLrValsFun(structure Token = LrParser.Token)
 
-(* reductions in both *)
-SIMP_PROVE bool_ss [] (--`(P = P') /\ (Q = Q') ==> ((P:'b->'a) Q = P' Q')`--);
+  structure SampleLex =
+    SampleLexFun(structure Tokens = SampleLrVals.Tokens)
 
-(* reduction inside abs. *)
-SIMP_PROVE bool_ss [] (--`(P = P') ==> ((!x:'a. P x) = (!x. P' x))`--);
+  structure SampleParser =
+    Join(structure LrParser = LrParser
+   structure ParserData = SampleLrVals.ParserData
+   structure Lex = SampleLex)
 
-(* solving side conditions with a dproc (SATISFY) *)
+(* 
+ * We need a function which given a lexer invokes the parser. The
+ * function invoke does this.
+ *)
 
-(* making reductions with a dproc *)
-(*Fails! *)
-val ss = mk_simpset [BOOL_ss,SATISFY_ss];
-SIMP_PROVE ss [] (--`Q 0 1 ==> ?x y. Q x y`--);;
-SIMP_PROVE ss [] (--`Q 1 1 /\ (!z:num. R z 0) ==> ?x y z. Q x y /\ R z 0`--);;
+  fun invoke lexstream =
+      let fun print_error (s,i:int,_) =
+        TextIO.output(TextIO.stdOut,
+          "Error, line " ^ (Int.toString i) ^ ", " ^ s ^ "\n")
+       in SampleParser.parse(0,lexstream,print_error, ())
+      end
 
-(* making reductions with a conversion (BETA_CONV) *)
-SIMP_PROVE bool_ss [] (--`(\x. Q x 0:num) 1 = Q 1 0`--);;
-
-(* unwinding *)
-val ss = mk_simpset [BOOL_ss,UNWIND_ss];
-SIMP_CONV ss [] (--`?a b:num. (0 = a) /\ P a b`--);;
-SIMP_CONV ss [] (--`!a b:num. (1 + 2 = a) ==> P a b`--);;
-SIMP_CONV ss [] (--`!a b:num. G ==> R /\ (3 = a) ==> P a b`--);;
-
-(* reprocessing of non-trivial context
-Before adding reprocessing the "else" branch of the following
-would not have been simplified *)
-
-SIMP_PROVE bool_ss [boolTheory.DE_MORGAN_THM]
-      (--`((P \/ Q) => x | ~P) = (P \/ Q ==> x)`--);
+  datatype ws_type = WS of int | NL of int | TAB of int | Comment of string * int;
 
 
-(* multiple beta convs *)
-SIMP_CONV bool_ss [] (--`(\x y z. P x y z:num) 1 2 3`--);
+  fun check_string (x: char list, final: string) = 
+      case (x) of
+        nil => (final, x)
+      | ch :: x' => if ch <> #" " andalso ch <> #"\n" andalso ch <> #"\t" then check_string (x', final ^ (String.implode ([ch])))
+                    else (final, x)
 
-(* arithmetic *)
-trace_level := 1;;
-SIMP_PROVE arith_ss [] (--`P (x + 2) = (P (2 + x):'a)`--);
+  fun readList (x: char list, req: int list, ens: int list, cases: int list, num: int, final: char list) = 
+    case (x) of 
+      nil => final
+    | ch :: x' => if ch = #"$" then (let 
+                                       val (str, x'') = check_string (x, "") 
+                                     in 
+                                       if str = "$#$$#$" then (case (cases) of
+                                                                 nil            => raise Fail "Cant reach HERE! REQIRES"
+                                                               | num1 :: cases' => case (req) of inte :: req' => if num1 = num then readList (x'', req, ens, cases', 
+                                                                                                                 num, final @ (String.explode (Int.toString (inte))))
+                                                                                                                 else readList (x, req', List.drop (ens, 1), cases, num + 1, final)) 
+                                       else readList (x'', req, ens, cases, num, final @ String.explode (str))
+                                     end)
 
-SIMP_CONV arith_ss [] (--`1 < 2 => 3 | 4`--);
-SIMP_CONV arith_ss [] (--`(x > z + 1) /\ ( y + 1 > x + 1) => (y > x) | Z`--);
-SIMP_CONV arith_ss [] (--`(x > 20 + 1) /\ ( y + 1 > x + 1) => (y > 15) | Z`--);
-profile2 SIMP_CONV arith_ss (--`(x > z + 1) /\ ( y + 1 > x + 1) => (y > x) | Z`--);
+
+             else if ch = #"%" then (let 
+                                      val (str, x'') = check_string (x, "") 
+                                     in   
+                                       if str = "%#%%#%" then (case (cases) of
+                                                                 nil            => raise Fail "Cant reach HERE! ENSURES"
+                                                               | num1 :: cases' => case (ens) of inte :: ens' => if num1 = num then readList (x'', req, ens, cases', 
+                                                                                                                 num, final @ (String.explode (Int.toString (inte))))
+                                                                                                                 else readList (x, List.drop (req, 1), ens', cases, num + 1, final))
+                                       else readList (x'', req, ens, cases, num, final @ String.explode (str))
+                                     end)
+
+             else readList (x', req, ens, cases, num, final @ [ch])
+
+  fun write_file filename content =
+      let val fd = TextIO.openOut filename
+          val _ = TextIO.output (fd, content) handle e => (TextIO.closeOut fd; raise e)
+          val _ = TextIO.closeOut fd
+      in () end
+
+  fun modify_filename filename = 
+    String.substring (filename, 0, size(filename) - 4) ^ "_parsed" ^ ".sml";
 
 
-(* cached arithmetic *)
-CACHED_ARITH [] (--`1 < 2`--);;
-CACHED_ARITH [] (--`1 < 2`--);;  (* cache hit - success *)
-CACHED_ARITH [] (--`3 < 1`--);;
-CACHED_ARITH [] (--`3 < 1`--);; (* cache hit, failure *)
+(* 
+ * Finally, we need a driver function that reads one or more expressions
+ * from the standard input. The function parse, shown below, does
+ * this. It runs the sampleulator on the standard input and terminates when
+ * an end-of-file is encountered.
+ *)
 
-(* semi-congruence closure via conditional rewriting *)
-val CC = SIMP_PROVE bool_ss [] (--`!P:'a->'b. (x = x') ==> (P x = P x')`--);
-val CC2 = SIMP_PROVE bool_ss [] (--`!P:'a->'b->'c. (x = x') /\ (y = y') ==> (P x y = P x' y')`--);
-SIMP_PROVE arith_ss [CC,CC2] (--`y >= z ==> z >= y ==> (P y (x + 2):bool = P z (2 + x))`--);
+  fun parse (filename) = 
+      let val inStream = TextIO.openIn (filename)
+      val lexer = SampleParser.makeLexer (fn _ => 
+                                           case TextIO.inputLine inStream
+                                              of SOME s => s
+                                               | _ => "") 
+
+    val dummy_ws_list_ref: (int list * int list * int list) ref = ref ([], [], [])
+    val dummyEOF = SampleLrVals.Tokens.EOF(dummy_ws_list_ref, 0, 0)
+    fun loop lexer =
+        let val (result,lexer) = invoke lexer
+      val (nextToken,lexer) = SampleParser.Stream.get lexer
+      val _ = case result
+          of SOME (x,y) => (let
+                              val (req_list, ens_list, case_list) = y
+                              val (req_list, ens_list, case_list) = (req_list, ens_list, List.rev (case_list))
+                              val new_char_list = readList (String.explode (x), req_list, ens_list, case_list, 1, [])
+                            in
+                              write_file (modify_filename(filename)) (String.implode (new_char_list) ^ "\n\n")
+                            end)
+           | NONE => ()
+         in if SampleParser.sameToken(nextToken,dummyEOF) then ()
+      else loop lexer
+        end
+       in loop lexer
+      end
+
+
+
+  fun parse_print (filename) = 
+      let val inStream = TextIO.openIn (filename)
+      val lexer = SampleParser.makeLexer (fn _ => 
+                                           case TextIO.inputLine inStream
+                                              of SOME s => s
+                                               | _ => "")
+
+    val dummy_ws_list_ref: (int list * int list * int list) ref = ref ([], [], [])
+    val dummyEOF = SampleLrVals.Tokens.EOF(dummy_ws_list_ref, 0, 0)
+    fun loop lexer =
+        let val (result,lexer) = invoke lexer
+      val (nextToken,lexer) = SampleParser.Stream.get lexer
+      val _ = case result
+          of SOME (x,y) => (let
+                              val (req_list, ens_list, case_list) = y
+                              val (req_list, ens_list, case_list) = (req_list, ens_list, List.rev (case_list))
+                              val new_char_list = readList (String.explode (x), req_list, ens_list, case_list, 1, [])
+                            in
+                              print (String.implode (new_char_list) ^ "\n\n")
+                            end)
+           | NONE => ()
+         in if SampleParser.sameToken(nextToken,dummyEOF) then ()
+      else loop lexer
+        end
+       in loop lexer
+      end
+end

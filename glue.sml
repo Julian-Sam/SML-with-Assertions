@@ -53,7 +53,7 @@ struct
                                      in 
                                        if str = "$#$$#$" then (case (cases) of
                                                                  nil            => raise Fail "Cant reach HERE! REQIRES"
-                                                               | num1 :: cases' => case (req) of inte :: req' => if num1 = num then readList (x'', req, ens, cases', 
+                                                               | num1 :: cases' => case (req) of nil => [] | inte :: req' => if num1 = num then readList (x'', req, ens, cases', 
                                                                                                                  num, final @ (String.explode (Int.toString (inte))))
                                                                                                                  else readList (x, req', List.drop (ens, 1), cases, num + 1, final)) 
                                        else readList (x'', req, ens, cases, num, final @ String.explode (str))
@@ -65,7 +65,7 @@ struct
                                      in   
                                        if str = "%#%%#%" then (case (cases) of
                                                                  nil            => raise Fail "Cant reach HERE! ENSURES"
-                                                               | num1 :: cases' => case (ens) of inte :: ens' => if num1 = num then readList (x'', req, ens, cases', 
+                                                               | num1 :: cases' => case (ens) of nil => [] | inte :: ens' => if num1 = num then readList (x'', req, ens, cases', 
                                                                                                                  num, final @ (String.explode (Int.toString (inte))))
                                                                                                                  else readList (x, List.drop (req, 1), ens', cases, num + 1, final))
                                        else readList (x'', req, ens, cases, num, final @ String.explode (str))
