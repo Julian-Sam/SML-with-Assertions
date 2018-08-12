@@ -9,20 +9,20 @@ fun printf x = ();
 datatype ws_type = WS of int | NL of int | TAB of int | Comment of string * int
 
 
-val ws_type_list_ref: (int list * int list * int list) ref = ref ([], [], [])
+val assertion_list_ref: (int list * int list * int list) ref = ref ([], [], [])
 val final_ref_list: (int list * int list * int list) ref = ref ([], [], [])
 val string_ref =  ref ("", 0)
 
 fun req num = let
-			   val (ws_list, nl_list, _) = !ws_type_list_ref
+			   val (req_list, ens_list, _) = !assertion_list_ref
 			 in
-			   ws_type_list_ref := (num :: ws_list, nl_list, [])
+			   assertion_list_ref := (num :: req_list, ens_list, [])
 			 end
 
 fun ens num = let
-			   val (ws_list, nl_list, _) = !ws_type_list_ref
+			   val (req_list, ens_list, _) = !assertion_list_ref
 			 in
-			   ws_type_list_ref := (ws_list, num :: nl_list, [])
+			   assertion_list_ref := (req_list, num :: ens_list, [])
 			 end
 
 fun rev_str (str: string) = String.implode (List.rev (String.explode (str)))
@@ -43,11 +43,11 @@ fun dec(x) = x := (!x - 1)
 fun eof () = (if (!unmatched_comments) <> 0 
 			 then (printf("Error: Unmatched Comment Bracket"); raise UnmatchedComments)
 			 else (let
-					 val (ws, nl, _) = !ws_type_list_ref
+					 val (ws, nl, _) = !assertion_list_ref
 					 val final_ref_list = ref (List.rev (ws), List.rev (nl), [])
 				   in
 					 pos := 1;
-					 ws_type_list_ref := ([], [], []);
+					 assertion_list_ref := ([], [], []);
 					 Tokens.EOF(final_ref_list, !pos, !pos)
 				   end))
 
@@ -55,7 +55,9 @@ fun error (e,l : int,_) = printf (String.concat[
 	"line ", (Int.toString l), ": ", e, "\n"
       ])
 
+
 %%
+
 %header (functor SampleLexFun(structure Tokens: Sample_TOKENS));
 %reject
 %s COMMENT; 
@@ -91,7 +93,10 @@ char_ = "#\""{chars}"\"";
 non_quotes = [^\"\\];
 str_content = {non_quotes} | {escaped};
 string_ = "\""{str_content}*"\"";
-%%	
+
+
+%%
+
 <INITIAL>{space}     => (printf "space\n"; lex());
 <INITIAL>{tab}       => (printf "tab\n"; lex());
 <INITIAL>{newline}   => (printf "newline\n"; pos := !pos + 1; lex());
