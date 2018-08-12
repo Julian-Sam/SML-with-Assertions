@@ -1,4 +1,4 @@
-(* This file provides glue code for building the sampleulator using the
+(* This file provides glue code for building the SML parser using the
  * parser and lexer specified in sample.lex and sample.grm.
 *)
 

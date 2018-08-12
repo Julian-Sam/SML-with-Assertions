@@ -27,11 +27,9 @@ for i in new_files:
 	if "_parsed.sml" in i:
 		remove(join(mypath, i))
 
-one_fail = False
 
 for i in broken_files:
-	one_fail = True
 	print(i + " does not parse properly")
 
-if not one_fail:
+if not broken_files:
 	print("\n\nAll tests passed!")
