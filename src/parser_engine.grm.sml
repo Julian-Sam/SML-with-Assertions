@@ -11,23 +11,30 @@ struct
 open String
 open Int
 exception LabError
-exception AssertionError
-fun concatWith_(x, lis) = concatWith (x) (lis);
-fun spacer(lis) = concatWith_("",lis);
-fun spacer'(lis) = concatWith_(" ",lis);
 
+  (* String utility functions *)
+fun concatWith_(x, lis) = concatWith (x) (lis);
+  (* Adds space between a list of words *)
+fun add_space(lis) = concatWith_(" ",lis);
+
+  (* Stores assertion blocks *)
 datatype Assert_Type = 
     EMPTY
   | REQ of string
   | ENS of string
   | BOTH of string * string
 
+  (* Passed to EOF to be used in glue for assertions *)
 val final_list_ref: (int list * int list * int list) ref = ref ([], [], []) 
+  
+  (* Variables to hold list of case numbers per function *)
 val new_ref: int list ref = ref []
 val new_num = ref 1
 
+  (* Stack datatype to insert assertions for parsing before functions *)
 type stack = Assert_Type list
 
+  (* Stack functions *)
 fun pop (S) = case S of
               []         => ([], EMPTY)
             | elem :: S' => (S', elem)
@@ -1543,25 +1550,22 @@ datatype svalue = VOID | ntVOID of unit ->  unit
  | CHAR of unit ->  (string) | WORD of unit ->  (string)
  | REAL of unit ->  (string) | INT of unit ->  (string)
  | EOF of unit ->  ( ( int list * int list * int list )  ref)
- | EXP_A of unit ->  (string) | INF_EXP_A of unit ->  (string)
- | APP_EXP_A of unit ->  (string) | EXP_A_ROW of unit ->  (string)
- | AT_EXP_A of unit ->  (string) | EXP_A_SEQ of unit ->  (string)
- | EXP_A_LIST of unit ->  (string) | TY_CON of unit ->  (string)
- | ALL_IDs of unit ->  (string) | OR_PAT_LIST of unit ->  (string)
- | AT_PAT' of unit ->  (string) | PLABELS of unit ->  (string)
- | PLABEL of unit ->  (string) | QID of unit ->  (string)
- | TYP' of unit ->  (string) | TLABELS of unit ->  (string)
- | TLABEL of unit ->  (string) | SELECTOR of unit ->  (string)
- | PROGRAM of unit ->  (string) | PROGRAM' of unit ->  (string)
- | TOP_DEC of unit ->  (string) | TOP_DEC' of unit ->  (string)
- | FUN_BIND of unit ->  (string) | FUN_BIND' of unit ->  (string)
- | STR_DESC of unit ->  (string) | EX_DESC of unit ->  (string)
- | CON_DESC of unit ->  (string) | DAT_DESC of unit ->  (string)
- | DAT_DESC' of unit ->  (string) | TYP_DESC of unit ->  (string)
- | TYP_DESC' of unit ->  (string) | VAL_DESC of unit ->  (string)
- | SPEC of unit ->  (string) | SPEC' of unit ->  (string)
- | SIG_BIND of unit ->  (string) | SIG_DEC of unit ->  (string)
- | SIG_EXP of unit ->  (string) | SIG_ID_SPCE_SEQ of unit ->  (string)
+ | TY_CON of unit ->  (string) | ALL_IDs of unit ->  (string)
+ | OR_PAT_LIST of unit ->  (string) | AT_PAT' of unit ->  (string)
+ | PLABELS of unit ->  (string) | PLABEL of unit ->  (string)
+ | QID of unit ->  (string) | TYP' of unit ->  (string)
+ | TLABELS of unit ->  (string) | TLABEL of unit ->  (string)
+ | SELECTOR of unit ->  (string) | PROGRAM of unit ->  (string)
+ | PROGRAM' of unit ->  (string) | TOP_DEC of unit ->  (string)
+ | TOP_DEC' of unit ->  (string) | FUN_BIND of unit ->  (string)
+ | FUN_BIND' of unit ->  (string) | STR_DESC of unit ->  (string)
+ | EX_DESC of unit ->  (string) | CON_DESC of unit ->  (string)
+ | DAT_DESC of unit ->  (string) | DAT_DESC' of unit ->  (string)
+ | TYP_DESC of unit ->  (string) | TYP_DESC' of unit ->  (string)
+ | VAL_DESC of unit ->  (string) | SPEC of unit ->  (string)
+ | SPEC' of unit ->  (string) | SIG_BIND of unit ->  (string)
+ | SIG_DEC of unit ->  (string) | SIG_EXP of unit ->  (string)
+ | SIG_ID_SPCE_SEQ of unit ->  (string)
  | LONG_STR_ID_EQ_SEQ of unit ->  (string)
  | LONG_TY_CON_EQ_SEQ of unit ->  (string)
  | TYP_REFINE of unit ->  (string) | TYP_REFINE' of unit ->  (string)
@@ -1736,7 +1740,7 @@ end
  let val  result = MlyValue.PROGRAM (fn _ => let val  (SEMICOLON as 
 SEMICOLON1) = SEMICOLON1 ()
  val  (PROGRAM as PROGRAM1) = PROGRAM1 ()
- in (spacer'([SEMICOLON, PROGRAM]))
+ in (add_space([SEMICOLON, PROGRAM]))
 end)
  in ( LrTable.NT 84, ( result, SEMICOLON1left, PROGRAM1right), rest671
 )
@@ -1745,7 +1749,7 @@ end
  ( MlyValue.EXP EXP1, EXP1left, _)) :: rest671)) => let val  result = 
 MlyValue.PROGRAM (fn _ => let val  (EXP as EXP1) = EXP1 ()
  val  (PROGRAM as PROGRAM1) = PROGRAM1 ()
- in (spacer'([EXP, PROGRAM]))
+ in (add_space([EXP, PROGRAM]))
 end)
  in ( LrTable.NT 84, ( result, EXP1left, PROGRAM1right), rest671)
 end
@@ -1754,7 +1758,7 @@ end
 result = MlyValue.PROGRAM (fn _ => let val  (S_DEC as S_DEC1) = S_DEC1
  ()
  val  (PROGRAM as PROGRAM1) = PROGRAM1 ()
- in (spacer'([S_DEC, PROGRAM]))
+ in (add_space([S_DEC, PROGRAM]))
 end)
  in ( LrTable.NT 84, ( result, S_DEC1left, PROGRAM1right), rest671)
 
@@ -1869,7 +1873,7 @@ ALL_IDs1left, _)) :: rest671)) => let val  result = MlyValue.QID (fn _
  => let val  (ALL_IDs as ALL_IDs1) = ALL_IDs1 ()
  val  (DOT as DOT1) = DOT1 ()
  val  (QID as QID1) = QID1 ()
- in (spacer([ALL_IDs, DOT, QID]))
+ in (add_space([ALL_IDs, DOT, QID]))
 end)
  in ( LrTable.NT 89, ( result, ALL_IDs1left, QID1right), rest671)
 end
@@ -2113,7 +2117,7 @@ end
 result = MlyValue.AT_EXP (fn _ => let val  (LCURLY as LCURLY1) = 
 LCURLY1 ()
  val  (RCURLY as RCURLY1) = RCURLY1 ()
- in (spacer'([LCURLY, RCURLY]))
+ in (add_space([LCURLY, RCURLY]))
 end)
  in ( LrTable.NT 16, ( result, LCURLY1left, RCURLY1right), rest671)
 
@@ -2124,7 +2128,7 @@ LCURLY1left, _)) :: rest671)) => let val  result = MlyValue.AT_EXP (fn
  _ => let val  (LCURLY as LCURLY1) = LCURLY1 ()
  val  (EXP_ROW as EXP_ROW1) = EXP_ROW1 ()
  val  (RCURLY as RCURLY1) = RCURLY1 ()
- in (spacer'([LCURLY, EXP_ROW, RCURLY]))
+ in (add_space([LCURLY, EXP_ROW, RCURLY]))
 end)
  in ( LrTable.NT 16, ( result, LCURLY1left, RCURLY1right), rest671)
 
@@ -2153,7 +2157,7 @@ end
  (fn _ => let val  (LPAREN as LPAREN1) = LPAREN1 ()
  val  (EXP_LIST as EXP_LIST1) = EXP_LIST1 ()
  val  (RPAREN as RPAREN1) = RPAREN1 ()
- in (spacer'([LPAREN, EXP_LIST, RPAREN]))
+ in (add_space([LPAREN, EXP_LIST, RPAREN]))
 end)
  in ( LrTable.NT 16, ( result, LPAREN1left, RPAREN1right), rest671)
 
@@ -2174,7 +2178,7 @@ end
  (fn _ => let val  (LBRACK as LBRACK1) = LBRACK1 ()
  val  (EXP_LIST as EXP_LIST1) = EXP_LIST1 ()
  val  (RBRACK as RBRACK1) = RBRACK1 ()
- in (spacer'([LBRACK, EXP_LIST, RBRACK]))
+ in (add_space([LBRACK, EXP_LIST, RBRACK]))
 end)
  in ( LrTable.NT 16, ( result, LBRACK1left, RBRACK1right), rest671)
 
@@ -2185,7 +2189,7 @@ LPAREN1left, _)) :: rest671)) => let val  result = MlyValue.AT_EXP (fn
  _ => let val  (LPAREN as LPAREN1) = LPAREN1 ()
  val  (EXP_SEQ as EXP_SEQ1) = EXP_SEQ1 ()
  val  (RPAREN as RPAREN1) = RPAREN1 ()
- in (spacer'([LPAREN, EXP_SEQ, RPAREN]))
+ in (add_space([LPAREN, EXP_SEQ, RPAREN]))
 end)
  in ( LrTable.NT 16, ( result, LPAREN1left, RPAREN1right), rest671)
 
@@ -2199,7 +2203,7 @@ LET as LET1) = LET1 ()
  val  (IN as IN1) = IN1 ()
  val  (EXP as EXP1) = EXP1 ()
  val  (END as END1) = END1 ()
- in (spacer'([LET, DEC, IN, EXP, END]))
+ in (add_space([LET, DEC, IN, EXP, END]))
 end)
  in ( LrTable.NT 16, ( result, LET1left, END1right), rest671)
 end
@@ -2212,7 +2216,7 @@ LET1left, _)) :: rest671)) => let val  result = MlyValue.AT_EXP (fn _
  val  (IN as IN1) = IN1 ()
  val  (EXP_SEQ as EXP_SEQ1) = EXP_SEQ1 ()
  val  (END as END1) = END1 ()
- in (spacer'([LET, DEC, IN, EXP_SEQ, END]))
+ in (add_space([LET, DEC, IN, EXP_SEQ, END]))
 end)
  in ( LrTable.NT 16, ( result, LET1left, END1right), rest671)
 end
@@ -2290,7 +2294,7 @@ MlyValue.COLON COLON1, _, _)) :: ( _, ( MlyValue.EXP EXP1, EXP1left, _
 EXP as EXP1) = EXP1 ()
  val  (COLON as COLON1) = COLON1 ()
  val  (TYP as TYP1) = TYP1 ()
- in (spacer'([EXP, COLON, TYP]))
+ in (add_space([EXP, COLON, TYP]))
 end)
  in ( LrTable.NT 20, ( result, EXP1left, TYP1right), rest671)
 end
@@ -2300,7 +2304,7 @@ EXP1left, _)) :: rest671)) => let val  result = MlyValue.EXP (fn _ =>
  let val  EXP1 = EXP1 ()
  val  (ANDALSO as ANDALSO1) = ANDALSO1 ()
  val  EXP2 = EXP2 ()
- in (spacer'([EXP1, ANDALSO, EXP2]))
+ in (add_space([EXP1, ANDALSO, EXP2]))
 end)
  in ( LrTable.NT 20, ( result, EXP1left, EXP2right), rest671)
 end
@@ -2310,7 +2314,7 @@ MlyValue.ORELSE ORELSE1, _, _)) :: ( _, ( MlyValue.EXP EXP1, EXP1left,
 EXP1 = EXP1 ()
  val  (ORELSE as ORELSE1) = ORELSE1 ()
  val  EXP2 = EXP2 ()
- in (spacer'([EXP1, ORELSE, EXP2]))
+ in (add_space([EXP1, ORELSE, EXP2]))
 end)
  in ( LrTable.NT 20, ( result, EXP1left, EXP2right), rest671)
 end
@@ -2320,7 +2324,7 @@ MlyValue.HANDLE HANDLE1, _, _)) :: ( _, ( MlyValue.EXP EXP1, EXP1left,
  (EXP as EXP1) = EXP1 ()
  val  (HANDLE as HANDLE1) = HANDLE1 ()
  val  (MATCH as MATCH1) = MATCH1 ()
- in (spacer'([EXP, HANDLE, MATCH]))
+ in (add_space([EXP, HANDLE, MATCH]))
 end)
  in ( LrTable.NT 20, ( result, EXP1left, MATCH1right), rest671)
 end
@@ -2328,7 +2332,7 @@ end
 MlyValue.RAISE RAISE1, RAISE1left, _)) :: rest671)) => let val  result
  = MlyValue.EXP (fn _ => let val  (RAISE as RAISE1) = RAISE1 ()
  val  (EXP as EXP1) = EXP1 ()
- in (spacer'([RAISE, EXP]))
+ in (add_space([RAISE, EXP]))
 end)
  in ( LrTable.NT 20, ( result, RAISE1left, EXP1right), rest671)
 end
@@ -2342,7 +2346,7 @@ MlyValue.ELSE ELSE1, _, _)) :: ( _, ( MlyValue.EXP EXP2, _, _)) :: ( _
  val  EXP2 = EXP2 ()
  val  (ELSE as ELSE1) = ELSE1 ()
  val  EXP3 = EXP3 ()
- in (spacer'([IF, EXP1, THEN, EXP2, ELSE, EXP3]))
+ in (add_space([IF, EXP1, THEN, EXP2, ELSE, EXP3]))
 end)
  in ( LrTable.NT 20, ( result, IF1left, EXP3right), rest671)
 end
@@ -2353,7 +2357,7 @@ MlyValue.WHILE WHILE1, WHILE1left, _)) :: rest671)) => let val  result
  val  EXP1 = EXP1 ()
  val  (DO as DO1) = DO1 ()
  val  EXP2 = EXP2 ()
- in (spacer'([WHILE, EXP1, DO, EXP2]))
+ in (add_space([WHILE, EXP1, DO, EXP2]))
 end)
  in ( LrTable.NT 20, ( result, WHILE1left, EXP2right), rest671)
 end
@@ -2364,7 +2368,7 @@ MlyValue.EXP (fn _ => let val  (CASE as CASE1) = CASE1 ()
  val  (EXP as EXP1) = EXP1 ()
  val  (OF as OF1) = OF1 ()
  val  (MATCH as MATCH1) = MATCH1 ()
- in (spacer'([CASE, EXP, OF, MATCH]))
+ in (add_space([CASE, EXP, OF, MATCH]))
 end)
  in ( LrTable.NT 20, ( result, CASE1left, MATCH1right), rest671)
 end
@@ -2372,7 +2376,7 @@ end
 MlyValue.FN FN1, FN1left, _)) :: rest671)) => let val  result = 
 MlyValue.EXP (fn _ => let val  (FN as FN1) = FN1 ()
  val  (MATCH as MATCH1) = MATCH1 ()
- in (spacer'([FN, MATCH]))
+ in (add_space([FN, MATCH]))
 end)
  in ( LrTable.NT 20, ( result, FN1left, MATCH1right), rest671)
 end
@@ -2382,7 +2386,7 @@ MlyValue.DARROW DARROW1, _, _)) :: ( _, ( MlyValue.PAT PAT1, PAT1left,
  val  (PAT as PAT1) = PAT1 ()
  val  (DARROW as DARROW1) = DARROW1 ()
  val  (EXP as EXP1) = EXP1 ()
- in (spacer'([PAT, DARROW, EXP]))
+ in (add_space([PAT, DARROW, EXP]))
 end)
  in ( LrTable.NT 21, ( result, PAT1left, EXP1right), rest671)
 end
@@ -2526,7 +2530,7 @@ LONG_STR_ID1left, _)) :: rest671)) => let val  result =
 MlyValue.LONG_STR_ID_LIST (fn _ => let val  (LONG_STR_ID as 
 LONG_STR_ID1) = LONG_STR_ID1 ()
  val  (LONG_STR_ID_LIST as LONG_STR_ID_LIST1) = LONG_STR_ID_LIST1 ()
- in (spacer'([LONG_STR_ID, LONG_STR_ID_LIST]))
+ in (add_space([LONG_STR_ID, LONG_STR_ID_LIST]))
 end)
  in ( LrTable.NT 27, ( result, LONG_STR_ID1left, 
 LONG_STR_ID_LIST1right), rest671)
@@ -2550,7 +2554,7 @@ end
 ( _, ( MlyValue.VAL VAL1, VAL1left, _)) :: rest671)) => let val  
 result = MlyValue.DEC' (fn _ => let val  (VAL as VAL1) = VAL1 ()
  val  (VAL_BIND as VAL_BIND1) = VAL_BIND1 ()
- in (spacer'(["\n\n", VAL, VAL_BIND]))
+ in (add_space(["\n\n", VAL, VAL_BIND]))
 end)
  in ( LrTable.NT 29, ( result, VAL1left, VAL_BIND1right), rest671)
 end
@@ -2560,7 +2564,7 @@ MlyValue.VAL VAL1, VAL1left, _)) :: rest671)) => let val  result =
 MlyValue.DEC' (fn _ => let val  (VAL as VAL1) = VAL1 ()
  val  (TYP_VAR_SEQ as TYP_VAR_SEQ1) = TYP_VAR_SEQ1 ()
  val  (VAL_BIND as VAL_BIND1) = VAL_BIND1 ()
- in (spacer'(["\n\n", VAL, TYP_VAR_SEQ, VAL_BIND]))
+ in (add_space(["\n\n", VAL, TYP_VAR_SEQ, VAL_BIND]))
 end)
  in ( LrTable.NT 29, ( result, VAL1left, VAL_BIND1right), rest671)
 end
@@ -2570,7 +2574,7 @@ ASSERTIONS1, ASSERTIONS1left, _)) :: rest671)) => let val  result =
 MlyValue.DEC' (fn _ => let val  ASSERTIONS1 = ASSERTIONS1 ()
  val  (FUN as FUN1) = FUN1 ()
  val  (FVAL_BIND as FVAL_BIND1) = FVAL_BIND1 ()
- in (spacer'(["\n\n", FUN, FVAL_BIND]))
+ in (add_space(["\n\n", FUN, FVAL_BIND]))
 end)
  in ( LrTable.NT 29, ( result, ASSERTIONS1left, FVAL_BIND1right), 
 rest671)
@@ -2583,7 +2587,7 @@ ASSERTIONS1left, _)) :: rest671)) => let val  result = MlyValue.DEC'
  val  (FUN as FUN1) = FUN1 ()
  val  (TYP_VAR_SEQ as TYP_VAR_SEQ1) = TYP_VAR_SEQ1 ()
  val  (FVAL_BIND as FVAL_BIND1) = FVAL_BIND1 ()
- in (spacer'(["\n\n", FUN, TYP_VAR_SEQ, FVAL_BIND]))
+ in (add_space(["\n\n", FUN, TYP_VAR_SEQ, FVAL_BIND]))
 end)
  in ( LrTable.NT 29, ( result, ASSERTIONS1left, FVAL_BIND1right), 
 rest671)
@@ -2592,7 +2596,7 @@ end
  :: ( _, ( MlyValue.FUN FUN1, FUN1left, _)) :: rest671)) => let val  
 result = MlyValue.DEC' (fn _ => let val  (FUN as FUN1) = FUN1 ()
  val  (FVAL_BIND as FVAL_BIND1) = FVAL_BIND1 ()
- in (spacer'(["\n\n", FUN, FVAL_BIND]))
+ in (add_space(["\n\n", FUN, FVAL_BIND]))
 end)
  in ( LrTable.NT 29, ( result, FUN1left, FVAL_BIND1right), rest671)
 
@@ -2603,7 +2607,7 @@ MlyValue.FUN FUN1, FUN1left, _)) :: rest671)) => let val  result =
 MlyValue.DEC' (fn _ => let val  (FUN as FUN1) = FUN1 ()
  val  (TYP_VAR_SEQ as TYP_VAR_SEQ1) = TYP_VAR_SEQ1 ()
  val  (FVAL_BIND as FVAL_BIND1) = FVAL_BIND1 ()
- in (spacer'(["\n\n", FUN, TYP_VAR_SEQ, FVAL_BIND]))
+ in (add_space(["\n\n", FUN, TYP_VAR_SEQ, FVAL_BIND]))
 end)
  in ( LrTable.NT 29, ( result, FUN1left, FVAL_BIND1right), rest671)
 
@@ -2612,7 +2616,7 @@ end
 ( _, ( MlyValue.TYPE TYPE1, TYPE1left, _)) :: rest671)) => let val  
 result = MlyValue.DEC' (fn _ => let val  (TYPE as TYPE1) = TYPE1 ()
  val  (TYP_BIND as TYP_BIND1) = TYP_BIND1 ()
- in (spacer'(["\n\n", TYPE, TYP_BIND]))
+ in (add_space(["\n\n", TYPE, TYP_BIND]))
 end)
  in ( LrTable.NT 29, ( result, TYPE1left, TYP_BIND1right), rest671)
 
@@ -2622,7 +2626,7 @@ end
  let val  result = MlyValue.DEC' (fn _ => let val  (DATATYPE as 
 DATATYPE1) = DATATYPE1 ()
  val  (DAT_BIND as DAT_BIND1) = DAT_BIND1 ()
- in (spacer'(["\n\n", DATATYPE, DAT_BIND]))
+ in (add_space(["\n\n", DATATYPE, DAT_BIND]))
 end)
  in ( LrTable.NT 29, ( result, DATATYPE1left, DAT_BIND1right), rest671
 )
@@ -2635,7 +2639,7 @@ DATATYPE1left, _)) :: rest671)) => let val  result = MlyValue.DEC' (fn
  val  (DAT_BIND as DAT_BIND1) = DAT_BIND1 ()
  val  (WITHTYPE as WITHTYPE1) = WITHTYPE1 ()
  val  (TYP_BIND as TYP_BIND1) = TYP_BIND1 ()
- in (spacer'(["\n\n", DATATYPE, DAT_BIND, WITHTYPE, TYP_BIND]))
+ in (add_space(["\n\n", DATATYPE, DAT_BIND, WITHTYPE, TYP_BIND]))
 end)
  in ( LrTable.NT 29, ( result, DATATYPE1left, TYP_BIND1right), rest671
 )
@@ -2650,8 +2654,9 @@ TYP_CON1, _, _)) :: ( _, ( MlyValue.DATATYPE DATATYPE1, DATATYPE1left,
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  DATATYPE2 = DATATYPE2 ()
  val  (LONG_TYP_CON as LONG_TYP_CON1) = LONG_TYP_CON1 ()
- in (spacer'(["", DATATYPE, TYP_CON, EQUALOP, DATATYPE, LONG_TYP_CON])
-)
+ in (
+add_space(["", DATATYPE, TYP_CON, EQUALOP, DATATYPE, LONG_TYP_CON]))
+
 end)
  in ( LrTable.NT 29, ( result, DATATYPE1left, LONG_TYP_CON1right), 
 rest671)
@@ -2665,7 +2670,7 @@ MlyValue.DEC' (fn _ => let val  (ABSTYPE as ABSTYPE1) = ABSTYPE1 ()
  val  (WITH as WITH1) = WITH1 ()
  val  (DEC as DEC1) = DEC1 ()
  val  (END as END1) = END1 ()
- in (spacer'(["", ABSTYPE, DAT_BIND, WITH, DEC, END]))
+ in (add_space(["", ABSTYPE, DAT_BIND, WITH, DEC, END]))
 end)
  in ( LrTable.NT 29, ( result, ABSTYPE1left, END1right), rest671)
 end
@@ -2683,8 +2688,8 @@ WITHTYPE1, _, _)) :: ( _, ( MlyValue.DAT_BIND DAT_BIND1, _, _)) :: ( _
  val  (DEC as DEC1) = DEC1 ()
  val  (END as END1) = END1 ()
  in (
-spacer'(["", ABSTYPE, DAT_BIND, WITHTYPE, TYP_BIND, WITH, DEC, END]))
-
+add_space(["", ABSTYPE, DAT_BIND, WITHTYPE, TYP_BIND, WITH, DEC, END])
+)
 end)
  in ( LrTable.NT 29, ( result, ABSTYPE1left, END1right), rest671)
 end
@@ -2693,7 +2698,7 @@ end
  => let val  result = MlyValue.DEC' (fn _ => let val  (EXCEPTION as 
 EXCEPTION1) = EXCEPTION1 ()
  val  (EX_BIND as EX_BIND1) = EX_BIND1 ()
- in (spacer'(["", EXCEPTION, EX_BIND]))
+ in (add_space(["", EXCEPTION, EX_BIND]))
 end)
  in ( LrTable.NT 29, ( result, EXCEPTION1left, EX_BIND1right), rest671
 )
@@ -2703,7 +2708,7 @@ LONG_STR_ID_LIST1right)) :: ( _, ( MlyValue.OPEN OPEN1, OPEN1left, _))
  :: rest671)) => let val  result = MlyValue.DEC' (fn _ => let val  (
 OPEN as OPEN1) = OPEN1 ()
  val  (LONG_STR_ID_LIST as LONG_STR_ID_LIST1) = LONG_STR_ID_LIST1 ()
- in (spacer'(["", OPEN, LONG_STR_ID_LIST]))
+ in (add_space(["", OPEN, LONG_STR_ID_LIST]))
 end)
  in ( LrTable.NT 29, ( result, OPEN1left, LONG_STR_ID_LIST1right), 
 rest671)
@@ -2713,7 +2718,7 @@ end
  val  result = MlyValue.DEC' (fn _ => let val  (INFIX as INFIX1) = 
 INFIX1 ()
  val  (VID_LIST as VID_LIST1) = VID_LIST1 ()
- in (spacer'(["", INFIX, VID_LIST]))
+ in (add_space(["", INFIX, VID_LIST]))
 end)
  in ( LrTable.NT 29, ( result, INFIX1left, VID_LIST1right), rest671)
 
@@ -2723,7 +2728,7 @@ end
  val  result = MlyValue.DEC' (fn _ => let val  (INFIXR as INFIXR1) = 
 INFIXR1 ()
  val  (VID_LIST as VID_LIST1) = VID_LIST1 ()
- in (spacer'(["", INFIXR, VID_LIST]))
+ in (add_space(["", INFIXR, VID_LIST]))
 end)
  in ( LrTable.NT 29, ( result, INFIXR1left, VID_LIST1right), rest671)
 
@@ -2734,7 +2739,7 @@ INFIX1left, _)) :: rest671)) => let val  result = MlyValue.DEC' (fn _
  => let val  (INFIX as INFIX1) = INFIX1 ()
  val  (INT as INT1) = INT1 ()
  val  (VID_LIST as VID_LIST1) = VID_LIST1 ()
- in (spacer'(["", INFIX, INT, VID_LIST]))
+ in (add_space(["", INFIX, INT, VID_LIST]))
 end)
  in ( LrTable.NT 29, ( result, INFIX1left, VID_LIST1right), rest671)
 
@@ -2745,7 +2750,7 @@ INFIXR1left, _)) :: rest671)) => let val  result = MlyValue.DEC' (fn _
  => let val  (INFIXR as INFIXR1) = INFIXR1 ()
  val  (INT as INT1) = INT1 ()
  val  (VID_LIST as VID_LIST1) = VID_LIST1 ()
- in (spacer'(["", INFIXR, INT, VID_LIST]))
+ in (add_space(["", INFIXR, INT, VID_LIST]))
 end)
  in ( LrTable.NT 29, ( result, INFIXR1left, VID_LIST1right), rest671)
 
@@ -2755,7 +2760,7 @@ end
  val  result = MlyValue.DEC' (fn _ => let val  (NONFIX as NONFIX1) = 
 NONFIX1 ()
  val  (VID_LIST as VID_LIST1) = VID_LIST1 ()
- in (spacer'(["", NONFIX, VID_LIST]))
+ in (add_space(["", NONFIX, VID_LIST]))
 end)
  in ( LrTable.NT 29, ( result, NONFIX1left, VID_LIST1right), rest671)
 
@@ -2791,7 +2796,7 @@ result = MlyValue.DEC (fn _ => let val  (LOCAL as LOCAL1) = LOCAL1 ()
  val  DEC2 = DEC2 ()
  val  (END as END1) = END1 ()
  val  DEC3 = DEC3 ()
- in (spacer'([LOCAL, DEC1, IN, DEC2, END, DEC3]))
+ in (add_space([LOCAL, DEC1, IN, DEC2, END, DEC3]))
 end)
  in ( LrTable.NT 30, ( result, LOCAL1left, DEC3right), rest671)
 end
@@ -2801,7 +2806,7 @@ PAT1left, _)) :: rest671)) => let val  result = MlyValue.VAL_BIND (fn
  _ => let val  (PAT as PAT1) = PAT1 ()
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  (EXP as EXP1) = EXP1 ()
- in (spacer'([PAT, EQUALOP, EXP]))
+ in (add_space([PAT, EQUALOP, EXP]))
 end)
  in ( LrTable.NT 31, ( result, PAT1left, EXP1right), rest671)
 end
@@ -2814,7 +2819,7 @@ MlyValue.VAL_BIND (fn _ => let val  (PAT as PAT1) = PAT1 ()
  val  (EXP as EXP1) = EXP1 ()
  val  (AND as AND1) = AND1 ()
  val  (VAL_BIND as VAL_BIND1) = VAL_BIND1 ()
- in (spacer'([PAT, EQUALOP, EXP, AND, VAL_BIND]))
+ in (add_space([PAT, EQUALOP, EXP, AND, VAL_BIND]))
 end)
  in ( LrTable.NT 31, ( result, PAT1left, VAL_BIND1right), rest671)
 end
@@ -2822,7 +2827,7 @@ end
  ( _, ( MlyValue.REC REC1, REC1left, _)) :: rest671)) => let val  
 result = MlyValue.VAL_BIND (fn _ => let val  (REC as REC1) = REC1 ()
  val  (VAL_BIND as VAL_BIND1) = VAL_BIND1 ()
- in (spacer'([REC, VAL_BIND]))
+ in (add_space([REC, VAL_BIND]))
 end)
  in ( LrTable.NT 31, ( result, REC1left, VAL_BIND1right), rest671)
 end
@@ -2854,7 +2859,7 @@ rest671)) => let val  result = MlyValue.FVALBIND_BASE (fn _ => let
  val  (EXP as EXP1) = EXP1 ()
  in (
 case (peek (!Stack)) of
-                         (s', EMPTY)                => spacer'([VID, AT_PAT_LIST, EQUALOP, EXP])
+                         (s', EMPTY)                => add_space([VID, AT_PAT_LIST, EQUALOP, EXP])
 
                        | (s', REQ (exp))            => (let
                                                           val number = !new_num
@@ -2862,7 +2867,7 @@ case (peek (!Stack)) of
                                                         in
                                                           Stack := s'; 
                                                           new_ref := number :: numlist;
-                                                          spacer'([VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "(", exp, ")", "=", "false", "then", 
+                                                          add_space([VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "(", exp, ")", "=", "false", "then", 
                                                                  "raise Fail \" Function", VID, "Error:", "Requires Failure in line", "$#$$#$", "\"", 
                                                                  "else", EXP, "end"])
                                                         end)
@@ -2873,7 +2878,7 @@ case (peek (!Stack)) of
                                                         in
                                                           Stack := s';
                                                           new_ref := number :: numlist;
-                                                          spacer'([VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "(", exp, ")", "=", "false", "then", 
+                                                          add_space([VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "(", exp, ")", "=", "false", "then", 
                                                                  "raise Fail \" Function", VID, "Error:", "Ensures Failure in line", "%#%%#%", "\"", 
                                                                  "else", EXP, "end"])
                                                         end)
@@ -2885,7 +2890,7 @@ case (peek (!Stack)) of
                                                         in
                                                           Stack := s';
                                                           new_ref := number :: number :: numlist;
-                                                          spacer'([VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "(", exp1, ")", "=", "false", "then", 
+                                                          add_space([VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "(", exp1, ")", "=", "false", "then", 
                                                                  "raise Fail \" Function", VID, "Error:", "Requires Failure in line", "$#$$#$", "\"", "else if", "(", exp2, ")", "=", "false", "then", 
                                                                  "raise Fail \" Function", VID, "Error:", "Ensures Failure in line", "%#%%#%", "\"", 
                                                                  "else", EXP, "end"])
@@ -2907,7 +2912,7 @@ MlyValue.FVALBIND_BASE (fn _ => let val  (VID as VID1) = VID1 ()
  val  (EXP as EXP1) = EXP1 ()
  in (
 case (peek (!Stack)) of
-                         (s', EMPTY)                => (spacer'([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, EXP]))
+                         (s', EMPTY)                => (add_space([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, EXP]))
 
 
                        | (s', REQ (exp))            => (let
@@ -2916,7 +2921,7 @@ case (peek (!Stack)) of
                                                         in
                                                           Stack := s'; 
                                                           new_ref := number :: numlist;
-                                                          spacer'([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "(", exp, ")", "=", "false", "then", 
+                                                          add_space([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "(", exp, ")", "=", "false", "then", 
                                                                  "raise Fail \" Function", VID, "Error:", "Requires Failure in line", "$#$$#$", "\"", 
                                                                  "else", EXP, "end"])
                                                         end)
@@ -2927,7 +2932,7 @@ case (peek (!Stack)) of
                                                         in
                                                           Stack := s';
                                                           new_ref := number :: numlist;
-                                                          spacer'([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "(", exp, ")", "=", "false", "then", 
+                                                          add_space([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "(", exp, ")", "=", "false", "then", 
                                                                  "raise Fail \" Function", VID, "Error:", "Ensures Failure in line", "%#%%#%", "\"", 
                                                                  "else", EXP, "end"])
                                                         end)
@@ -2940,7 +2945,7 @@ case (peek (!Stack)) of
                                                         in
                                                           Stack := s';
                                                           new_ref := number :: number :: numlist;
-                                                          spacer'([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "(", exp1, ")", "=", "false", "then", 
+                                                          add_space([VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "(", exp1, ")", "=", "false", "then", 
                                                                  "raise Fail \" Function", VID, "Error:", "Requires Failure in line", "$#$$#$", "\"", "else if", "(", exp2, ")", "=", "false", "then", 
                                                                  "raise Fail \" Function", VID, "Error:", "Ensures Failure in line", "%#%%#%", "\"", 
                                                                  "else", EXP, "end"])
@@ -2960,7 +2965,7 @@ MlyValue.FVALBIND_BASE (fn _ => let val  (OP as OP1) = OP1 ()
  val  (EXP as EXP1) = EXP1 ()
  in (
 case (peek (!Stack)) of
-                         (s', EMPTY)                => spacer'([OP, VID, AT_PAT_LIST, EQUALOP, EXP])
+                         (s', EMPTY)                => add_space([OP, VID, AT_PAT_LIST, EQUALOP, EXP])
 
                        | (s', REQ (exp))            => (let
                                                           val number = !new_num
@@ -2968,7 +2973,7 @@ case (peek (!Stack)) of
                                                         in
                                                           Stack := s';
                                                           new_ref := number :: numlist;
-                                                          spacer'([OP, VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "(", exp, ")", "=", "false", "then", 
+                                                          add_space([OP, VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "(", exp, ")", "=", "false", "then", 
                                                                  "raise Fail \" Function", VID, "Error:", "Requires Failure in line", "$#$$#$", "\"", 
                                                                  "else", EXP, "end"])
                                                         end)
@@ -2979,7 +2984,7 @@ case (peek (!Stack)) of
                                                         in
                                                           Stack := s'; 
                                                           new_ref := number :: numlist;
-                                                          spacer'([OP, VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "(", exp, ")", "=", "false", "then", 
+                                                          add_space([OP, VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "(", exp, ")", "=", "false", "then", 
                                                                  "raise Fail \" Function", VID, "Error:", "Ensures Failure in line", "%#%%#%", "\"", 
                                                                  "else", EXP, "end"])
                                                         end)
@@ -2989,7 +2994,7 @@ case (peek (!Stack)) of
                                                           val numlist = !new_ref
                                                         in
                                                           Stack := s'; 
-                                                          spacer'([OP, VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "(", exp1, ")", "=", "false", "then", 
+                                                          add_space([OP, VID, AT_PAT_LIST, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "(", exp1, ")", "=", "false", "then", 
                                                                  "raise Fail \" Function", VID, "Error:", "Requires Failure in line", "$#$$#$", "\"", "else if", "(", exp2, ")", "=", "false", "then", 
                                                                  "raise Fail \" Function", VID, "Error:", "Ensures Failure in line", "%#%%#%", "\"", 
                                                                  "else", EXP, "end"])
@@ -3013,14 +3018,14 @@ OP1 ()
  val  (EXP as EXP1) = EXP1 ()
  in (
 case (peek (!Stack)) of
-                         (s', EMPTY)                => spacer'([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, EXP])
+                         (s', EMPTY)                => add_space([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, EXP])
 
                        | (s', REQ (exp))            => (let
                                                           val number = !new_num
                                                           val numlist = !new_ref
                                                         in
                                                           Stack := s'; 
-                                                          spacer'([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "(", exp, ")", "=", "false", "then", 
+                                                          add_space([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "(", exp, ")", "=", "false", "then", 
                                                                  "raise Fail \" Function", VID, "Error:", "Requires Failure in line", "$#$$#$", "\"", 
                                                                  "else", EXP, "end"])
                                                         end)
@@ -3030,7 +3035,7 @@ case (peek (!Stack)) of
                                                           val numlist = !new_ref
                                                         in
                                                           Stack := s'; 
-                                                          spacer'([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "(", exp, ")", "=", "false", "then", 
+                                                          add_space([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "(", exp, ")", "=", "false", "then", 
                                                                  "raise Fail \" Function", VID, "Error:", "Ensures Failure in line", "%#%%#%", "\"", 
                                                                  "else", EXP, "end"])
                                                         end)
@@ -3040,7 +3045,7 @@ case (peek (!Stack)) of
                                                           val numlist = !new_ref
                                                         in
                                                           Stack := s'; 
-                                                          spacer'([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "(", exp1, ")", "=", "false", "then", 
+                                                          add_space([OP, VID, AT_PAT_LIST, COLON, TYP, EQUALOP, "let", "val", "result", EQUALOP, EXP, "in", "if", "(", exp1, ")", "=", "false", "then", 
                                                                  "raise Fail \" Function", VID, "Error:", "Requires Failure in line", "$#$$#$", "\"", "else if", "(", exp2, ")", "=", "false", "then", 
                                                                  "raise Fail \" Function", VID, "Error:", "Ensures Failure in line", "%#%%#%", "\"", 
                                                                  "else", EXP, "end"])
@@ -3059,7 +3064,7 @@ let
                              in 
                                Stack := s';
                                new_num := !new_num + 1;
-                               spacer'([FVALBIND_BASE, ""])
+                               add_space([FVALBIND_BASE, ""])
                              end
 )
 end)
@@ -3073,7 +3078,7 @@ result = MlyValue.FVAL_BIND (fn _ => let val  (FVALBIND_BASE as
 FVALBIND_BASE1) = FVALBIND_BASE1 ()
  val  (BAR as BAR1) = BAR1 ()
  val  (FVAL_BIND as FVAL_BIND1) = FVAL_BIND1 ()
- in (spacer'([FVALBIND_BASE, " \n", BAR, FVAL_BIND]))
+ in (add_space([FVALBIND_BASE, " \n", BAR, FVAL_BIND]))
 end)
  in ( LrTable.NT 34, ( result, FVALBIND_BASE1left, FVAL_BIND1right), 
 rest671)
@@ -3091,7 +3096,7 @@ let
                                            in 
                                              Stack := s';
                                              new_num := !new_num + 1;
-                                             spacer'([FVALBIND_BASE, AND, FVAL_BIND])
+                                             add_space([FVALBIND_BASE, AND, FVAL_BIND])
                                            end
 )
 end)
@@ -3113,7 +3118,7 @@ let
                                                      in 
                                                        Stack := s';
                                                        new_num := !new_num + 1;
-                                                       spacer'([FVALBIND_BASE, "", AND, "", FVAL_BIND])
+                                                       add_space([FVALBIND_BASE, "", AND, "", FVAL_BIND])
                                                      end
 )
 end)
@@ -3127,7 +3132,7 @@ MlyValue.TYP_BIND' (fn _ => let val  (TYP_CON as TYP_CON1) = TYP_CON1
  ()
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  (TYP as TYP1) = TYP1 ()
- in (spacer'([TYP_CON, EQUALOP, TYP]))
+ in (add_space([TYP_CON, EQUALOP, TYP]))
 end)
  in ( LrTable.NT 35, ( result, TYP_CON1left, TYP1right), rest671)
 end
@@ -3139,7 +3144,7 @@ MlyValue.EQUALOP EQUALOP1, _, _)) :: ( _, ( MlyValue.TYP_CON TYP_CON1,
  val  (TYP_CON as TYP_CON1) = TYP_CON1 ()
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  (TYP as TYP1) = TYP1 ()
- in (spacer'([TYP_VAR_SEQ, TYP_CON, EQUALOP, TYP]))
+ in (add_space([TYP_VAR_SEQ, TYP_CON, EQUALOP, TYP]))
 end)
  in ( LrTable.NT 35, ( result, TYP_VAR_SEQ1left, TYP1right), rest671)
 
@@ -3159,7 +3164,7 @@ MlyValue.TYP_BIND (fn _ => let val  (TYP_BIND' as TYP_BIND'1) =
 TYP_BIND'1 ()
  val  (AND as AND1) = AND1 ()
  val  (TYP_BIND as TYP_BIND1) = TYP_BIND1 ()
- in (spacer'([TYP_BIND', AND, TYP_BIND]))
+ in (add_space([TYP_BIND', AND, TYP_BIND]))
 end)
  in ( LrTable.NT 36, ( result, TYP_BIND'1left, TYP_BIND1right), 
 rest671)
@@ -3171,7 +3176,7 @@ MlyValue.DAT_BIND' (fn _ => let val  (TYP_CON as TYP_CON1) = TYP_CON1
  ()
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  (CON_BIND as CON_BIND1) = CON_BIND1 ()
- in (spacer'([TYP_CON, EQUALOP, CON_BIND]))
+ in (add_space([TYP_CON, EQUALOP, CON_BIND]))
 end)
  in ( LrTable.NT 37, ( result, TYP_CON1left, CON_BIND1right), rest671)
 
@@ -3185,7 +3190,7 @@ TYP_VAR_SEQ1 ()
  val  (TYP_CON as TYP_CON1) = TYP_CON1 ()
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  (CON_BIND as CON_BIND1) = CON_BIND1 ()
- in (spacer'([TYP_VAR_SEQ, TYP_CON, EQUALOP, CON_BIND]))
+ in (add_space([TYP_VAR_SEQ, TYP_CON, EQUALOP, CON_BIND]))
 end)
  in ( LrTable.NT 37, ( result, TYP_VAR_SEQ1left, CON_BIND1right), 
 rest671)
@@ -3205,7 +3210,7 @@ MlyValue.DAT_BIND (fn _ => let val  (DAT_BIND' as DAT_BIND'1) =
 DAT_BIND'1 ()
  val  (AND as AND1) = AND1 ()
  val  (DAT_BIND as DAT_BIND1) = DAT_BIND1 ()
- in (spacer'([DAT_BIND', AND, DAT_BIND]))
+ in (add_space([DAT_BIND', AND, DAT_BIND]))
 end)
  in ( LrTable.NT 38, ( result, DAT_BIND'1left, DAT_BIND1right), 
 rest671)
@@ -3223,7 +3228,7 @@ rest671)) => let val  result = MlyValue.CONBIND_BASE (fn _ => let val
  (VID as VID1) = VID1 ()
  val  (OF as OF1) = OF1 ()
  val  (TYP as TYP1) = TYP1 ()
- in (spacer'([VID, OF, TYP]))
+ in (add_space([VID, OF, TYP]))
 end)
  in ( LrTable.NT 39, ( result, VID1left, TYP1right), rest671)
 end
@@ -3242,7 +3247,7 @@ MlyValue.CONBIND_BASE (fn _ => let val  (OP as OP1) = OP1 ()
  val  (VID as VID1) = VID1 ()
  val  (OF as OF1) = OF1 ()
  val  (TYP as TYP1) = TYP1 ()
- in (spacer'([OP, VID, OF, TYP]))
+ in (add_space([OP, VID, OF, TYP]))
 end)
  in ( LrTable.NT 39, ( result, OP1left, TYP1right), rest671)
 end
@@ -3262,7 +3267,7 @@ CONBIND_BASE1, CONBIND_BASE1left, _)) :: rest671)) => let val  result
  = CONBIND_BASE1 ()
  val  (BAR as BAR1) = BAR1 ()
  val  (CON_BIND as CON_BIND1) = CON_BIND1 ()
- in (spacer'([CONBIND_BASE, BAR, CON_BIND]))
+ in (add_space([CONBIND_BASE, BAR, CON_BIND]))
 end)
  in ( LrTable.NT 40, ( result, CONBIND_BASE1left, CON_BIND1right), 
 rest671)
@@ -3280,7 +3285,7 @@ rest671)) => let val  result = MlyValue.EX_BIND_BASE (fn _ => let val
  (VID as VID1) = VID1 ()
  val  (OF as OF1) = OF1 ()
  val  (TYP as TYP1) = TYP1 ()
- in (spacer'([VID, OF, TYP]))
+ in (add_space([VID, OF, TYP]))
 end)
  in ( LrTable.NT 41, ( result, VID1left, TYP1right), rest671)
 end
@@ -3299,7 +3304,7 @@ MlyValue.EX_BIND_BASE (fn _ => let val  OP1 = OP1 ()
  val  (VID as VID1) = VID1 ()
  val  (OF as OF1) = OF1 ()
  val  (TYP as TYP1) = TYP1 ()
- in (spacer'([VID, OF, TYP]))
+ in (add_space([VID, OF, TYP]))
 end)
  in ( LrTable.NT 41, ( result, OP1left, TYP1right), rest671)
 end
@@ -3309,7 +3314,7 @@ end
  (fn _ => let val  (VID as VID1) = VID1 ()
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  (LONG_VID as LONG_VID1) = LONG_VID1 ()
- in (spacer'([VID, EQUALOP, LONG_VID]))
+ in (add_space([VID, EQUALOP, LONG_VID]))
 end)
  in ( LrTable.NT 41, ( result, VID1left, LONG_VID1right), rest671)
 end
@@ -3321,7 +3326,7 @@ end
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  (OP as OP1) = OP1 ()
  val  (LONG_VID as LONG_VID1) = LONG_VID1 ()
- in (spacer'([VID, EQUALOP, OP, LONG_VID]))
+ in (add_space([VID, EQUALOP, OP, LONG_VID]))
 end)
  in ( LrTable.NT 41, ( result, VID1left, LONG_VID1right), rest671)
 end
@@ -3333,7 +3338,7 @@ OP1 ()
  val  (VID as VID1) = VID1 ()
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  (LONG_VID as LONG_VID1) = LONG_VID1 ()
- in (spacer'([OP, VID, EQUALOP, LONG_VID]))
+ in (add_space([OP, VID, EQUALOP, LONG_VID]))
 end)
  in ( LrTable.NT 41, ( result, OP1left, LONG_VID1right), rest671)
 end
@@ -3346,7 +3351,7 @@ OP1left, _)) :: rest671)) => let val  result = MlyValue.EX_BIND_BASE
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  OP2 = OP2 ()
  val  (LONG_VID as LONG_VID1) = LONG_VID1 ()
- in (spacer'([OP, VID, EQUALOP, OP, LONG_VID]))
+ in (add_space([OP, VID, EQUALOP, OP, LONG_VID]))
 end)
  in ( LrTable.NT 41, ( result, OP1left, LONG_VID1right), rest671)
 end
@@ -3366,7 +3371,7 @@ EX_BIND_BASE1, EX_BIND_BASE1left, _)) :: rest671)) => let val  result
  = EX_BIND_BASE1 ()
  val  (AND as AND1) = AND1 ()
  val  (EX_BIND as EX_BIND1) = EX_BIND1 ()
- in (spacer'([EX_BIND_BASE, AND, EX_BIND]))
+ in (add_space([EX_BIND_BASE, AND, EX_BIND]))
 end)
  in ( LrTable.NT 42, ( result, EX_BIND_BASE1left, EX_BIND1right), 
 rest671)
@@ -3391,7 +3396,7 @@ MlyValue.TIMES TIMES1, _, _)) :: ( _, ( MlyValue.TYP' TYP'1, TYP'1left
  let val  TYP'1 = TYP'1 ()
  val  (TIMES as TIMES1) = TIMES1 ()
  val  TYP'2 = TYP'2 ()
- in (spacer'([TYP'1, TIMES, TYP'2]))
+ in (add_space([TYP'1, TIMES, TYP'2]))
 end)
  in ( LrTable.NT 43, ( result, TYP'1left, TYP'2right), rest671)
 end
@@ -3401,7 +3406,7 @@ end
  (fn _ => let val  (TYP' as TYP'1) = TYP'1 ()
  val  (TIMES as TIMES1) = TIMES1 ()
  val  (TYP_TUPLE as TYP_TUPLE1) = TYP_TUPLE1 ()
- in (spacer'([TYP', TIMES, TYP_TUPLE]))
+ in (add_space([TYP', TIMES, TYP_TUPLE]))
 end)
  in ( LrTable.NT 43, ( result, TYP'1left, TYP_TUPLE1right), rest671)
 
@@ -3412,7 +3417,7 @@ ALL_IDs1left, _)) :: rest671)) => let val  result = MlyValue.TY_CON
  (fn _ => let val  (ALL_IDs as ALL_IDs1) = ALL_IDs1 ()
  val  (DOT as DOT1) = DOT1 ()
  val  (TY_CON as TY_CON1) = TY_CON1 ()
- in (spacer([ALL_IDs, DOT, TY_CON]))
+ in (add_space([ALL_IDs, DOT, TY_CON]))
 end)
  in ( LrTable.NT 95, ( result, ALL_IDs1left, TY_CON1right), rest671)
 
@@ -3451,7 +3456,7 @@ SELECTOR1left, _)) :: rest671)) => let val  result = MlyValue.TLABEL
  (fn _ => let val  (SELECTOR as SELECTOR1) = SELECTOR1 ()
  val  (COLON as COLON1) = COLON1 ()
  val  (TYP as TYP1) = TYP1 ()
- in (spacer'([SELECTOR, COLON, TYP]))
+ in (add_space([SELECTOR, COLON, TYP]))
 end)
  in ( LrTable.NT 86, ( result, SELECTOR1left, TYP1right), rest671)
 end
@@ -3461,7 +3466,7 @@ end
  (fn _ => let val  (TLABEL as TLABEL1) = TLABEL1 ()
  val  (COMMA as COMMA1) = COMMA1 ()
  val  (TLABELS as TLABELS1) = TLABELS1 ()
- in (spacer'([TLABEL, COMMA, TLABELS]))
+ in (add_space([TLABEL, COMMA, TLABELS]))
 end)
  in ( LrTable.NT 87, ( result, TLABEL1left, TLABELS1right), rest671)
 
@@ -3488,7 +3493,7 @@ end
  _ => let val  (LCURLY as LCURLY1) = LCURLY1 ()
  val  (TLABELS as TLABELS1) = TLABELS1 ()
  val  (RCURLY as RCURLY1) = RCURLY1 ()
- in (spacer'([LCURLY, TLABELS, RCURLY]))
+ in (add_space([LCURLY, TLABELS, RCURLY]))
 end)
  in ( LrTable.NT 88, ( result, LCURLY1left, RCURLY1right), rest671)
 
@@ -3511,7 +3516,7 @@ LONG_TYP_CON1right)) :: ( _, ( MlyValue.RPAREN RPAREN1, _, _)) :: ( _,
  val  (TYP_SEQ as TYP_SEQ1) = TYP_SEQ1 ()
  val  (RPAREN as RPAREN1) = RPAREN1 ()
  val  (LONG_TYP_CON as LONG_TYP_CON1) = LONG_TYP_CON1 ()
- in (spacer'([LPAREN, TYP_SEQ, RPAREN, LONG_TYP_CON]))
+ in (add_space([LPAREN, TYP_SEQ, RPAREN, LONG_TYP_CON]))
 end)
  in ( LrTable.NT 88, ( result, LPAREN1left, LONG_TYP_CON1right), 
 rest671)
@@ -3522,7 +3527,7 @@ LPAREN1left, _)) :: rest671)) => let val  result = MlyValue.TYP' (fn _
  => let val  (LPAREN as LPAREN1) = LPAREN1 ()
  val  (TYP as TYP1) = TYP1 ()
  val  (RPAREN as RPAREN1) = RPAREN1 ()
- in (spacer'([LPAREN, TYP, RPAREN]))
+ in (add_space([LPAREN, TYP, RPAREN]))
 end)
  in ( LrTable.NT 88, ( result, LPAREN1left, RPAREN1right), rest671)
 
@@ -3557,7 +3562,7 @@ MlyValue.ARROW ARROW1, _, _)) :: ( _, ( MlyValue.TYP TYP1, TYP1left, _
 TYP1 = TYP1 ()
  val  (ARROW as ARROW1) = ARROW1 ()
  val  TYP2 = TYP2 ()
- in (spacer'([TYP1, ARROW, TYP2]))
+ in (add_space([TYP1, ARROW, TYP2]))
 end)
  in ( LrTable.NT 45, ( result, TYP1left, TYP2right), rest671)
 end
@@ -3598,7 +3603,7 @@ MlyValue.PAT PAT1, PAT1left, _)) :: rest671)) => let val  result =
 MlyValue.OR_PAT_LIST (fn _ => let val  (PAT as PAT1) = PAT1 ()
  val  (BAR as BAR1) = BAR1 ()
  val  (OR_PAT_LIST as OR_PAT_LIST1) = OR_PAT_LIST1 ()
- in (spacer'([PAT, BAR, OR_PAT_LIST]))
+ in (add_space([PAT, BAR, OR_PAT_LIST]))
 end)
  in ( LrTable.NT 93, ( result, PAT1left, OR_PAT_LIST1right), rest671)
 
@@ -3630,7 +3635,7 @@ rest671)) => let val  result = MlyValue.PAT (fn _ => let val  PAT1 =
 PAT1 ()
  val  (AS as AS1) = AS1 ()
  val  PAT2 = PAT2 ()
- in (spacer'([PAT1, AS, PAT2]))
+ in (add_space([PAT1, AS, PAT2]))
 end)
  in ( LrTable.NT 51, ( result, PAT1left, PAT2right), rest671)
 end
@@ -3640,7 +3645,7 @@ MlyValue.COLON COLON1, _, _)) :: ( _, ( MlyValue.PAT PAT1, PAT1left, _
 PAT as PAT1) = PAT1 ()
  val  (COLON as COLON1) = COLON1 ()
  val  (TYP as TYP1) = TYP1 ()
- in (spacer'([PAT, COLON, TYP]))
+ in (add_space([PAT, COLON, TYP]))
 end)
  in ( LrTable.NT 51, ( result, PAT1left, TYP1right), rest671)
 end
@@ -3666,7 +3671,7 @@ LPAREN1left, _)) :: rest671)) => let val  result = MlyValue.AT_PAT (fn
  _ => let val  (LPAREN as LPAREN1) = LPAREN1 ()
  val  (PAT as PAT1) = PAT1 ()
  val  (RPAREN as RPAREN1) = RPAREN1 ()
- in (spacer'([LPAREN, PAT, RPAREN]))
+ in (add_space([LPAREN, PAT, RPAREN]))
 end)
  in ( LrTable.NT 49, ( result, LPAREN1left, RPAREN1right), rest671)
 
@@ -3697,7 +3702,7 @@ MlyValue.AT_PAT (fn _ => let val  (LPAREN as LPAREN1) = LPAREN1 ()
  val  (COMMA as COMMA1) = COMMA1 ()
  val  (PAT_LIST as PAT_LIST1) = PAT_LIST1 ()
  val  (RPAREN as RPAREN1) = RPAREN1 ()
- in (spacer'([LPAREN, PAT, COMMA, PAT_LIST, RPAREN]))
+ in (add_space([LPAREN, PAT, COMMA, PAT_LIST, RPAREN]))
 end)
  in ( LrTable.NT 49, ( result, LPAREN1left, RPAREN1right), rest671)
 
@@ -3712,7 +3717,7 @@ LPAREN1 ()
  val  (BAR as BAR1) = BAR1 ()
  val  (OR_PAT_LIST as OR_PAT_LIST1) = OR_PAT_LIST1 ()
  val  (RPAREN as RPAREN1) = RPAREN1 ()
- in (spacer'([LPAREN, PAT, BAR, OR_PAT_LIST, RPAREN]))
+ in (add_space([LPAREN, PAT, BAR, OR_PAT_LIST, RPAREN]))
 end)
  in ( LrTable.NT 49, ( result, LPAREN1left, RPAREN1right), rest671)
 
@@ -3722,7 +3727,7 @@ LONG_ID_NO_EQ1right)) :: ( _, ( MlyValue.OP OP1, OP1left, _)) ::
 rest671)) => let val  result = MlyValue.AT_PAT' (fn _ => let val  (OP
  as OP1) = OP1 ()
  val  (LONG_ID_NO_EQ as LONG_ID_NO_EQ1) = LONG_ID_NO_EQ1 ()
- in (spacer'([OP, LONG_ID_NO_EQ]))
+ in (add_space([OP, LONG_ID_NO_EQ]))
 end)
  in ( LrTable.NT 92, ( result, OP1left, LONG_ID_NO_EQ1right), rest671)
 
@@ -3766,7 +3771,7 @@ LBRACK1, LBRACK1left, _)) :: rest671)) => let val  result =
 MlyValue.AT_PAT' (fn _ => let val  (LBRACK as LBRACK1) = LBRACK1 ()
  val  (PAT_LIST as PAT_LIST1) = PAT_LIST1 ()
  val  (RBRACK as RBRACK1) = RBRACK1 ()
- in (spacer'([LBRACK, PAT_LIST, RBRACK]))
+ in (add_space([LBRACK, PAT_LIST, RBRACK]))
 end)
  in ( LrTable.NT 92, ( result, LBRACK1left, RBRACK1right), rest671)
 
@@ -3777,7 +3782,7 @@ HASH1left, _)) :: rest671)) => let val  result = MlyValue.AT_PAT' (fn
  _ => let val  (HASH as HASH1) = HASH1 ()
  val  (LBRACK as LBRACK1) = LBRACK1 ()
  val  (RBRACK as RBRACK1) = RBRACK1 ()
- in (spacer'([HASH, LBRACK, RBRACK]))
+ in (add_space([HASH, LBRACK, RBRACK]))
 end)
  in ( LrTable.NT 92, ( result, HASH1left, RBRACK1right), rest671)
 end
@@ -3789,7 +3794,7 @@ HASH as HASH1) = HASH1 ()
  val  (LBRACK as LBRACK1) = LBRACK1 ()
  val  (PAT_LIST as PAT_LIST1) = PAT_LIST1 ()
  val  (RBRACK as RBRACK1) = RBRACK1 ()
- in (spacer'([HASH, LBRACK, PAT_LIST, RBRACK]))
+ in (add_space([HASH, LBRACK, PAT_LIST, RBRACK]))
 end)
  in ( LrTable.NT 92, ( result, HASH1left, RBRACK1right), rest671)
 end
@@ -3809,7 +3814,7 @@ end
  (fn _ => let val  (LCURLY as LCURLY1) = LCURLY1 ()
  val  (PLABELS as PLABELS1) = PLABELS1 ()
  val  (RCURLY as RCURLY1) = RCURLY1 ()
- in (spacer'([LCURLY, PLABELS, RCURLY]))
+ in (add_space([LCURLY, PLABELS, RCURLY]))
 end)
  in ( LrTable.NT 92, ( result, LCURLY1left, RCURLY1right), rest671)
 
@@ -3821,7 +3826,7 @@ MlyValue.PLABEL (fn _ => let val  (SELECTOR as SELECTOR1) = SELECTOR1
  ()
  val  EQUALOP1 = EQUALOP1 ()
  val  (PAT as PAT1) = PAT1 ()
- in (spacer'([SELECTOR, "=", PAT]))
+ in (add_space([SELECTOR, "=", PAT]))
 end)
  in ( LrTable.NT 90, ( result, SELECTOR1left, PAT1right), rest671)
 end
@@ -3839,7 +3844,7 @@ ID_NO_EQ1left, _)) :: rest671)) => let val  result = MlyValue.PLABEL
  (fn _ => let val  (ID_NO_EQ as ID_NO_EQ1) = ID_NO_EQ1 ()
  val  (AS as AS1) = AS1 ()
  val  (PAT as PAT1) = PAT1 ()
- in (spacer'([ID_NO_EQ, AS, PAT]))
+ in (add_space([ID_NO_EQ, AS, PAT]))
 end)
  in ( LrTable.NT 90, ( result, ID_NO_EQ1left, PAT1right), rest671)
 end
@@ -3849,7 +3854,7 @@ ID_NO_EQ1left, _)) :: rest671)) => let val  result = MlyValue.PLABEL
  (fn _ => let val  (ID_NO_EQ as ID_NO_EQ1) = ID_NO_EQ1 ()
  val  (COLON as COLON1) = COLON1 ()
  val  (TYP as TYP1) = TYP1 ()
- in (spacer'([ID_NO_EQ, COLON, TYP]))
+ in (add_space([ID_NO_EQ, COLON, TYP]))
 end)
  in ( LrTable.NT 90, ( result, ID_NO_EQ1left, TYP1right), rest671)
 end
@@ -3862,7 +3867,7 @@ ID_NO_EQ1left, _)) :: rest671)) => let val  result = MlyValue.PLABEL
  val  (TYP as TYP1) = TYP1 ()
  val  (AS as AS1) = AS1 ()
  val  (PAT as PAT1) = PAT1 ()
- in (spacer'([ID_NO_EQ, COLON, TYP, AS, PAT]))
+ in (add_space([ID_NO_EQ, COLON, TYP, AS, PAT]))
 end)
  in ( LrTable.NT 90, ( result, ID_NO_EQ1left, PAT1right), rest671)
 end
@@ -3880,7 +3885,7 @@ end
  (fn _ => let val  (PLABEL as PLABEL1) = PLABEL1 ()
  val  (COMMA as COMMA1) = COMMA1 ()
  val  (PLABELS as PLABELS1) = PLABELS1 ()
- in (spacer'([PLABEL, COMMA, PLABELS]))
+ in (add_space([PLABEL, COMMA, PLABELS]))
 end)
  in ( LrTable.NT 91, ( result, PLABEL1left, PLABELS1right), rest671)
 
@@ -3918,7 +3923,7 @@ end
  val  result = MlyValue.STR_EXP (fn _ => let val  (FUN_ID as FUN_ID1)
  = FUN_ID1 ()
  val  (ARG_FCT as ARG_FCT1) = ARG_FCT1 ()
- in (spacer'([FUN_ID, ARG_FCT]))
+ in (add_space([FUN_ID, ARG_FCT]))
 end)
  in ( LrTable.NT 52, ( result, FUN_ID1left, ARG_FCT1right), rest671)
 
@@ -3954,7 +3959,7 @@ MlyValue.STR_EXP STR_EXP1, _, _)) :: ( _, ( MlyValue.IN IN1, _, _)) ::
  val  (IN as IN1) = IN1 ()
  val  (STR_EXP as STR_EXP1) = STR_EXP1 ()
  val  (END as END1) = END1 ()
- in (spacer'([LET, STR_DEC, IN, STR_EXP, END]))
+ in (add_space([LET, STR_DEC, IN, STR_EXP, END]))
 end)
  in ( LrTable.NT 52, ( result, LET1left, END1right), rest671)
 end
@@ -3964,7 +3969,7 @@ end
  (fn _ => let val  (LPAREN as LPAREN1) = LPAREN1 ()
  val  (STR_DEC as STR_DEC1) = STR_DEC1 ()
  val  (RPAREN as RPAREN1) = RPAREN1 ()
- in (spacer'([LPAREN, STR_DEC, RPAREN]))
+ in (add_space([LPAREN, STR_DEC, RPAREN]))
 end)
  in ( LrTable.NT 53, ( result, LPAREN1left, RPAREN1right), rest671)
 
@@ -3975,7 +3980,7 @@ end
  (fn _ => let val  (LPAREN as LPAREN1) = LPAREN1 ()
  val  (STR_EXP as STR_EXP1) = STR_EXP1 ()
  val  (RPAREN as RPAREN1) = RPAREN1 ()
- in (spacer'([LPAREN, STR_EXP, RPAREN]))
+ in (add_space([LPAREN, STR_EXP, RPAREN]))
 end)
  in ( LrTable.NT 53, ( result, LPAREN1left, RPAREN1right), rest671)
 
@@ -3988,7 +3993,7 @@ STR_DEC1, _, _)) :: ( _, ( MlyValue.LPAREN LPAREN1, LPAREN1left, _))
  val  (STR_DEC as STR_DEC1) = STR_DEC1 ()
  val  (RPAREN as RPAREN1) = RPAREN1 ()
  val  (ARG_FCT as ARG_FCT1) = ARG_FCT1 ()
- in (spacer'([LPAREN, STR_DEC, RPAREN, ARG_FCT]))
+ in (add_space([LPAREN, STR_DEC, RPAREN, ARG_FCT]))
 end)
  in ( LrTable.NT 53, ( result, LPAREN1left, ARG_FCT1right), rest671)
 
@@ -4001,7 +4006,7 @@ STR_EXP1, _, _)) :: ( _, ( MlyValue.LPAREN LPAREN1, LPAREN1left, _))
  val  (STR_EXP as STR_EXP1) = STR_EXP1 ()
  val  (RPAREN as RPAREN1) = RPAREN1 ()
  val  (ARG_FCT as ARG_FCT1) = ARG_FCT1 ()
- in (spacer'([LPAREN, STR_EXP, RPAREN, ARG_FCT]))
+ in (add_space([LPAREN, STR_EXP, RPAREN, ARG_FCT]))
 end)
  in ( LrTable.NT 53, ( result, LPAREN1left, ARG_FCT1right), rest671)
 
@@ -4018,7 +4023,7 @@ end
 ) => let val  result = MlyValue.STR_DEC' (fn _ => let val  (STRUCTURE
  as STRUCTURE1) = STRUCTURE1 ()
  val  (STR_BIND as STR_BIND1) = STR_BIND1 ()
- in (spacer'([STRUCTURE, STR_BIND]))
+ in (add_space([STRUCTURE, STR_BIND]))
 end)
  in ( LrTable.NT 54, ( result, STRUCTURE1left, STR_BIND1right), 
 rest671)
@@ -4028,7 +4033,7 @@ end
  let val  result = MlyValue.STR_DEC' (fn _ => let val  (FUNCTOR as 
 FUNCTOR1) = FUNCTOR1 ()
  val  (FUN_BIND as FUN_BIND1) = FUN_BIND1 ()
- in (spacer'([FUNCTOR, FUN_BIND]))
+ in (add_space([FUNCTOR, FUN_BIND]))
 end)
  in ( LrTable.NT 54, ( result, FUNCTOR1left, FUN_BIND1right), rest671)
 
@@ -4042,7 +4047,7 @@ MlyValue.STR_DEC' (fn _ => let val  (LOCAL as LOCAL1) = LOCAL1 ()
  val  (IN as IN1) = IN1 ()
  val  STR_DEC2 = STR_DEC2 ()
  val  (END as END1) = END1 ()
- in (spacer'([LOCAL, STR_DEC1, IN, STR_DEC2, END]))
+ in (add_space([LOCAL, STR_DEC1, IN, STR_DEC2, END]))
 end)
  in ( LrTable.NT 54, ( result, LOCAL1left, END1right), rest671)
 end
@@ -4051,7 +4056,7 @@ end
  let val  result = MlyValue.STR_DEC (fn _ => let val  (STR_DEC' as 
 STR_DEC'1) = STR_DEC'1 ()
  val  (STR_DEC as STR_DEC1) = STR_DEC1 ()
- in (spacer'([STR_DEC', STR_DEC]))
+ in (add_space([STR_DEC', STR_DEC]))
 end)
  in ( LrTable.NT 55, ( result, STR_DEC'1left, STR_DEC1right), rest671)
 
@@ -4061,7 +4066,7 @@ end
  => let val  result = MlyValue.STR_DEC (fn _ => let val  (SEMICOLON
  as SEMICOLON1) = SEMICOLON1 ()
  val  (STR_DEC as STR_DEC1) = STR_DEC1 ()
- in (spacer'([SEMICOLON, STR_DEC]))
+ in (add_space([SEMICOLON, STR_DEC]))
 end)
  in ( LrTable.NT 55, ( result, SEMICOLON1left, STR_DEC1right), rest671
 )
@@ -4075,7 +4080,7 @@ end
 result = MlyValue.S_DECS (fn _ => let val  (S_DEC' as S_DEC'1) = 
 S_DEC'1 ()
  val  (S_DECS as S_DECS1) = S_DECS1 ()
- in (spacer'([S_DEC', S_DECS]))
+ in (add_space([S_DEC', S_DECS]))
 end)
  in ( LrTable.NT 56, ( result, S_DEC'1left, S_DECS1right), rest671)
 
@@ -4085,7 +4090,7 @@ end
  let val  result = MlyValue.S_DECS (fn _ => let val  (SEMICOLON as 
 SEMICOLON1) = SEMICOLON1 ()
  val  (S_DECS as S_DECS1) = S_DECS1 ()
- in (spacer'([SEMICOLON, S_DECS]))
+ in (add_space([SEMICOLON, S_DECS]))
 end)
  in ( LrTable.NT 56, ( result, SEMICOLON1left, S_DECS1right), rest671)
 
@@ -4099,7 +4104,7 @@ end
 ) => let val  result = MlyValue.S_DEC' (fn _ => let val  (STRUCTURE
  as STRUCTURE1) = STRUCTURE1 ()
  val  (STR_BIND as STR_BIND1) = STR_BIND1 ()
- in (spacer'([STRUCTURE, STR_BIND]))
+ in (add_space([STRUCTURE, STR_BIND]))
 end)
  in ( LrTable.NT 58, ( result, STRUCTURE1left, STR_BIND1right), 
 rest671)
@@ -4109,7 +4114,7 @@ end
 ) => let val  result = MlyValue.S_DEC' (fn _ => let val  (SIGNATURE
  as SIGNATURE1) = SIGNATURE1 ()
  val  (SIG_BIND as SIG_BIND1) = SIG_BIND1 ()
- in (spacer'([SIGNATURE, SIG_BIND]))
+ in (add_space([SIGNATURE, SIG_BIND]))
 end)
  in ( LrTable.NT 58, ( result, SIGNATURE1left, SIG_BIND1right), 
 rest671)
@@ -4119,7 +4124,7 @@ end
  let val  result = MlyValue.S_DEC' (fn _ => let val  (FUNCTOR as 
 FUNCTOR1) = FUNCTOR1 ()
  val  (FUN_BIND as FUN_BIND1) = FUN_BIND1 ()
- in (spacer'([FUNCTOR, FUN_BIND]))
+ in (add_space([FUNCTOR, FUN_BIND]))
 end)
  in ( LrTable.NT 58, ( result, FUNCTOR1left, FUN_BIND1right), rest671)
 
@@ -4133,7 +4138,7 @@ MlyValue.S_DECS S_DECS2, _, _)) :: ( _, ( MlyValue.IN IN1, _, _)) :: (
  val  (IN as IN1) = IN1 ()
  val  S_DECS2 = S_DECS2 ()
  val  (END as END1) = END1 ()
- in (spacer'([LOCAL, S_DECS, IN, S_DECS, END]))
+ in (add_space([LOCAL, S_DECS, IN, S_DECS, END]))
 end)
  in ( LrTable.NT 58, ( result, LOCAL1left, END1right), rest671)
 end
@@ -4157,7 +4162,7 @@ MlyValue.S_DEC' S_DEC'1, S_DEC'1left, _)) :: rest671)) => let val
 result = MlyValue.S_DEC (fn _ => let val  (S_DEC' as S_DEC'1) = 
 S_DEC'1 ()
  val  (S_DEC as S_DEC1) = S_DEC1 ()
- in (spacer'([S_DEC', S_DEC]))
+ in (add_space([S_DEC', S_DEC]))
 end)
  in ( LrTable.NT 57, ( result, S_DEC'1left, S_DEC1right), rest671)
 end
@@ -4167,7 +4172,7 @@ STR_ID1, STR_ID1left, _)) :: rest671)) => let val  result =
 MlyValue.STR_BIND' (fn _ => let val  (STR_ID as STR_ID1) = STR_ID1 ()
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  (STR_EXP as STR_EXP1) = STR_EXP1 ()
- in (spacer'([STR_ID, EQUALOP, STR_EXP]))
+ in (add_space([STR_ID, EQUALOP, STR_EXP]))
 end)
  in ( LrTable.NT 59, ( result, STR_ID1left, STR_EXP1right), rest671)
 
@@ -4183,7 +4188,7 @@ STR_ID1 ()
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  (STR_EXP as STR_EXP1) = STR_EXP1 ()
  in (
-spacer'([STR_ID, COLON, SIG_EXP, 
+add_space([STR_ID, COLON, SIG_EXP, 
                                                                           EQUALOP, STR_EXP])
 )
 end)
@@ -4201,7 +4206,7 @@ STR_ID1 ()
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  (STR_EXP as STR_EXP1) = STR_EXP1 ()
  in (
-spacer'([STR_ID, COLONGT, SIG_EXP, 
+add_space([STR_ID, COLONGT, SIG_EXP, 
                                                                           EQUALOP, STR_EXP])
 )
 end)
@@ -4223,7 +4228,7 @@ MlyValue.STR_BIND (fn _ => let val  (STR_BIND' as STR_BIND'1) =
 STR_BIND'1 ()
  val  (AND as AND1) = AND1 ()
  val  (STR_BIND as STR_BIND1) = STR_BIND1 ()
- in (spacer'([STR_BIND', AND, STR_BIND]))
+ in (add_space([STR_BIND', AND, STR_BIND]))
 end)
  in ( LrTable.NT 60, ( result, STR_BIND'1left, STR_BIND1right), 
 rest671)
@@ -4236,7 +4241,7 @@ LONG_TYP_CON1, _, _)) :: ( _, ( MlyValue.TYPE TYPE1, TYPE1left, _)) ::
  val  (LONG_TYP_CON as LONG_TYP_CON1) = LONG_TYP_CON1 ()
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  (TYP as TYP1) = TYP1 ()
- in (spacer'([TYPE, LONG_TYP_CON, EQUALOP, TYP]))
+ in (add_space([TYPE, LONG_TYP_CON, EQUALOP, TYP]))
 end)
  in ( LrTable.NT 61, ( result, TYPE1left, TYP1right), rest671)
 end
@@ -4250,7 +4255,7 @@ LONG_TYP_CON1, _, _)) :: ( _, ( MlyValue.TYP_VAR_SEQ TYP_VAR_SEQ1, _,
  val  (LONG_TYP_CON as LONG_TYP_CON1) = LONG_TYP_CON1 ()
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  (TYP as TYP1) = TYP1 ()
- in (spacer'([TYPE, TYP_VAR_SEQ, LONG_TYP_CON, EQUALOP, TYP]))
+ in (add_space([TYPE, TYP_VAR_SEQ, LONG_TYP_CON, EQUALOP, TYP]))
 end)
  in ( LrTable.NT 61, ( result, TYPE1left, TYP1right), rest671)
 end
@@ -4261,7 +4266,7 @@ rest671)) => let val  result = MlyValue.TYP_REFINE' (fn _ => let val
  (LONG_TYP_CON as LONG_TYP_CON1) = LONG_TYP_CON1 ()
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  LONG_TYP_CON2 = LONG_TYP_CON2 ()
- in (spacer'[LONG_TYP_CON, EQUALOP, LONG_TYP_CON])
+ in (add_space[LONG_TYP_CON, EQUALOP, LONG_TYP_CON])
 end)
  in ( LrTable.NT 61, ( result, LONG_TYP_CON1left, LONG_TYP_CON2right),
  rest671)
@@ -4282,7 +4287,7 @@ MlyValue.TYP_REFINE' TYP_REFINE'1, TYP_REFINE'1left, _)) :: rest671))
 TYP_REFINE' as TYP_REFINE'1) = TYP_REFINE'1 ()
  val  (AND as AND1) = AND1 ()
  val  (TYP_REFINE as TYP_REFINE1) = TYP_REFINE1 ()
- in (spacer'([TYP_REFINE', AND, TYP_REFINE]))
+ in (add_space([TYP_REFINE', AND, TYP_REFINE]))
 end)
  in ( LrTable.NT 62, ( result, TYP_REFINE'1left, TYP_REFINE1right), 
 rest671)
@@ -4294,7 +4299,7 @@ rest671)) => let val  result = MlyValue.LONG_TY_CON_EQ_SEQ (fn _ =>
  let val  (LONG_TYP_CON as LONG_TYP_CON1) = LONG_TYP_CON1 ()
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  LONG_TYP_CON2 = LONG_TYP_CON2 ()
- in (spacer'([LONG_TYP_CON, EQUALOP, LONG_TYP_CON]))
+ in (add_space([LONG_TYP_CON, EQUALOP, LONG_TYP_CON]))
 end)
  in ( LrTable.NT 63, ( result, LONG_TYP_CON1left, LONG_TYP_CON2right),
  rest671)
@@ -4307,7 +4312,7 @@ end
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  (LONG_TY_CON_EQ_SEQ as LONG_TY_CON_EQ_SEQ1) = 
 LONG_TY_CON_EQ_SEQ1 ()
- in (spacer'([LONG_TYP_CON, EQUALOP, LONG_TY_CON_EQ_SEQ]))
+ in (add_space([LONG_TYP_CON, EQUALOP, LONG_TY_CON_EQ_SEQ]))
 end)
  in ( LrTable.NT 63, ( result, LONG_TYP_CON1left, 
 LONG_TY_CON_EQ_SEQ1right), rest671)
@@ -4319,7 +4324,7 @@ rest671)) => let val  result = MlyValue.LONG_STR_ID_EQ_SEQ (fn _ =>
  let val  (LONG_STR_ID as LONG_STR_ID1) = LONG_STR_ID1 ()
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  LONG_STR_ID2 = LONG_STR_ID2 ()
- in (spacer'([LONG_STR_ID, EQUALOP, LONG_STR_ID]))
+ in (add_space([LONG_STR_ID, EQUALOP, LONG_STR_ID]))
 end)
  in ( LrTable.NT 64, ( result, LONG_STR_ID1left, LONG_STR_ID2right), 
 rest671)
@@ -4332,7 +4337,7 @@ end
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  (LONG_STR_ID_EQ_SEQ as LONG_STR_ID_EQ_SEQ1) = 
 LONG_STR_ID_EQ_SEQ1 ()
- in (spacer'([LONG_STR_ID, EQUALOP, LONG_STR_ID_EQ_SEQ]))
+ in (add_space([LONG_STR_ID, EQUALOP, LONG_STR_ID_EQ_SEQ]))
 end)
  in ( LrTable.NT 64, ( result, LONG_STR_ID1left, 
 LONG_STR_ID_EQ_SEQ1right), rest671)
@@ -4361,7 +4366,7 @@ MlyValue.SPEC SPEC1, _, _)) :: ( _, ( MlyValue.SIG SIG1, SIG1left, _))
  (SIG as SIG1) = SIG1 ()
  val  (SPEC as SPEC1) = SPEC1 ()
  val  (END as END1) = END1 ()
- in (spacer'([SIG, SPEC, END]))
+ in (add_space([SIG, SPEC, END]))
 end)
  in ( LrTable.NT 66, ( result, SIG1left, END1right), rest671)
 end
@@ -4380,7 +4385,7 @@ result = MlyValue.SIG_EXP (fn _ => let val  (SIG_EXP as SIG_EXP1) =
 SIG_EXP1 ()
  val  (WHERE as WHERE1) = WHERE1 ()
  val  (TYP_REFINE as TYP_REFINE1) = TYP_REFINE1 ()
- in (spacer'([SIG_EXP, WHERE, TYP_REFINE]))
+ in (add_space([SIG_EXP, WHERE, TYP_REFINE]))
 end)
  in ( LrTable.NT 66, ( result, SIG_EXP1left, TYP_REFINE1right), 
 rest671)
@@ -4401,7 +4406,7 @@ SIG_ID1, SIG_ID1left, _)) :: rest671)) => let val  result =
 MlyValue.SIG_BIND (fn _ => let val  (SIG_ID as SIG_ID1) = SIG_ID1 ()
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  (SIG_EXP as SIG_EXP1) = SIG_EXP1 ()
- in (spacer'([SIG_ID, EQUALOP, SIG_EXP]))
+ in (add_space([SIG_ID, EQUALOP, SIG_EXP]))
 end)
  in ( LrTable.NT 68, ( result, SIG_ID1left, SIG_EXP1right), rest671)
 
@@ -4416,7 +4421,7 @@ SIG_ID1 ()
  val  (SIG_EXP as SIG_EXP1) = SIG_EXP1 ()
  val  (AND as AND1) = AND1 ()
  val  (SIG_BIND as SIG_BIND1) = SIG_BIND1 ()
- in (spacer'([SIG_ID, EQUALOP, SIG_EXP, AND, SIG_BIND]))
+ in (add_space([SIG_ID, EQUALOP, SIG_EXP, AND, SIG_BIND]))
 end)
  in ( LrTable.NT 68, ( result, SIG_ID1left, SIG_BIND1right), rest671)
 
@@ -4468,7 +4473,7 @@ TYP_CON1, _, _)) :: ( _, ( MlyValue.DATATYPE DATATYPE1, DATATYPE1left,
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  DATATYPE2 = DATATYPE2 ()
  val  (LONG_TYP_CON as LONG_TYP_CON1) = LONG_TYP_CON1 ()
- in (spacer'([DATATYPE, TYP_CON, EQUALOP, DATATYPE, LONG_TYP_CON]))
+ in (add_space([DATATYPE, TYP_CON, EQUALOP, DATATYPE, LONG_TYP_CON]))
 
 end)
  in ( LrTable.NT 69, ( result, DATATYPE1left, LONG_TYP_CON1right), 
@@ -4531,7 +4536,7 @@ end
  val  (TYPE as TYPE1) = TYPE1 ()
  val  (LONG_TY_CON_EQ_SEQ as LONG_TY_CON_EQ_SEQ1) = 
 LONG_TY_CON_EQ_SEQ1 ()
- in (spacer'([SHARING, TYPE, LONG_TY_CON_EQ_SEQ]))
+ in (add_space([SHARING, TYPE, LONG_TY_CON_EQ_SEQ]))
 end)
  in ( LrTable.NT 69, ( result, SHARING1left, LONG_TY_CON_EQ_SEQ1right)
 , rest671)
@@ -4542,7 +4547,7 @@ SHARING1left, _)) :: rest671)) => let val  result = MlyValue.SPEC' (fn
  _ => let val  (SHARING as SHARING1) = SHARING1 ()
  val  (LONG_STR_ID_EQ_SEQ as LONG_STR_ID_EQ_SEQ1) = 
 LONG_STR_ID_EQ_SEQ1 ()
- in (spacer'([SHARING, LONG_STR_ID_EQ_SEQ]))
+ in (add_space([SHARING, LONG_STR_ID_EQ_SEQ]))
 end)
  in ( LrTable.NT 69, ( result, SHARING1left, LONG_STR_ID_EQ_SEQ1right)
 , rest671)
@@ -4555,7 +4560,7 @@ end
 MlyValue.SPEC' SPEC'1, SPEC'1left, _)) :: rest671)) => let val  result
  = MlyValue.SPEC (fn _ => let val  (SPEC' as SPEC'1) = SPEC'1 ()
  val  (SPEC as SPEC1) = SPEC1 ()
- in (spacer'([SPEC', SPEC]))
+ in (add_space([SPEC', SPEC]))
 end)
  in ( LrTable.NT 70, ( result, SPEC'1left, SPEC1right), rest671)
 end
@@ -4564,7 +4569,7 @@ MlyValue.SEMICOLON SEMICOLON1, SEMICOLON1left, _)) :: rest671)) => let
  val  result = MlyValue.SPEC (fn _ => let val  (SEMICOLON as 
 SEMICOLON1) = SEMICOLON1 ()
  val  (SPEC as SPEC1) = SPEC1 ()
- in (spacer'([SEMICOLON, SPEC]))
+ in (add_space([SEMICOLON, SPEC]))
 end)
  in ( LrTable.NT 70, ( result, SEMICOLON1left, SPEC1right), rest671)
 
@@ -4625,7 +4630,7 @@ MlyValue.TYP_DESC (fn _ => let val  (TYP_DESC' as TYP_DESC'1) =
 TYP_DESC'1 ()
  val  (AND as AND1) = AND1 ()
  val  (TYP_DESC as TYP_DESC1) = TYP_DESC1 ()
- in (spacer'([TYP_DESC', AND, TYP_DESC]))
+ in (add_space([TYP_DESC', AND, TYP_DESC]))
 end)
  in ( LrTable.NT 73, ( result, TYP_DESC'1left, TYP_DESC1right), 
 rest671)
@@ -4637,7 +4642,7 @@ MlyValue.DAT_DESC' (fn _ => let val  (TYP_CON as TYP_CON1) = TYP_CON1
  ()
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  (CON_DESC as CON_DESC1) = CON_DESC1 ()
- in (spacer'([TYP_CON, EQUALOP, CON_DESC]))
+ in (add_space([TYP_CON, EQUALOP, CON_DESC]))
 end)
  in ( LrTable.NT 74, ( result, TYP_CON1left, CON_DESC1right), rest671)
 
@@ -4651,7 +4656,7 @@ TYP_VAR_SEQ1 ()
  val  (TYP_CON as TYP_CON1) = TYP_CON1 ()
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  (CON_DESC as CON_DESC1) = CON_DESC1 ()
- in (spacer'([TYP_VAR_SEQ, TYP_CON, EQUALOP, CON_DESC]))
+ in (add_space([TYP_VAR_SEQ, TYP_CON, EQUALOP, CON_DESC]))
 end)
  in ( LrTable.NT 74, ( result, TYP_VAR_SEQ1left, CON_DESC1right), 
 rest671)
@@ -4671,7 +4676,7 @@ MlyValue.DAT_DESC (fn _ => let val  (DAT_DESC' as DAT_DESC'1) =
 DAT_DESC'1 ()
  val  (AND as AND1) = AND1 ()
  val  (DAT_DESC as DAT_DESC1) = DAT_DESC1 ()
- in (spacer'([DAT_DESC', AND, DAT_DESC]))
+ in (add_space([DAT_DESC', AND, DAT_DESC]))
 end)
  in ( LrTable.NT 75, ( result, DAT_DESC'1left, DAT_DESC1right), 
 rest671)
@@ -4689,7 +4694,7 @@ rest671)) => let val  result = MlyValue.CON_DESC (fn _ => let val  (
 VID as VID1) = VID1 ()
  val  (OF as OF1) = OF1 ()
  val  (TYP as TYP1) = TYP1 ()
- in (spacer'([VID, OF, TYP]))
+ in (add_space([VID, OF, TYP]))
 end)
  in ( LrTable.NT 76, ( result, VID1left, TYP1right), rest671)
 end
@@ -4699,7 +4704,7 @@ VID1left, _)) :: rest671)) => let val  result = MlyValue.CON_DESC (fn
  _ => let val  (VID as VID1) = VID1 ()
  val  (BAR as BAR1) = BAR1 ()
  val  (CON_DESC as CON_DESC1) = CON_DESC1 ()
- in (spacer'([VID, BAR, CON_DESC]))
+ in (add_space([VID, BAR, CON_DESC]))
 end)
  in ( LrTable.NT 76, ( result, VID1left, CON_DESC1right), rest671)
 end
@@ -4712,7 +4717,7 @@ VID1left, _)) :: rest671)) => let val  result = MlyValue.CON_DESC (fn
  val  (TYP as TYP1) = TYP1 ()
  val  (BAR as BAR1) = BAR1 ()
  val  (CON_DESC as CON_DESC1) = CON_DESC1 ()
- in (spacer'([VID, OF, TYP, BAR, CON_DESC]))
+ in (add_space([VID, OF, TYP, BAR, CON_DESC]))
 end)
  in ( LrTable.NT 76, ( result, VID1left, CON_DESC1right), rest671)
 end
@@ -4729,7 +4734,7 @@ rest671)) => let val  result = MlyValue.EX_DESC (fn _ => let val  (VID
  as VID1) = VID1 ()
  val  (OF as OF1) = OF1 ()
  val  (TYP as TYP1) = TYP1 ()
- in (spacer'([VID, OF, TYP]))
+ in (add_space([VID, OF, TYP]))
 end)
  in ( LrTable.NT 77, ( result, VID1left, TYP1right), rest671)
 end
@@ -4739,7 +4744,7 @@ end
  val  (VID as VID1) = VID1 ()
  val  (AND as AND1) = AND1 ()
  val  (EX_DESC as EX_DESC1) = EX_DESC1 ()
- in (spacer'([VID, AND, EX_DESC]))
+ in (add_space([VID, AND, EX_DESC]))
 end)
  in ( LrTable.NT 77, ( result, VID1left, EX_DESC1right), rest671)
 end
@@ -4752,7 +4757,7 @@ end
  val  (TYP as TYP1) = TYP1 ()
  val  (AND as AND1) = AND1 ()
  val  (EX_DESC as EX_DESC1) = EX_DESC1 ()
- in (spacer'([VID, OF, TYP, AND, EX_DESC]))
+ in (add_space([VID, OF, TYP, AND, EX_DESC]))
 end)
  in ( LrTable.NT 77, ( result, VID1left, EX_DESC1right), rest671)
 end
@@ -4762,7 +4767,7 @@ VID1left, _)) :: rest671)) => let val  result = MlyValue.STR_DESC (fn
  _ => let val  (VID as VID1) = VID1 ()
  val  (COLON as COLON1) = COLON1 ()
  val  (SIG_EXP as SIG_EXP1) = SIG_EXP1 ()
- in (spacer'([VID, COLON, SIG_EXP]))
+ in (add_space([VID, COLON, SIG_EXP]))
 end)
  in ( LrTable.NT 78, ( result, VID1left, SIG_EXP1right), rest671)
 end
@@ -4775,7 +4780,7 @@ MlyValue.STR_DESC (fn _ => let val  (VID as VID1) = VID1 ()
  val  (SIG_EXP as SIG_EXP1) = SIG_EXP1 ()
  val  (AND as AND1) = AND1 ()
  val  (STR_DESC as STR_DESC1) = STR_DESC1 ()
- in (spacer'([VID, COLON, SIG_EXP, AND, STR_DESC]))
+ in (add_space([VID, COLON, SIG_EXP, AND, STR_DESC]))
 end)
  in ( LrTable.NT 78, ( result, VID1left, STR_DESC1right), rest671)
 end
@@ -4794,7 +4799,7 @@ MlyValue.FUN_BIND' (fn _ => let val  (FUN_ID as FUN_ID1) = FUN_ID1 ()
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  (STR_EXP as STR_EXP1) = STR_EXP1 ()
  in (
-spacer'([FUN_ID, LPAREN, STR_ID, COLON, SIG_EXP, RPAREN, EQUALOP, STR_EXP])
+add_space([FUN_ID, LPAREN, STR_ID, COLON, SIG_EXP, RPAREN, EQUALOP, STR_EXP])
 )
 end)
  in ( LrTable.NT 79, ( result, FUN_ID1left, STR_EXP1right), rest671)
@@ -4819,7 +4824,7 @@ FUN_ID1) = FUN_ID1 ()
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  (STR_EXP as STR_EXP1) = STR_EXP1 ()
  in (
-spacer'([FUN_ID, LPAREN, STR_ID, COLON, SIG_EXP1, RPAREN, COLON, SIG_EXP2, EQUALOP, STR_EXP])
+add_space([FUN_ID, LPAREN, STR_ID, COLON, SIG_EXP1, RPAREN, COLON, SIG_EXP2, EQUALOP, STR_EXP])
 )
 end)
  in ( LrTable.NT 79, ( result, FUN_ID1left, STR_EXP1right), rest671)
@@ -4844,7 +4849,7 @@ FUN_ID1) = FUN_ID1 ()
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  (STR_EXP as STR_EXP1) = STR_EXP1 ()
  in (
-spacer'([FUN_ID, LPAREN, STR_ID, COLON, SIG_EXP1, RPAREN, COLONGT, SIG_EXP2, EQUALOP, STR_EXP])
+add_space([FUN_ID, LPAREN, STR_ID, COLON, SIG_EXP1, RPAREN, COLONGT, SIG_EXP2, EQUALOP, STR_EXP])
 )
 end)
  in ( LrTable.NT 79, ( result, FUN_ID1left, STR_EXP1right), rest671)
@@ -4861,7 +4866,7 @@ FUN_ID1left, _)) :: rest671)) => let val  result = MlyValue.FUN_BIND'
  val  (RPAREN as RPAREN1) = RPAREN1 ()
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  (STR_EXP as STR_EXP1) = STR_EXP1 ()
- in (spacer'([FUN_ID, LPAREN, SPEC, RPAREN, EQUALOP, STR_EXP]))
+ in (add_space([FUN_ID, LPAREN, SPEC, RPAREN, EQUALOP, STR_EXP]))
 end)
  in ( LrTable.NT 79, ( result, FUN_ID1left, STR_EXP1right), rest671)
 
@@ -4881,7 +4886,7 @@ MlyValue.FUN_BIND' (fn _ => let val  (FUN_ID as FUN_ID1) = FUN_ID1 ()
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  (STR_EXP as STR_EXP1) = STR_EXP1 ()
  in (
-spacer'([FUN_ID, LPAREN, SPEC, RPAREN, COLON, SIG_EXP, EQUALOP, STR_EXP])
+add_space([FUN_ID, LPAREN, SPEC, RPAREN, COLON, SIG_EXP, EQUALOP, STR_EXP])
 )
 end)
  in ( LrTable.NT 79, ( result, FUN_ID1left, STR_EXP1right), rest671)
@@ -4902,7 +4907,7 @@ MlyValue.FUN_BIND' (fn _ => let val  (FUN_ID as FUN_ID1) = FUN_ID1 ()
  val  (EQUALOP as EQUALOP1) = EQUALOP1 ()
  val  (STR_EXP as STR_EXP1) = STR_EXP1 ()
  in (
-spacer'([FUN_ID, LPAREN, SPEC, RPAREN, COLONGT, SIG_EXP, EQUALOP, STR_EXP])
+add_space([FUN_ID, LPAREN, SPEC, RPAREN, COLONGT, SIG_EXP, EQUALOP, STR_EXP])
 )
 end)
  in ( LrTable.NT 79, ( result, FUN_ID1left, STR_EXP1right), rest671)

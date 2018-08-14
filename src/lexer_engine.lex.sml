@@ -106,16 +106,13 @@ structure Tokens = Tokens
 type pos = int
 type svalue = Tokens.svalue
 type ('a,'b) token = ('a,'b) Tokens.token
-type lexresult= (svalue,pos) token
+type lexresult = (svalue,pos) token
 exception UnmatchedComments
 val pos = ref 1
-fun printf x = ();
-datatype ws_type = WS of int | NL of int | TAB of int | Comment of string * int
 
-
+(*  *)
 val assertion_list_ref: (int list * int list * int list) ref = ref ([], [], [])
 val final_ref_list: (int list * int list * int list) ref = ref ([], [], [])
-val string_ref =  ref ("", 0)
 
 fun req num = let
 			   val (req_list, ens_list, _) = !assertion_list_ref
@@ -131,21 +128,15 @@ fun ens num = let
 
 fun rev_str (str: string) = String.implode (List.rev (String.explode (str)))
 
-fun printf_Ints (x) =
-  case x of 
-    nil => printf ("[]\n\n")
-  | i :: x' => (let
-                   val _ = printf (Int.toString (i) ^ " :: ")
-                 in
-                   printf_Ints (x')
-                 end)
-
+(* Holds the number of unmatched comments at any given time. Used to balance comment parenthesis *)
 val unmatched_comments = ref 0
+
+(* Increment and Decrement functions *)
 fun inc(x) = x := (!x + 1)
 fun dec(x) = x := (!x - 1)
 
 fun eof () = (if (!unmatched_comments) <> 0 
-			 then (printf("Error: Unmatched Comment Bracket"); raise UnmatchedComments)
+			 then (print("Error: Unmatched Comment Bracket"); raise UnmatchedComments)
 			 else (let
 					 val (ws, nl, _) = !assertion_list_ref
 					 val final_ref_list = ref (List.rev (ws), List.rev (nl), [])
@@ -155,7 +146,7 @@ fun eof () = (if (!unmatched_comments) <> 0
 					 Tokens.EOF(final_ref_list, !pos, !pos)
 				   end))
 
-fun error (e,l : int,_) = printf (String.concat[
+fun error (e,l : int,_) = print (String.concat[
 	"line ", (Int.toString l), ": ", e, "\n"
       ])
 
@@ -1485,381 +1476,372 @@ fun error (e,l : int,_) = printf (String.concat[
 		      end)
 	    in 
 let
-fun yyAction0 (strm, lastMatch : yymatch) = (yystrm := strm;
-      (printf "space\n"; lex()))
-fun yyAction1 (strm, lastMatch : yymatch) = (yystrm := strm;
-      (printf "tab\n"; lex()))
+fun yyAction0 (strm, lastMatch : yymatch) = (yystrm := strm; (lex()))
+fun yyAction1 (strm, lastMatch : yymatch) = (yystrm := strm; (lex()))
 fun yyAction2 (strm, lastMatch : yymatch) = (yystrm := strm;
-      (printf "newline\n"; pos := !pos + 1; lex()))
+      (pos := !pos + 1; lex()))
 fun yyAction3 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "int\n"; Tokens.INT(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.INT(yytext, !pos, !pos))
       end
 fun yyAction4 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "1\n"; Tokens.INT(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.INT(yytext, !pos, !pos))
       end
 fun yyAction5 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "1\n"; Tokens.REAL(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.REAL(yytext, !pos, !pos))
       end
 fun yyAction6 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "1\n"; Tokens.WORD(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.WORD(yytext, !pos,!pos))
       end
 fun yyAction7 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "char\n"; Tokens.CHAR(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.CHAR(yytext, !pos, !pos))
       end
 fun yyAction8 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "string\n"; Tokens.STRING(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.STRING(yytext, !pos, !pos))
       end
 fun yyAction9 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "equalop\n"; Tokens.EQUALOP(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.EQUALOP(yytext, !pos,!pos))
       end
 fun yyAction10 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "1\n"; Tokens.TIMES(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.TIMES(yytext, !pos,!pos))
       end
 fun yyAction11 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm;
-        (printf "semicolon\n"; Tokens.SEMICOLON (yytext, !pos, !pos))
+        yystrm := strm; (Tokens.SEMICOLON (yytext, !pos, !pos))
       end
 fun yyAction12 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "1\n"; Tokens.COMMA(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.COMMA(yytext, !pos,!pos))
       end
 fun yyAction13 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "1\n"; Tokens.DOT (yytext, !pos, !pos))
+        yystrm := strm; (Tokens.DOT (yytext, !pos, !pos))
       end
 fun yyAction14 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "2\n"; Tokens.ARROW(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.ARROW(yytext, !pos,!pos))
       end
 fun yyAction15 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "2\n"; Tokens.DARROW(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.DARROW(yytext, !pos,!pos))
       end
 fun yyAction16 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "2\n"; Tokens.BAR(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.BAR(yytext, !pos,!pos))
       end
 fun yyAction17 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "2\n"; Tokens.COLON(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.COLON(yytext, !pos,!pos))
       end
 fun yyAction18 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf ":>\n"; Tokens.COLONGT(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.COLONGT(yytext, !pos,!pos))
       end
 fun yyAction19 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "2\n"; Tokens.HASH(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.HASH(yytext, !pos,!pos))
       end
 fun yyAction20 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "2\n"; Tokens.LCURLY(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.LCURLY(yytext, !pos,!pos))
       end
 fun yyAction21 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "2\n"; Tokens.RCURLY(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.RCURLY(yytext, !pos,!pos))
       end
 fun yyAction22 (strm, lastMatch : yymatch) = (yystrm := strm;
-      (printf "open comment ini\n"; YYBEGIN COMMENT; unmatched_comments := 1;
+      (YYBEGIN COMMENT; unmatched_comments := 1;
 						 lex()))
 fun yyAction23 (strm, lastMatch : yymatch) = (yystrm := strm;
-      (printf "open comment com\n"; inc unmatched_comments; lex()))
+      (inc unmatched_comments; lex()))
 fun yyAction24 (strm, lastMatch : yymatch) = (yystrm := strm;
-      (printf "close comment com\n"; dec unmatched_comments; 
+      (dec unmatched_comments; 
 						 if (!unmatched_comments) = 0
 						 then YYBEGIN INITIAL else (); 
 						 lex()))
 fun yyAction25 (strm, lastMatch : yymatch) = (yystrm := strm;
-      (printf "4\n"; pos := !pos + 1; lex()))
-fun yyAction26 (strm, lastMatch : yymatch) = (yystrm := strm;
-      (printf "4\n"; lex()))
+      (pos := !pos + 1; lex()))
+fun yyAction26 (strm, lastMatch : yymatch) = (yystrm := strm; (lex()))
 fun yyAction27 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "a\n"; Tokens.LBRACK(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.LBRACK(yytext, !pos,!pos))
       end
 fun yyAction28 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "b\n"; Tokens.RBRACK(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.RBRACK(yytext, !pos,!pos))
       end
 fun yyAction29 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "c\n"; Tokens.LPAREN(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.LPAREN(yytext, !pos,!pos))
       end
 fun yyAction30 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm;
-        (printf "close paren\n"; Tokens.RPAREN(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.RPAREN(yytext, !pos,!pos))
       end
 fun yyAction31 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "8\n"; Tokens.IF(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.IF(yytext, !pos,!pos))
       end
 fun yyAction32 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "8\n"; Tokens.THEN(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.THEN(yytext, !pos,!pos))
       end
 fun yyAction33 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "8\n"; Tokens.ELSE(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.ELSE(yytext, !pos,!pos))
       end
 fun yyAction34 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "7\n"; Tokens.WHILE(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.WHILE(yytext, !pos,!pos))
       end
 fun yyAction35 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "7\n"; Tokens.DO(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.DO(yytext, !pos,!pos))
       end
 fun yyAction36 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "e\n"; Tokens.LET(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.LET(yytext, !pos,!pos))
       end
 fun yyAction37 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "e\n"; Tokens.IN(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.IN(yytext, !pos,!pos))
       end
 fun yyAction38 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "end\n"; Tokens.END(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.END(yytext, !pos,!pos))
       end
 fun yyAction39 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.ORELSE(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.ORELSE(yytext, !pos,!pos))
       end
 fun yyAction40 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.ANDALSO(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.ANDALSO(yytext, !pos,!pos))
       end
 fun yyAction41 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.HANDLE(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.HANDLE(yytext, !pos,!pos))
       end
 fun yyAction42 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.RAISE(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.RAISE(yytext, !pos,!pos))
       end
 fun yyAction43 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.EXCEPTION(yytext, !pos,!pos))
+        yystrm := strm; (Tokens.EXCEPTION(yytext, !pos,!pos))
       end
 fun yyAction44 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "val\n"; Tokens.VAL(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.VAL(yytext, !pos, !pos))
       end
 fun yyAction45 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.AND(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.AND(yytext, !pos, !pos))
       end
 fun yyAction46 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.FN(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.FN(yytext, !pos, !pos))
       end
 fun yyAction47 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "fun\n"; Tokens.FUN(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.FUN(yytext, !pos, !pos))
       end
 fun yyAction48 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.CASE(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.CASE(yytext, !pos, !pos))
       end
 fun yyAction49 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.OF(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.OF(yytext, !pos, !pos))
       end
 fun yyAction50 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.WILD(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.WILD(yytext, !pos, !pos))
       end
 fun yyAction51 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "op\n"; Tokens.OP(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.OP(yytext, !pos, !pos))
       end
 fun yyAction52 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.REC(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.REC(yytext, !pos, !pos))
       end
 fun yyAction53 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.TYPE(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.TYPE(yytext, !pos, !pos))
       end
 fun yyAction54 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.DATATYPE(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.DATATYPE(yytext, !pos, !pos))
       end
 fun yyAction55 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.ABSTYPE(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.ABSTYPE(yytext, !pos, !pos))
       end
 fun yyAction56 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.WITH(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.WITH(yytext, !pos, !pos))
       end
 fun yyAction57 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.WITHTYPE(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.WITHTYPE(yytext, !pos, !pos))
       end
 fun yyAction58 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.AS(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.AS(yytext, !pos, !pos))
       end
 fun yyAction59 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.OPEN(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.OPEN(yytext, !pos, !pos))
       end
 fun yyAction60 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.LOCAL(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.LOCAL(yytext, !pos, !pos))
       end
 fun yyAction61 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.INFIX(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.INFIX(yytext, !pos, !pos))
       end
 fun yyAction62 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.INFIXR(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.INFIXR(yytext, !pos, !pos))
       end
 fun yyAction63 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.NONFIX(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.NONFIX(yytext, !pos, !pos))
       end
 fun yyAction64 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "struct\n"; Tokens.STRUCT(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.STRUCT(yytext, !pos, !pos))
       end
 fun yyAction65 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm;
-        (printf "structure\n"; Tokens.STRUCTURE(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.STRUCTURE(yytext, !pos, !pos))
       end
 fun yyAction66 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.SIG(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.SIG(yytext, !pos, !pos))
       end
 fun yyAction67 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.SIGNATURE(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.SIGNATURE(yytext, !pos, !pos))
       end
 fun yyAction68 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.FUNCTOR(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.FUNCTOR(yytext, !pos, !pos))
       end
 fun yyAction69 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.INCLUDE(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.INCLUDE(yytext, !pos, !pos))
       end
 fun yyAction70 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.WHERE(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.WHERE(yytext, !pos, !pos))
       end
 fun yyAction71 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.EQTYPE(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.EQTYPE(yytext, !pos, !pos))
       end
 fun yyAction72 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.SHARING(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.SHARING(yytext, !pos, !pos))
       end
 fun yyAction73 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm;
-        (printf "5\n"; Tokens.DOTTED_WILDCARD(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.DOTTED_WILDCARD(yytext, !pos, !pos))
       end
 fun yyAction74 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.LASSERT(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.LASSERT(yytext, !pos, !pos))
       end
 fun yyAction75 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "5\n"; Tokens.RASSERT(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.RASSERT(yytext, !pos, !pos))
       end
 fun yyAction76 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm;
-        (printf "5\n"; req (!pos); Tokens.REQUIRES(yytext, !pos, !pos))
+        yystrm := strm; (req (!pos); Tokens.REQUIRES(yytext, !pos, !pos))
       end
 fun yyAction77 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm;
-        (printf "5\n"; ens (!pos); Tokens.ENSURES(yytext, !pos, !pos))
+        yystrm := strm; (ens (!pos); Tokens.ENSURES(yytext, !pos, !pos))
       end
 fun yyAction78 (strm, lastMatch : yymatch) = let
       val oldStrm = !(yystrm)
@@ -1867,7 +1849,7 @@ fun yyAction78 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
         yystrm := strm;
-        (printf "symbol_token\n"; if yytext = ":" orelse
+        (if yytext = ":" orelse
 							yytext = "|" orelse
 							yytext = "=" orelse
 							yytext = "#" then REJECT()
@@ -1876,19 +1858,18 @@ fun yyAction78 (strm, lastMatch : yymatch) = let
 fun yyAction79 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm;
-        (printf "quote_id\n"; Tokens.QUOTE_ID(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.QUOTE_ID(yytext, !pos, !pos))
       end
 fun yyAction80 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
-        yystrm := strm; (printf "token\n"; Tokens.ID(yytext, !pos, !pos))
+        yystrm := strm; (Tokens.ID(yytext, !pos, !pos))
       end
 fun yyAction81 (strm, lastMatch : yymatch) = let
       val yytext = yymktext(strm)
       in
         yystrm := strm;
-        (printf "smthing else\n"; error ("ignoring bad character "^yytext,!pos,!pos); lex())
+        (error ("ignoring bad character "^yytext,!pos,!pos); lex())
       end
 val yyactTable = Vector.fromList([yyAction0, yyAction1, yyAction2, yyAction3,
   yyAction4, yyAction5, yyAction6, yyAction7, yyAction8, yyAction9, yyAction10,
