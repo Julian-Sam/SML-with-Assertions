@@ -32,7 +32,7 @@ fun inc(x) = x := (!x + 1)
 fun dec(x) = x := (!x - 1)
 
 fun eof () = (if (!unmatched_comments) <> 0 
-			 then (printf("Error: Unmatched Comment Bracket"); raise UnmatchedComments)
+			 then (print("Error: Unmatched Comment Bracket"); raise UnmatchedComments)
 			 else (let
 					 val (ws, nl, _) = !assertion_list_ref
 					 val final_ref_list = ref (List.rev (ws), List.rev (nl), [])
@@ -42,7 +42,7 @@ fun eof () = (if (!unmatched_comments) <> 0
 					 Tokens.EOF(final_ref_list, !pos, !pos)
 				   end))
 
-fun error (e,l : int,_) = printf (String.concat[
+fun error (e,l : int,_) = print (String.concat[
 	"line ", (Int.toString l), ": ", e, "\n"
       ])
 

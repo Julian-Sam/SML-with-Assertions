@@ -277,7 +277,7 @@ val Stack: stack ref = ref []
   ALL_IDs : ID (ID)
           | SYMBOLS (SYMBOLS)
 
-  QID : ALL_IDs DOT QID (spacer([ALL_IDs, DOT, QID]))
+  QID : ALL_IDs DOT QID (add_space([ALL_IDs, DOT, QID]))
       | VID (VID)
 
     (* Type Constructor *)
@@ -664,7 +664,7 @@ val Stack: stack ref = ref []
   TYP_TUPLE : TYP' TIMES TYP' (add_space([TYP'1, TIMES, TYP'2]))
             | TYP' TIMES TYP_TUPLE (add_space([TYP', TIMES, TYP_TUPLE]))
 
-  TY_CON : ALL_IDs DOT TY_CON (spacer([ALL_IDs, DOT, TY_CON]))
+  TY_CON : ALL_IDs DOT TY_CON (add_space([ALL_IDs, DOT, TY_CON]))
          | ALL_IDs (ALL_IDs)
 
   TYP_SEQ : TYP COMMA TYP (TYP1 ^ " " ^ COMMA ^ " " ^ TYP2)
