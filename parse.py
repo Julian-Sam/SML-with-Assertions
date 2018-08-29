@@ -60,6 +60,7 @@ else:
     return_status = subprocess.call(command, shell=True)
     if return_status == 1:
         print ("File: " + files[0] + " failed on the Assertions Parser\n")
+        sys.exit()
 
     print("\nFile Parsed Successfully!\n")
     command = "sml " + new_file_name(files[0])
