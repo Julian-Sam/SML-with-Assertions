@@ -49,13 +49,13 @@ To represent assertions in your .sml file, adhere to the following template:
 
 where: 
 
-  "(*!"     - This token opens an assertion block for the function foo.
+    "(*!"       - This token opens an assertion block for the function foo.
 
-  "REQUIRES"     - This token is used to initiate a 'requires' assertion.
+    "REQUIRES"  - This token is used to initiate a 'requires' assertion.
 
-  "ENSURES"     - This token is used to initiate a 'ensures' assertion.
+    "ENSURES"   - This token is used to initiate a 'ensures' assertion.
 
-  "!*)"     - This token is used to close the assertion block for the function foo.
+    "!*)"       - This token is used to close the assertion block for the function foo.
 
 
 To refer to the output of the function in your ENSURES boolean expressions, use the variable name  'result'. For example:
