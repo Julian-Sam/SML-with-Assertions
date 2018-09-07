@@ -1,6 +1,6 @@
 # SML With Assertions #
 
-In this project, we implement native support for function contracts in the form of requires and ensures statements (prerequisites and postrequisites) for SML-NJ. This third party assertions parser will serve to extend the original SML GRAMMAR to provide translating for assertion syntax. 
+In this project, we implement native support for function contracts in the form of requires and ensures statements (prerequisites and postrequisites) for SML-NJ. To achieve this goal, we recreated the SML Parser as a code translater which accomodates a new syntax for preconditions and postconditions and maps this to syntax which is coherent to the SML GRAMMAR. 
 
 ## Getting Started ##
 
@@ -14,15 +14,13 @@ The file given using the -c flag should be the sources.cm file necessary to comp
 
 * However the [-c] flag is optional.
 
-### Prerequisites for Usage
+### Prerequisites for Usage ###
 
 Standard ML installation:
 http://smlnj.org/
 
 Python 3 installation:
 https://www.python.org/
-
-###
 
 
 filepath>> python parse.py -f sample1.sml sample2.sml ...  -c sources.cm
@@ -34,8 +32,9 @@ filepath>> val it = true : bool
 
 To run the program, you need to use the following commands to test you files:
 
+* To run the parser open and terminal and navigate to the filepath of this folder. Add the sml files you want to test into this folder and run the following command. 
+
 filepath>> python parse.py -f sample1.sml sample2.sml ...  -c sources.cm
-filepath>> ...
 
 * This indicates that the compilation was successful
 
