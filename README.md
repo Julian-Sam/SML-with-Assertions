@@ -22,18 +22,23 @@ http://smlnj.org/
 Python 3 installation:
 https://www.python.org/
 
-# The -f positional parameter takes n number of files mentioned in the sources.cm file.
+
+
 filepath>> python parse.py -f sample1.sml sample2.sml ...  -c sources.cm
 filepath>> ...
-```
 
-# This indicates that compilation is successful 
 filepath>> val it = true : bool 
-```
 
-End with an example of getting some data out of the system or using it for a little demo
+### Running the tests
 
-## Running the tests
+To run the program, you need to use the following commands to test you files:
+
+filepath>> python parse.py -f sample1.sml sample2.sml ...  -c sources.cm
+filepath>> ...
+
+* This indicates that the compilation was successful
+
+filepath>> val it = true : bool
 
 The baseline for the implementation of our parser involves adding SML GRAMMAR to support the use of
 assertions. To represent assertions in your .sml file, adhere to the following template:
@@ -92,7 +97,6 @@ and
 
 For nested functions, the assertion block must be placed right before the definiton of the local function.
 
-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
 
 (*!
 	REQUIRES: ...
@@ -109,8 +113,6 @@ fun OuterNestedFun (...) =
    in
        ...
    end
-
-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
 
 If there is an assertion failure, the Compilation Manager will raise the following FAIL error:
 
