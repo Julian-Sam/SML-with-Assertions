@@ -113,7 +113,7 @@ We use [GitHub](http://github.com/) for versioning. For the versions available, 
 
 ## Authors ##
 
-* **Julian Sam**   - [juliansam72](https://github.com/juliansam72)
+* **Julian Sam**   - [Julian-Sam](https://github.com/Julian-Sam)
 * **Sameer Ahmad** - [SameerAhmad2](https://github.com/SameerAhmad2)
 
 ## Acknowledgments ##
