@@ -29,7 +29,7 @@ https://www.python.org/
 
 To run the program, you need to use the following commands to test you files:
 
-* To run the parser open and terminal and navigate to the filepath of this folder. Add the sml files you want to test into this folder and run the following command. 
+* To run the parser open any terminal and navigate to this folders filepath. Add the sml files you want to test into this folder and run the following command. 
 
 filepath>> python parse.py -f sample1.sml sample2.sml ...  -c sources.cm
 
