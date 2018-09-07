@@ -42,27 +42,27 @@ filepath>> val it = true : bool
 To represent assertions in your .sml file, adhere to the following template:
 
     (*! 
-    	REQUIRES: (boolean exp #1) andalso (boolean exp #2) andalso ... 
-    	ENSURES: (boolean exp #1) andalso (boolean exp #2) andalso ...
+      REQUIRES: (boolean exp #1) andalso (boolean exp #2) andalso ... 
+      ENSURES: (boolean exp #1) andalso (boolean exp #2) andalso ...
     !*)
     fun foo (...) = ... 
 
 where: 
 
-	"(*!"     - This token opens an assertion block for the function foo.
+  "(*!"     - This token opens an assertion block for the function foo.
 
-	"REQUIRES"     - This token is used to initiate a 'requires' assertion.
+  "REQUIRES"     - This token is used to initiate a 'requires' assertion.
 
-	"ENSURES"     - This token is used to initiate a 'ensures' assertion.
+  "ENSURES"     - This token is used to initiate a 'ensures' assertion.
 
-	"!*)"	    - This token is used to close the assertion block for the function foo.
+  "!*)"     - This token is used to close the assertion block for the function foo.
 
 
 To refer to the output of the function in your ENSURES boolean expressions, use the variable name  'result'. For example:
 
     (*!
-    	REQUIRES: n >= 5 andalso b > 0
-    	ENSURES: result >= 5 
+      REQUIRES: n >= 5 andalso b > 0
+      ENSURES: result >= 5 
     !*)
     fun pow (n: int, b as 0: int) = 1
       | pow (n, b) = n * pow (n, b - 1)
@@ -71,15 +71,15 @@ To refer to the output of the function in your ENSURES boolean expressions, use 
 For mutually recursive functions, the assertion block for second function must be placed after the "and" token. For example:
 
     (*!
-    	REQUIRES: n >= 0
-    	ENSURES: true
+      REQUIRES: n >= 0
+      ENSURES: true
     !*)
     fun even (n as 0: int) = true
       | even n = odd (n-1)
     and 
     (*!
-    	REQUIRES: n >= 0
-    	ENSURES: true
+      REQUIRES: n >= 0
+      ENSURES: true
     !*)
         odd (n as 0: int) = false
       | odd n = even (n-1)
@@ -87,15 +87,15 @@ For mutually recursive functions, the assertion block for second function must b
 For nested functions, the assertion block must be placed right before the definiton of the local function.
 
     (*!
-    	REQUIRES: ...
-    	ENSURES: ...
+      REQUIRES: ...
+      ENSURES: ...
     !*)
     fun OuterNestedFun (...) =
        let
            (*!
-    	       REQUIRES: ...
-    		   ENSURES: ...
-    	   !*)
+             REQUIRES: ...
+             ENSURES: ...
+           !*)
            fun InnerNestedFun (...) = ...
            val (...) = ...
        in
