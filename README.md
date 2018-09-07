@@ -1,8 +1,8 @@
-# SML With Assertions
+# SML With Assertions #
 
 In this project, we implement native support for function contracts in the form of requires and ensures statements (prerequisites and postrequisites) for SML-NJ. This third party assertions parser will serve to extend the original SML GRAMMAR to provide translating for assertion syntax. 
 
-## Getting Started
+## Getting Started ##
 
 Enter the main folder and run the parse.py file on the command prompt as follows:
 
@@ -22,6 +22,7 @@ http://smlnj.org/
 Python 3 installation:
 https://www.python.org/
 
+###
 
 
 filepath>> python parse.py -f sample1.sml sample2.sml ...  -c sources.cm
@@ -29,7 +30,7 @@ filepath>> ...
 
 filepath>> val it = true : bool 
 
-### Running the tests
+### Running the tests ###
 
 To run the program, you need to use the following commands to test you files:
 
@@ -42,13 +43,13 @@ filepath>> val it = true : bool
 
 The baseline for the implementation of our parser involves adding SML GRAMMAR to support the use of
 assertions. To represent assertions in your .sml file, adhere to the following template:
-"
+
 (*! 
 	REQUIRES: (boolean exp #1) andalso (boolean exp #2) andalso ... 
 	ENSURES: (boolean exp #1) andalso (boolean exp #2) andalso ...
 !*)
 fun foo (...) = ... 
-"
+
 where: 
 
 	"(*!" 		- This token opens an assertion block for the function foo
@@ -112,15 +113,15 @@ If there is an assertion failure, the Compilation Manager will raise the followi
 
 Fail [fun (function name) error: (Requires/Ensures) failure on line (line no. of assertion tag)]
 
-## Versioning
+## Versioning ##
 
 We use [GitHub](http://github.com/) for versioning. For the versions available, check out our project repository [SML-With-Assertions](https://github.com/Julian-Sam/SML-with-Assertions). 
 
-## Authors
+## Authors ##
 
 * **Julian Sam**   - [juliansam72](https://github.com/juliansam72)
 * **Sameer Ahmad** - [SameerAhmad2](https://github.com/SameerAhmad2)
 
-## Acknowledgments
+## Acknowledgments ##
 
 * We would like to acknowledge Professor Giselle Reis for guiding us through the project.
