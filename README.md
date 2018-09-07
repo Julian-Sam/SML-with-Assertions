@@ -127,6 +127,4 @@ We use [GitHub](http://github.com/) for versioning. For the versions available, 
 
 ## Acknowledgments
 
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
+* We would like to acknowledge Professor Giselle Reis for guiding us through the project.
