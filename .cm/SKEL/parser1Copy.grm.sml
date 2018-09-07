@@ -1,0 +1,2 @@
+Skeleton 5
+ae"SampleLrValsFun"i2aä¢Token"gp1c"TOKEN"f±ÿjh2aä¢ParserData"h7aä¢Header"h2egp1ä¢String"egp1d"Int"aä¢LrTable"gp2ÿÿ$Caÿgpÿ*båçğ±ÿ$f6d"Char"Cd"List"ÿd"General"ÿ$d"Array"Nbåçğ±ÿaä¢MlyValue"è0ad"EC"h2ÿ?bÿ‚1æ±ÿ‚9ad"Actions"h2bÿ‚1f2ÿ$ÿ‚9ÿƒNaä¢Tokens"jÿƒçğ±ã¢Sample_TOKENS"h2aÿ1gp1c"PARSER_DATA"aÿƒ8ÿ„
