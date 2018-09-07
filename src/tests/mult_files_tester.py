@@ -6,9 +6,6 @@ mypath = "test_files"
 broken_files = []
 files = [f for f in listdir(mypath) if isfile(join(mypath, f))]
 
-def new_file_name(old_file_name):
-	return old_file_name[old_file_name.rfind('.')-1] + "_parsed.sml"
-
 for i in files:
 	print(i)
 
@@ -33,3 +30,9 @@ for i in broken_files:
 
 if not broken_files:
 	print("\n\nAll tests passed!")
+
+
+remove("../lexer_engine.lex.sml")
+remove("../parser_engine.grm.desc")
+remove("../parser_engine.grm.sig")
+remove("../parser_engine.grm.sml")
