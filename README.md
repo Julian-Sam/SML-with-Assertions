@@ -2,6 +2,7 @@
 
 In this project, we implement native support for function contracts in the form of requires and ensures statements (prerequisites and postrequisites) for SML-NJ. To achieve this goal, we recreated the SML Parser as a code translater which accomodates a new syntax for preconditions and postconditions and maps this to syntax which is coherent to the SML GRAMMAR. 
 
+
 ## Getting Started ##
 
 Enter the main folder and run the parse.py file on the command prompt as follows:
@@ -14,7 +15,8 @@ The file given using the -c flag should be the sources.cm file necessary to comp
 
 * However the [-c] flag is optional.
 
-### Prerequisites for Usage ###
+
+## Prerequisites for Usage ##
 
 Standard ML installation:
 http://smlnj.org/
@@ -23,12 +25,7 @@ Python 3 installation:
 https://www.python.org/
 
 
-filepath>> python parse.py -f sample1.sml sample2.sml ...  -c sources.cm
-filepath>> ...
-
-filepath>> val it = true : bool 
-
-### Running the tests ###
+### Usage Instructions ###
 
 To run the program, you need to use the following commands to test you files:
 
@@ -40,8 +37,9 @@ filepath>> python parse.py -f sample1.sml sample2.sml ...  -c sources.cm
 
 filepath>> val it = true : bool
 
-The baseline for the implementation of our parser involves adding SML GRAMMAR to support the use of
-assertions. To represent assertions in your .sml file, adhere to the following template:
+### Representing Assertions in SML ###
+
+To represent assertions in your .sml file, adhere to the following template:
 
     (*! 
     	REQUIRES: (boolean exp #1) andalso (boolean exp #2) andalso ... 
@@ -51,13 +49,13 @@ assertions. To represent assertions in your .sml file, adhere to the following t
 
 where: 
 
-	"(*!" 		- This token opens an assertion block for the function foo
+	"(*!" 		  - This token opens an assertion block for the function foo
 
 	"REQUIRES"  - This token is used to initiate a 'requires' assertion and must be true for all input of the function foo.
 
 	"ENSURES"   - This token is used to initiate a 'ensures' assertion and must be true for all output of the function foo.
 
-	"!*)"	    - This token is used to close the assertion block for the function foo.
+	"!*)"	      - This token is used to close the assertion block for the function foo.
 
 
 To refer to the output of the function in your ENSURES boolean expressions, use the variable name  'result'. For example:
@@ -107,6 +105,7 @@ For nested functions, the assertion block must be placed right before the defini
 If there is an assertion failure, the Compilation Manager will raise the following FAIL error:
 
 Fail [fun (function name) error: (Requires/Ensures) failure on line (line no. of assertion tag)]
+
 
 ## Versioning ##
 
