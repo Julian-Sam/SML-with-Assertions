@@ -1,18 +1,22 @@
-# SML With Assertions
+# SML With Assertions #
 
-In this project, we implement native support for function contracts in the form of requires and ensures statements (prerequisites and postrequisites)
+In this project, we implement native support for function contracts in the form of requires and ensures statements (prerequisites and postrequisites) for SML-NJ. To achieve this goal, we recreated the SML Parser as a code translater which accomodates a new syntax for preconditions and postconditions and maps this to syntax which is coherent to the SML GRAMMAR. 
 
-## Getting Started
 
-Enter the main folder and run the parse.py file as follows:
+## Getting Started ##
+
+Enter the main folder and run the parse.py file on the command prompt as follows:
 
 python parse.py -f file1 file2... [-c sources_file] 
 
 The files given using the -f flag should include all the files compiled in the sources file.
 
-The file given using the -c flag should be the sources.cm file necessary to compile the above files
+The file given using the -c flag should be the sources.cm file necessary to compile the above files.
 
-### Prerequisites
+* However the [-c] flag is optional.
+
+
+## Prerequisites for Usage ##
 
 Standard ML installation:
 http://smlnj.org/
@@ -20,72 +24,98 @@ http://smlnj.org/
 Python 3 installation:
 https://www.python.org/
 
-### Installing
 
-A step by step series of examples that tell you how to get a development env running
+### Usage Instructions ###
 
-Say what the step will be 
+To run the program, you need to use the following commands to test you files:
 
-```
-# The -f positional parameter takes n number of files mentioned in the sources.cm file.
+* To run the parser open any terminal and navigate to this folders filepath. Add the sml files you want to test into this folder and run the following command. 
+
 filepath>> python parse.py -f sample1.sml sample2.sml ...  -c sources.cm
-filepath>> ...
-```
-```
-# This indicates that compilation is successful 
-filepath>> val it = true : bool 
-```
 
-End with an example of getting some data out of the system or using it for a little demo
+* This indicates that the compilation was successful
 
-## Running the tests
+filepath>> val it = true : bool
 
-The baseline for the implementation of our parser involves adding SML GRAMMAR to support the use of
-assertions. To add assertions to your SML file, follow these necessary steps. 
+### Representing Assertions in SML ###
 
-```
-# This is how an assertion block is represented in our grammar
+To represent assertions in your .sml file, adhere to the following template:
 
-```
+    (*! 
+      REQUIRES: (boolean exp #1) andalso (boolean exp #2) andalso ... 
+      ENSURES: (boolean exp #1) andalso (boolean exp #2) andalso ...
+    !*)
+    fun foo (...) = ... 
 
-### Break down into end to end tests
+where: 
 
-Explain what these tests test and why
+    "(*!"       - This token opens an assertion block for the function foo.
 
-```
-Give an example
-```
+    "REQUIRES"  - This token is used to initiate a 'requires' assertion.
 
-### And coding style tests
+    "ENSURES"   - This token is used to initiate a 'ensures' assertion.
 
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-## Deployment
-
-Add additional notes about how to deploy this on a live system
-
-## Versioning
-
-We use [GitHub](http://github.com/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
-
-## Authors
-
-* **Julian Sam** - [juliansam72](https://github.com/juliansam72)
-* **Sameer Ahmad** - [Shurikenladd](https://github.com/Shurikenladd)
+    "!*)"       - This token is used to close the assertion block for the function foo.
 
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+To refer to the output of the function in your ENSURES boolean expressions, use the variable name  'result'. For example:
 
-## License
+    (*!
+      REQUIRES: n >= 5 andalso b > 0
+      ENSURES: result >= 5 
+    !*)
+    fun pow (n: int, b as 0: int) = 1
+      | pow (n, b) = n * pow (n, b - 1)
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
-## Acknowledgments
+For mutually recursive functions, the assertion block for second function must be placed after the "and" token. For example:
 
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
+    (*!
+      REQUIRES: n >= 0
+      ENSURES: true
+    !*)
+    fun even (n as 0: int) = true
+      | even n = odd (n-1)
+    and 
+    (*!
+      REQUIRES: n >= 0
+      ENSURES: true
+    !*)
+        odd (n as 0: int) = false
+      | odd n = even (n-1)
+
+For nested functions, the assertion block must be placed right before the definiton of the local function.
+
+    (*!
+      REQUIRES: ...
+      ENSURES: ...
+    !*)
+    fun OuterNestedFun (...) =
+       let
+           (*!
+             REQUIRES: ...
+             ENSURES: ...
+           !*)
+           fun InnerNestedFun (...) = ...
+           val (...) = ...
+       in
+           ...
+       end
+
+If there is an assertion failure, the Compilation Manager will raise the following FAIL error:
+
+Fail [fun (function name) error: (Requires/Ensures) failure on line (line no. of assertion tag)]
+
+
+## Versioning ##
+
+We use [GitHub](http://github.com/) for versioning. For the versions available, check out our project repository [SML-With-Assertions](https://github.com/Julian-Sam/SML-with-Assertions). 
+
+## Authors ##
+
+* **Julian Sam**   - [Julian-Sam](https://github.com/Julian-Sam)
+* **Sameer Ahmad** - [SameerAhmad2](https://github.com/SameerAhmad2)
+
+## Acknowledgments ##
+
+* We would like to acknowledge Professor Giselle Reis for guiding us through the project.
