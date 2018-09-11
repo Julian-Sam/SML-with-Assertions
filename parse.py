@@ -29,17 +29,6 @@ if Args.c is not None and len(Args.c) > 1:
     sys.exit()
 
 files = Args.f 
-one_file_fail = False
-
-# for file in files:
-#     command = "sml " + file # replace with byte code thing
-#     # return_status = subprocess.call(command, shell=True)
-#     # if return_status == 1:
-#     #   print ("File: " + file + " failed on the SML Parser\n")
-#     #   one_file_fail = True
-
-if one_file_fail:
-    sys.exit()
 
 if sources_exists:
     for file in files:
@@ -47,7 +36,7 @@ if sources_exists:
         with fileinput.FileInput(sources_file, inplace=True) as open_file:
             for line in open_file:
                 print(line.replace(file, new_file_name(file)), end='')
-
+    # Do this without editing the sources file directly, or go back to original sources file after running parse
     command = "sml run_sources.sml " + sources_file
     return_status = subprocess.call(command, shell=True)
 
