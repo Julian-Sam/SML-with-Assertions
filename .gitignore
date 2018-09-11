@@ -1,6 +1,6 @@
 src/.cm/
 
-
+src/tests/homeworks/*
 src/lexer_engine.lex.sml
 src/parser_engine.grm.desc
 src/parser_engine.grm.sig
