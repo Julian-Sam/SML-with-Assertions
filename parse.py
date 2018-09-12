@@ -31,14 +31,33 @@ if Args.c is not None and len(Args.c) > 1:
 files = Args.f 
 
 if sources_exists:
+    # Copy files content to a variable, to insert into the file later (since original file will be modified)
+    with open(sources_file, "r") as src_file:
+        sources_file_data = src_file.read()
+
     for file in files:
         print(file)
+
+        # Replace the file with the new file name in the sources file
         with fileinput.FileInput(sources_file, inplace=True) as open_file:
             for line in open_file:
                 print(line.replace(file, new_file_name(file)), end='')
-    # Do this without editing the sources file directly, or go back to original sources file after running parse
+
+        # Make the new parsed files
+        command = "sml " + abspath(join("src", 
+            "run_parser.sml")) + " " + abspath(file) + " " + join("src", "sources.cm")
+        return_status = subprocess.call(command, shell=True)
+
     command = "sml run_sources.sml " + sources_file
     return_status = subprocess.call(command, shell=True)
+
+    # Write back to the file the original data 
+    with open(sources_file, "w") as src_file:
+        src_file.write(sources_file_data)
+
+    # Remove new files created
+    for file in files:
+        remove(new_file_name(file))
 
 else:
     if len(files) != 1:
@@ -52,9 +71,10 @@ else:
         sys.exit()
 
     print("\nFile Parsed Successfully!\n")
-    command = "sml " + new_file_name(files[0])
+    # Apparantly running 'sml <test.sml' allows you to exit the SML interpreter after running
+    command = "sml <" + new_file_name(files[0])
     return_status = subprocess.call(command, shell=True)
-
+    remove(new_file_name(files[0]))
 
 remove("src/lexer_engine.lex.sml")
 remove("src/parser_engine.grm.desc")
