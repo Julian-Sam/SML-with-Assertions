@@ -64,7 +64,7 @@ else:
         print("Please provide a sources file with the -c flag if there is more than one file. Use the -h flag for help")
         sys.exit()
 
-    command = "sml " + abspath(join("src", "run_parser.sml")) + " " + abspath(files[0]) + " " + join("src", "sources.cm")
+    command = "sml \"" + abspath(join("src", "run_parser.sml")) + "\" \"" + abspath(files[0]) + "\" \"" + join("src", "sources.cm") + "\""
     return_status = subprocess.call(command, shell=True)
     if return_status == 1:
         print ("File: " + files[0] + " failed on the Assertions Parser\n")
@@ -72,7 +72,7 @@ else:
 
     print("\nFile Parsed Successfully!\n")
     # Apparantly running 'sml <test.sml' allows you to exit the SML interpreter after running
-    command = "sml <" + new_file_name(files[0])
+    command = "sml <\"" + new_file_name(files[0]) + "\""
     return_status = subprocess.call(command, shell=True)
     remove(new_file_name(files[0]))
 
