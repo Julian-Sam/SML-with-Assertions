@@ -2,6 +2,22 @@
 
 In this project, we implement native support for function contracts in the form of requires and ensures statements (prerequisites and postrequisites) for SML-NJ. To achieve this goal, we recreated the SML Parser as a code translater which accomodates a new syntax for preconditions and postconditions and maps this to syntax which is coherent to the SML GRAMMAR. 
 
+## Getting the Code ##
+
+Clone the project: 
+```
+  $ git clone https://github.com/Julian-Sam/SML-with-Assertions.git
+```
+
+Alternatively, you can download the zipped project from github
+
+## Prerequisites for Usage ##
+
+Standard ML installation:
+http://smlnj.org/
+
+Python 3 installation:
+https://www.python.org/
 
 ## Getting Started ##
 
@@ -14,16 +30,6 @@ The files given using the -f flag should include all the files compiled in the s
 The file given using the -c flag should be the sources.cm file necessary to compile the above files.
 
 * However the [-c] flag is optional.
-
-
-## Prerequisites for Usage ##
-
-Standard ML installation:
-http://smlnj.org/
-
-Python 3 installation:
-https://www.python.org/
-
 
 ### Usage Instructions ###
 
