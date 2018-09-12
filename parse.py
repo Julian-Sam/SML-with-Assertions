@@ -7,6 +7,13 @@ from os.path import isfile, join, abspath
 def new_file_name(old_file_name):
     return old_file_name[:(old_file_name.rfind('.'))] + "_parsed" + old_file_name[(old_file_name.rfind('.')):]
 
+##def modify_file_path(old_file_path):
+##    file_path_list = old_file_path.split("\\")
+##    new_file_path = ""
+##    for i in file_path_list[:len(file_path_list) - 1]:
+##        new_file_path += '"' + i + '"\\'
+##    return new_file_path + '"' + file_path_list[-1] + '"'
+    
 if __name__ == "__main__":
     #Initializing the Parser
     Arguments = argparse.ArgumentParser (description = "SML Compiler Script Arguments")
@@ -65,7 +72,11 @@ else:
         sys.exit()
 
     command = "sml " + abspath(join("src", "run_parser.sml")) + " " + abspath(files[0]) + " " + join("src", "sources.cm")
+    print (command)
+    print ("\n")
     return_status = subprocess.call(command, shell=True)
+    print (return_status)
+    print ("\n")
     if return_status == 1:
         print ("File: " + files[0] + " failed on the Assertions Parser\n")
         sys.exit()
