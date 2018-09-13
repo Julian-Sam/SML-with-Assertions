@@ -6,13 +6,6 @@ from os.path import isfile, join, abspath
 
 def new_file_name(old_file_name):
     return old_file_name[:(old_file_name.rfind('.'))] + "_parsed" + old_file_name[(old_file_name.rfind('.')):]
-
-##def modify_file_path(old_file_path):
-##    file_path_list = old_file_path.split("\\")
-##    new_file_path = ""
-##    for i in file_path_list[:len(file_path_list) - 1]:
-##        new_file_path += '"' + i + '"\\'
-##    return new_file_path + '"' + file_path_list[-1] + '"'
     
 if __name__ == "__main__":
     #Initializing the Parser
@@ -51,8 +44,8 @@ if sources_exists:
                 print(line.replace(file, new_file_name(file)), end='')
 
         # Make the new parsed files
-        command = "sml " + abspath(join("src", 
-            "run_parser.sml")) + " " + abspath(file) + " " + join("src", "sources.cm")
+        command = "sml \"" + abspath(join("src", 
+            "run_parser.sml")) + "\" \"" + abspath(file) + "\" \"" + join("src", "sources.cm") + "\""
         return_status = subprocess.call(command, shell=True)
 
     command = "sml run_sources.sml " + sources_file
@@ -71,21 +64,18 @@ else:
         print("Please provide a sources file with the -c flag if there is more than one file. Use the -h flag for help")
         sys.exit()
 
-    command = "sml " + abspath(join("src", "run_parser.sml")) + " " + abspath(files[0]) + " " + join("src", "sources.cm")
-    print (command)
-    print ("\n")
+    command = "sml \"" + abspath(join("src", "run_parser.sml")) + "\" \"" + abspath(files[0]) + "\" \"" + join("src", "sources.cm") + "\""
     return_status = subprocess.call(command, shell=True)
-    print (return_status)
-    print ("\n")
     if return_status == 1:
         print ("File: " + files[0] + " failed on the Assertions Parser\n")
-        sys.exit()
+        #sys.exit()
 
-    print("\nFile Parsed Successfully!\n")
-    # Apparantly running 'sml <test.sml' allows you to exit the SML interpreter after running
-    command = "sml <" + new_file_name(files[0])
-    return_status = subprocess.call(command, shell=True)
-    remove(new_file_name(files[0]))
+    else :
+        print("\nFile Parsed Successfully!\n")
+        # Apparantly running 'sml <test.sml' allows you to exit the SML interpreter after running
+        command = "sml <\"" + new_file_name(files[0]) + "\""
+        return_status = subprocess.call(command, shell=True)
+        remove(new_file_name(files[0]))
 
 remove("src/lexer_engine.lex.sml")
 remove("src/parser_engine.grm.desc")

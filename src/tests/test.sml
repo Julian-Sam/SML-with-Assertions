@@ -1,14 +1,14 @@
 (*! 
-	REQUIRES: true
+	REQUIRES: x < 20
 	ENSURES: true
 !*)
-fun add (x: int) = x + 1
-  | add (0) = 1
+fun add (x as 0: int) = 1
+  | add (x) = x + 1
 
 (*! 
 	REQUIRES: true
 	ENSURES: true
 !*)
-fun sub (x: int): int = x - 1
-  | sub (0) = ~1
+fun sub (0: int): int = ~1
+  | sub (x) = x - 1
 
