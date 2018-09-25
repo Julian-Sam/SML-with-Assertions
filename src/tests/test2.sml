@@ -1,1 +1,0 @@
-fun NiceGuysFinishLast (x: int): string = Int.toString (x)

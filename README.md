@@ -63,7 +63,6 @@ where:
 
     "!*)"       - This token is used to close the assertion block for the function foo.
 
-
 To refer to the output of the function in your ENSURES boolean expressions, use the variable name  'result'. For example:
 
     (*!
@@ -73,6 +72,15 @@ To refer to the output of the function in your ENSURES boolean expressions, use 
     fun pow (n: int, b as 0: int) = 1
       | pow (n, b) = n * pow (n, b - 1)
 
+When generalising input for all cases, make sure to use the following syntax if you are essentially pattern matching in you function cases as follows;
+
+    (*!
+      REQUIRES: case (n) of empty => false
+		              | _ => true
+      ENSURES: result >= 5 
+    !*)
+    fun check (n as (leaf(s)): tree) = s
+      | check (n as (node(l, r)) = check (l) ^ check (r)
 
 For mutually recursive functions, the assertion block for second function must be placed after the "and" token. For example:
 
