@@ -72,7 +72,7 @@ To refer to the output of the function in your ENSURES boolean expressions, use 
     fun pow (n: int, b as 0: int) = 1
       | pow (n, b) = n * pow (n, b - 1)
 
-When generalising input for all cases, make sure to use the following syntax if you are essentially pattern matching in you function cases as follows;
+When generalising input for all cases, make sure to use the following syntax if you are pattern matching in your function cases as follows;
 
     (*!
       REQUIRES: case (n) of empty => false
